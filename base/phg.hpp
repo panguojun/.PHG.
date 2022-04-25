@@ -850,7 +850,7 @@ int subtrunk(code& cd, var& ret)
 		if (type == '~') // break
 		{
 			PRINT("break");
-			return 3;
+			return 3; // 跳出
 		}
 		else if (type == ';')
 		{
@@ -860,7 +860,7 @@ int subtrunk(code& cd, var& ret)
 		}
 		else if (type == '}')
 		{
-			PRINT("}")
+			//PRINT("}")
 			cd.next();
 			break;
 		}
@@ -870,6 +870,7 @@ int subtrunk(code& cd, var& ret)
 		}
 		else if (type == '?')  // if else
 		{
+		IF_STATEMENT:
 			ASSERT(cd.next() == '(');
 			cd.next();
 			const var& e = expr(cd);
@@ -884,27 +885,39 @@ int subtrunk(code& cd, var& ret)
 				else
 					continue;
 			}
-			bool bp = false;
+			bool tk = false;
 			if (cd.cur() == '{')
 			{
-				bp = true;
+				tk = true;
 				cd.next();
 			}
 
 			int rettype = subtrunk(cd, ret);
-			if (rettype == 1 || rettype == 3)
-			{
-				if(bp)
-					finishtrunk(cd, 1);
-				return rettype;
-			}
 			if (rettype == 2) {
 				return rettype;
 			}
+			if (rettype == 3)
+			{
+				if(tk)
+					finishtrunk(cd, 1);
+				return rettype;
+			}
+		}
+		else if (type == ':')
+		{
+			cd.next();
+			if (cd.cur() == '(')
+			{
+				goto IF_STATEMENT;
+			}
+			finishtrunk(cd, 0);
+
+			while (checkspace(cd.cur())) cd.next();
+
+			continue;
 		}
 		else if (type == '@') // loop
 		{
-			
 			if (cd.next() == '(') {
 				cd.next();
 
@@ -924,11 +937,7 @@ int subtrunk(code& cd, var& ret)
 				if (e != 0) {
 					cd.next();
 					int rettype = subtrunk(cd, ret);
-					if (rettype == 1)
-					{
-						finishtrunk(cd, 1);
-						break;
-					}
+					
 					if (rettype == 2) {
 						return rettype;
 					}
@@ -963,11 +972,7 @@ int subtrunk(code& cd, var& ret)
 					cd.ptr = cp;
 					int rettype = subtrunk(cd, ret);
 					//PRINTV(rettype);
-					if (rettype == 1)
-					{
-						finishtrunk(cd, 1);
-						break;
-					}
+					
 					if (rettype == 2) {
 						return rettype;
 					}
@@ -982,13 +987,9 @@ int subtrunk(code& cd, var& ret)
 		else if (type == '$') // return
 		{
 			cd.next();
-			if (cd.cur() == '@') {
-				return 1;
-			}
-			else {
-				ret = expr(cd);
-				return 2;
-			}
+
+			ret = expr(cd);
+			return 2; // 函数返回
 		}
 		else
 		{
