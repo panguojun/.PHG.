@@ -20,14 +20,14 @@ using namespace std;
 namespace ScePHG
 {
 // ---------------------------------------------------------------------
-#include "phg_head.hpp"
+#include "base/phg_head.hpp"
 // ---------------------------------------------------------------------
-#include "element.hpp"
+#include "base/element.hpp"
 // ---------------------------------------------------------------------
-#include "node.hpp"
+#include "base/node.hpp"
 // ---------------------------------------------------------------------
 //#include "entity.hpp"
-#include "sprite.hpp"
+#include "entity/sprite.hpp"
 // ---------------------------------------------------------------------
 
 	// Clear
@@ -248,7 +248,7 @@ namespace ScePHG
 	}
 #ifdef XML
 // ----------------------------------------
-#include "xmlparser.hpp"
+#include "parsers/xmlparser.hpp"
 // ----------------------------------------
 	API(fromXML)
 	{
@@ -263,7 +263,7 @@ namespace ScePHG
 #endif
 
 // ----------------------------------------
-#include "jsonparser.hpp"
+#include "parsers/jsonparser.hpp"
 // ----------------------------------------
 
 	API(tojsonraw)
