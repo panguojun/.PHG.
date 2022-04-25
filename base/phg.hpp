@@ -870,8 +870,8 @@ int subtrunk(code& cd, var& ret)
 		}
 		else if (type == '?')  // if else
 		{
-		IF_STATEMENT:
 			ASSERT(cd.next() == '(');
+		IF_STATEMENT:
 			cd.next();
 			const var& e = expr(cd);
 			cd.next();
