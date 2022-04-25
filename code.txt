@@ -1,0 +1,7 @@
+{#root
+	node1:{txt: 'hello_world!'}
+}
+dump();
+
+# loop
+@2{>_i;}
