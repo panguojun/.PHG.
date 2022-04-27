@@ -90,8 +90,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ExcludePath>
     </ExcludePath>
-    <IncludePath>C:\Users\Administrator\Desktop\PUBLISHING\FLOWERS\_SteamSDK\public;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Administrator\Desktop\PUBLISHING\FLOWERS\FlowerDesign\PMDLL Achievement\PMDLL\PMDLL\steam;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
@@ -106,8 +106,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /e /r /y C:\Users\18858\Documents\NaU\EPM\Debug\*.dll C:\Users\18858\Documents\NaU\ZEXE\NaU_Data\Plugins
-xcopy /e /r /y C:\Users\18858\Documents\NaU\EPM\Debug\*.dll C:\Users\18858\Documents\NaU\ZEXE</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -120,7 +119,7 @@ xcopy /e /r /y C:\Users\18858\Documents\NaU\EPM\Debug\*.dll C:\Users\18858\Docum
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /e /r /y C:\Users\18858\Documents\NaU\EPM\Debug\*.dll C:\Users\18858\Documents\NaU\ZEXE\NaU_Data\Plugins</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,7 +145,7 @@ xcopy /e /r /y C:\Users\18858\Documents\NaU\EPM\Debug\*.dll C:\Users\18858\Docum
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /e /r /y C:\Users\18858\Documents\LAB\EPM\Release\*.dll C:\Users\18858\Documents\LAB\ZEXE</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -178,7 +177,7 @@ xcopy /e /r /y C:\Users\18858\Documents\NaU\EPM\Debug\*.dll C:\Users\18858\Docum
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /e /r /y C:\Users\18858\Documents\_LAB\EPM\x64\Release\*.dll C:\Users\18858\Documents\_LAB\ZEXE</Command>
+      <Command></Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
