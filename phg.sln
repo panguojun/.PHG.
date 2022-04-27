@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31328.270
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "phg", "PMDLL.vcxproj", "{0D4E16F2-53BB-4BB0-8362-88381EDD4911}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "phg", "phg.vcxproj", "{0D4E16F2-53BB-4BB0-8362-88381EDD4911}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
