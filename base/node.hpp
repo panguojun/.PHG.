@@ -1,14 +1,14 @@
 /**************************************************************************
-*						½ÚµãÊ÷µÄ½âÎö
-*					½ÚµãÊ÷¾ÍÊÇ°Ñ¸öÌå×é³É¼Ò×å
-*					°üÀ¨ÕóÁĞ£¬ĞòÁĞ, Ñ¡Ôñ×ÓµÈÖØÒª¸ÅÄî
+*						èŠ‚ç‚¹æ ‘çš„è§£æ
+*					èŠ‚ç‚¹æ ‘å°±æ˜¯æŠŠä¸ªä½“ç»„æˆå®¶æ—
+*					åŒ…æ‹¬é˜µåˆ—ï¼Œåºåˆ—, é€‰æ‹©å­ç­‰é‡è¦æ¦‚å¿µ
 **************************************************************************/
 #define NODE		tree_t
-#define ROOT		gtree
+#define ROOT		ScePHG::gtree
 #define ME			work_stack.back()
 #define GET_NODE(key, node)	key == "me" ? ME : _gettree(key, node)
 
-// ¼ÓÇ°×º
+// åŠ å‰ç¼€
 inline void add_suffix(string& name, const string& clonename) {
 
 	string suffix;
@@ -23,10 +23,10 @@ inline void add_suffix(string& name, const string& clonename) {
 struct tree_t
 {
 	tree_t* parent = 0;
-	string name;								// Ãû×Ö
-	std::map<std::string, std::string> kv;		// ÊôĞÔ×Öµä
-	std::map<std::string, tree_t*> children;	// ×Ó×Öµä
-	std::vector<tree_t*>	childrenlist;		// ×ÓÁĞ±í£¬ÓÃÓÚjson/xmlµÈ¸ñÊ½×ª»¯
+	string name;								// åå­—
+	std::map<std::string, std::string> kv;		// å±æ€§å­—å…¸
+	std::map<std::string, tree_t*> children;	// å­å­—å…¸
+	std::vector<tree_t*>	childrenlist;		// å­åˆ—è¡¨ï¼Œç”¨äºjson/xmlç­‰æ ¼å¼è½¬åŒ–
 
 	tree_t() {}
 
@@ -41,7 +41,7 @@ struct tree_t
 
 	void operator += (const tree_t& t)
 	{
-		// ÔİÊ±¿½±´£¬ÒÔºó¿ÉÒÔ×öÔËËã
+		// æš‚æ—¶æ‹·è´ï¼Œä»¥åå¯ä»¥åšè¿ç®—
 
 		for (auto it : t.kv)
 		{
@@ -52,7 +52,7 @@ struct tree_t
 		{
 			tree_t* ntree = new tree_t();
 			
-			ntree->name = to_string(depth + 1) + "." + to_string(children.size() + 1);
+			ntree->name = to_string(depth + 1) + "_" + to_string(children.size() + 1);
 			// add_suffix(ntree->name, it.first);
 			children[ntree->name] = ntree;
 			ntree->parent = this;
@@ -74,8 +74,8 @@ struct tree_t
 };
 
 // -----------------------------------------------------------------------
-tree_t* gtree = 0;				// ÔİÊ±Ê¹ÓÃÈ«¾ÖÊ÷
-vector<tree_t*>	work_stack;		// ¹¤×÷Õ»
+tree_t* gtree = 0;				// æš‚æ—¶ä½¿ç”¨å…¨å±€æ ‘
+vector<tree_t*>	work_stack;		// å·¥ä½œæ ˆ
 
 extern void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, const string& selector);
 extern void _crt_sequ(code& cd, tree_t* tree, const string& pre, int depth);
@@ -96,15 +96,14 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 		char c = cd.cur();
 		//PRINT("c=" << c );
 
-		// ×¢½â
+		// æ³¨è§£
 		if (c == '#') {
 			cd.nextline();
-			//PRINTV(cd.cur());
 			//cd.next();
 			continue;
 		}
 
-		// PHG±í´ïÊ½
+		// PHGè¡¨è¾¾å¼
 		else if (c == '(' && pstr != &val)
 		{
 			int bracket_d = 1;
@@ -122,7 +121,6 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 
 				phg_expr.push_back(nc);
 			}
-			//PRINTV(phg_expr);
 			{// do expr
 				work_stack.push_back(tree);
 				ScePHG::dostring(phg_expr.c_str());
@@ -130,18 +128,18 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			cd.next();
 		}
 
-		// Ñ¡Ôñ×Ó
+		// é€‰æ‹©å­
 		else if (c == '?' && pstr == &key) {
 			cd.next();
 			selector = getstring(cd,'[');
 			cd.ptr--; // move back
 		}
 
-		// ½Úµã¿ªÊ¼
+		// èŠ‚ç‚¹å¼€å§‹
 		else if (c == '{' || c == '[' || c == '<') {
 			if (key.empty())
 			{
-				key = to_string(depth + 1) + "." + to_string(tree->children.size() + 1);
+				key = to_string(depth + 1) + "_" + to_string(tree->children.size() + 1);
 			}
 			
 			if (c == '{') {
@@ -160,11 +158,11 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 				//PRINT(pre << key << " : ");
 				_tree(cd, ntree, pre + "\t", depth + 1);
 			}
-			else if (c == '[') // ÕóÁĞ
+			else if (c == '[') // é˜µåˆ—
 			{
 				_crt_array(cd, tree, pre, depth + 1, selector);
 			}
-			else if (c == '<') // ĞòÁĞ
+			else if (c == '<') // åºåˆ—
 			{
 				_crt_sequ(cd, tree, pre, depth + 1);
 			}
@@ -173,7 +171,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			pstr = &key;
 		}
 
-		// ½Úµã½áÊø
+		// èŠ‚ç‚¹ç»“æŸ
 		else if (c == ';' || c == '}' || c == '>' || c == '\n' || c == '\r') {
 			if (!key.empty() || !val.empty()) {
 
@@ -189,13 +187,6 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 				}
 				else
 				{
-					index++;
-					if (val.empty())
-					{
-						val = key;
-						key = to_string(index);
-					}
-					//PRINTV(val);
 					tree->kv[key] = val;
 					//PRINT(pre << key << " : " << val);
 				}
@@ -205,12 +196,11 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			}
 			cd.next();
 			if (c == '}' || c == '>') {
-				//PRINT(pre << "}");
 				return;
 			}
 		}
 
-		// ¶ººÅ¼ä¸ô,²»ÄÜ×÷ÎªpropertyµÄ½áÎ²£¡
+		// é€—å·é—´éš”,ä¸èƒ½ä½œä¸ºpropertyçš„ç»“å°¾ï¼
 		else if (c == ',' && pstr != &val) {
 			{// inhert
 				if (key.empty()) key = "me";
@@ -229,13 +219,12 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			cd.next();
 		}
 
-		// Ãû×Ö Óë ÊıÖµ/×Ó½Úµã
+		// åå­— ä¸ æ•°å€¼/å­èŠ‚ç‚¹
 		else if (c == ':') {
-
-			if (key == "") {
-				SYNTAXERR("key is missing before ':' !");
-				cd.ptr = 0;
-				return;
+			if (key.empty()) 
+			{
+				//SYNTAXERR("key is missing before ':' !");cd.ptr = 0;return;
+				key = "pr" + to_string(tree->kv.size() + 1); // default porperty name
 			}
 			if (pstr == &val) {
 				SYNTAXERR("':' is in value!");
@@ -246,7 +235,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			cd.next4();
 		}
 
-		// ×Ö·û´®
+		// å­—ç¬¦ä¸²
 		else if (c == '\'' || c == '\"') {
 
 			cd.next();
@@ -287,7 +276,7 @@ int select(int ind, int rnd, crstr selector)
 	sscanf_s(selector.c_str(), "%d/%d", &pa, &len);
 	ASSERT(len != 0);
 
-	if (rnd % len == ind) // Ëæ»úÑ¡ÔñÒ»¸ö
+	if (rnd % len == ind) // éšæœºé€‰æ‹©ä¸€ä¸ª
 	{
 		PRINT("selected!")
 		return 1; // select one
@@ -297,7 +286,7 @@ int select(int ind, int rnd, crstr selector)
 	return 0;
 }
 
-// ÕóÁĞ
+// é˜µåˆ—
 static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, const string& selector)
 {
 	cd.next();
@@ -376,7 +365,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 			{// create node
 				work_stack.push_back(tree);
 				ntree = new tree_t;
-				ntree->name = to_string(depth + 1) + "." + to_string(index);
+				ntree->name = to_string(depth + 1) + "_" + to_string(index);
 				{// inhert
 					tree_t* t = GET_NODE(node, ROOT);
 					if (t) {
@@ -417,7 +406,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 	}
 }
 
-// ĞòÁĞ
+// åºåˆ—
 static void _crt_sequ(code& cd, tree_t* tree, const string& pre, int depth)
 {
 	cd.next();
@@ -451,7 +440,7 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre, int depth)
 			depth = tree_t::getdepth(tree);
 			if (node.empty())
 			{
-				node = to_string(depth + 1) + "." + to_string(tree->children.size() + 1);
+				node = to_string(depth + 1) + "_" + to_string(tree->children.size() + 1);
 			}
 
 			work_stack.push_back(tree);
@@ -482,7 +471,7 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre, int depth)
 				work_stack.push_back(tree);
 				ntree = new tree_t;
 				depth = tree_t::getdepth(tree);
-				ntree->name = to_string(depth + 1) + "." + to_string(tree->children.size() + 1);
+				ntree->name = to_string(depth + 1) + "_" + to_string(tree->children.size() + 1);
 				{// inhert
 					tree_t* t = GET_NODE(node, ROOT);
 					if (t) {
@@ -510,7 +499,7 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre, int depth)
 	}
 }
 
-// Èë¿Ú
+// å…¥å£
 void _tree(code& cd)
 {
 	//tree_t* tree = new tree_t;
@@ -525,13 +514,23 @@ void _tree(code& cd)
 // ------------------------------------
 // API
 // ------------------------------------
+API(cur)
+{
+	ASSERT(args == 1);
+	
+	SPARAM(node);
+	NODE* me = _gettree(node, ROOT);
+	if(me)
+		work_stack.push_back(me);
+	return 0;
+}
 API(array)
 {
 	ASSERT(ME);
 	tree_t* ntree = new tree_t;
 	int depth = tree_t::getdepth(ME);
 
-	ntree->name = to_string(depth + 1) + "." + to_string(ME->children.size() + 1);
+	ntree->name = to_string(depth + 1) + "_" + to_string(ME->children.size() + 1);
 	if (args == 1)
 	{
 		SPARAM(clonenode);
@@ -561,7 +560,7 @@ API(sequ)
 	ASSERT(ME);
 	tree_t* ntree = new tree_t;
 	int depth = tree_t::getdepth(ME);
-	ntree->name = to_string(depth + 1) + "." + to_string(ME->children.size() + 1);
+	ntree->name = to_string(depth + 1) + "_" + to_string(ME->children.size() + 1);
 	
 	if (args == 1)
 	{
