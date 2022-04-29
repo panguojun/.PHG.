@@ -1,8 +1,8 @@
-﻿/****************************************************************************
+/****************************************************************************
 							Phg2.1
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
-语法示例:	
+语法示例:
 
 #function
 $blend(a, b, alpha)
@@ -65,10 +65,10 @@ yy = yy + 1;
 #define LGOPR		0x04FF
 
 //#ifndef code	
-	struct code;
+struct code;
 //#endif
 #ifndef callfunc
-	var callfunc(code& cd);
+var callfunc(code& cd);
 #endif
 #ifndef parser_fun
 typedef void (*parser_fun)(code& cd);
@@ -83,7 +83,7 @@ char rank[256];
 
 std::vector<var> gtable;
 
-typedef var (*get_var_fun)(const char*);
+typedef var(*get_var_fun)(const char*);
 get_var_fun get_var = 0;
 
 typedef void(*add_var_fun)(const char*, var&);
@@ -113,7 +113,7 @@ inline int add2table(const var& v)
 
 // API
 #ifndef fun_t
-	typedef var (*fun_t)(code& cd, int stackpos);
+typedef var(*fun_t)(code& cd, int stackpos);
 #endif 
 struct api_fun_t
 {
@@ -130,19 +130,19 @@ void(*table)(code& cd);
 
 //void(*tree)(code& cd);
 #ifndef tree_fun
-	void(*tree)(code& cd);
+void(*tree)(code& cd);
 #else
-	tree_fun tree = 0;
+tree_fun tree = 0;
 #endif 
 // 运算
 var(*act)(code& cd, int args);
-	
+
 // -----------------------------------------------------------------------
 static inline bool checkline(char c) {
 	return (c == '\n' || c == '\r');
 }
 static inline bool checkspace(char c) {
-	return (c == ' ' || c == '\t'|| c == '\n' || c == '\r');
+	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
 }
 static inline bool checkspace2(char c) {
 	return (c == ' ' || c == '\t');
@@ -198,7 +198,7 @@ struct valstack_t
 		//PRINT("PUSH2")
 		stack.emplace_back(v);
 	}
-	var pop() { 
+	var pop() {
 		//PRINT("POP")
 		var ret = stack.back();
 		stack.pop_back();
@@ -220,7 +220,7 @@ struct valstack_t
 		ASSERT(top() - pos >= 0);
 		return stack[top() - pos];
 	}
-	int top(){
+	int top() {
 		return stack.size() - 1;
 	}
 	void reset()
@@ -249,7 +249,7 @@ struct oprstack_t
 		ASSERT(!stack.empty());
 		stack[top()] = o;
 	}
-	int top(){
+	int top() {
 		return stack.size() - 1;
 	}
 	bool empty() {
@@ -262,7 +262,7 @@ struct varmapstack_t
 {
 	using varmap_t = std::map<varname, var>;
 	std::vector<varmap_t> stack;
-		
+
 	void push()
 	{
 		//PRINT("varmapstack PUSH");
@@ -290,7 +290,6 @@ struct varmapstack_t
 		if (stack.empty())
 		{
 			ERRORMSG("var: " << name << " undefined!");
-			throw;
 			return INVALIDVAR;
 		}
 
@@ -303,7 +302,6 @@ struct varmapstack_t
 			}
 		}
 		ERRORMSG("var: " << name << " undefined!");
-		throw;
 		return INVALIDVAR;
 	}
 	bool getvar(var& vout, const char* name)
@@ -335,10 +333,10 @@ struct varmapstack_t
 
 struct code
 {
-	const char*			start;	
-	const char*			ptr;
+	const char* start;
+	const char* ptr;
 	codestack_t			codestack;
-	std::map<fnname, functionptr>	funcnamemap;	
+	std::map<fnname, functionptr>	funcnamemap;
 	std::vector<std::string>	strstack;
 	valstack_t			valstack;
 	oprstack_t			oprstack;
@@ -357,7 +355,7 @@ struct code
 		return (*ptr);
 	}
 	char next2() {
-		while (!eoc(++ptr)){
+		while (!eoc(++ptr)) {
 			if (!checkspace(*(ptr)) && !isname(*(ptr)))
 				break;
 		}
@@ -385,8 +383,8 @@ struct code
 	}
 	char getnext2() {
 		const char* p = ptr;
-		while (!eoc(++p)){
-			if(!checkspace(*(p)) && (!isname(*(p))))
+		while (!eoc(++p)) {
+			if (!checkspace(*(p)) && (!isname(*(p))))
 				break;
 		}
 		return (*p);
@@ -425,13 +423,12 @@ struct code
 		}
 		(*pbuf) = '\0';
 		return buf;
-	}
-	/*
+	}/*
 	const char* getcontent(char st, char ed) {
-		const char buf[32];
-		const char* pbuf = buf;
+		static char buf[32];
+		char* pbuf = buf;
 		const char* p = ptr;
-		
+
 		while (!eoc(p++))
 		{
 			if ((*p) == st) continue;
@@ -439,12 +436,12 @@ struct code
 
 			*(pbuf++) = *(p);
 		}
-		
+
 		(*pbuf) = '\0';
 		return buf;
 	}*/
 };
-	
+
 // get char
 short get(code& cd)
 {
@@ -592,7 +589,7 @@ inline var chars2var(code& cd) {
 
 // get value
 void getval(code& cd, short type) {
-		
+
 	if (type == NUMBER) {
 		cd.valstack.push(chars2var(cd));
 		/*if (cd.oprstack.empty() || !(iscalc(cd.oprstack.cur()) || islogic(cd.oprstack.cur()))) {
@@ -601,20 +598,23 @@ void getval(code& cd, short type) {
 	}
 	else if (type == NAME) {
 		const char* name = cd.getname();
-		
+
 		// 函数
 		if (api_list.find(name) != api_list.end() ||
 			cd.funcnamemap.find(name) != INVALIDFUN) {
 			cd.valstack.push(callfunc(cd));
 		}
-		else 
+		else
 		{// 变量
 			const char* name = cd.getname();
-			cd.valstack.push(
-				get_var ?
-				get_var(name) :
-				(gvarmapstack.getvar(name))
-			);
+			if (get_var)
+				cd.valstack.push(get_var(name));
+			else
+			{
+				var v;
+				if(gvarmapstack.getvar(v,name))
+					cd.valstack.push(v);
+			}
 			cd.next3();
 
 			cd.strstack.push_back(name);
@@ -727,7 +727,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 					args++;
 				}
 				char no = cd.getnext3();
-				if (cd.cur() != '(' && 
+				if (cd.cur() != '(' &&
 					iscalc(no))
 				{
 					if (cd.cur() == ')')
@@ -770,7 +770,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				cd.next();
 				cd.valstack.push(expr(cd));
 				cd.next();
-				
+
 				args++;
 			}
 			else if (c == ')' || c == ']' || c == ';' || c == ',' || c == '{') {
@@ -812,7 +812,7 @@ void singvar(code& cd) {
 
 // statement
 void statement_default(code& cd) {
-	
+
 	short type = get(cd);
 	if (type == NAME) {
 		char nc = cd.getnext4();
@@ -842,7 +842,7 @@ void statement_default(code& cd) {
 }
 
 // subtrunk: usually a single line
-int subtrunk(code& cd, var& ret)
+int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 {
 	while (!cd.eoc()) {
 		short type = get(cd);
@@ -855,13 +855,18 @@ int subtrunk(code& cd, var& ret)
 		else if (type == ';')
 		{
 			PRINT(";")
-			cd.nextline();
+				cd.nextline();
 			break;
 		}
 		else if (type == '}')
 		{
 			//PRINT("}")
 			cd.next();
+			if (bfunc && depth == 0)
+			{
+				PRINT("func return}")
+				return 2; // 函数返回
+			}
 			break;
 		}
 		else if (type == '\'' || type == '#')
@@ -878,8 +883,8 @@ int subtrunk(code& cd, var& ret)
 			if (e == 0) {
 				finishtrunk(cd, 0);
 
-				while(checkspace(cd.cur())) cd.next();
-					
+				while (checkspace(cd.cur())) cd.next();
+
 				if (cd.cur() == ':')
 					cd.next();
 				else
@@ -892,13 +897,13 @@ int subtrunk(code& cd, var& ret)
 				cd.next();
 			}
 
-			int rettype = subtrunk(cd, ret);
+			int rettype = subtrunk(cd, ret, depth + 1);
 			if (rettype == 2) {
 				return rettype;
 			}
 			if (rettype == 3)
 			{
-				if(tk)
+				if (tk)
 					finishtrunk(cd, 1);
 				return rettype;
 			}
@@ -921,11 +926,11 @@ int subtrunk(code& cd, var& ret)
 			if (cd.next() == '(') {
 				cd.next();
 
-			const char* cp = cd.ptr;
-			cd.iter.push_back(0);
+				const char* cp = cd.ptr;
+				cd.iter.push_back(0);
 			codepos1:
 				{ // iter
-					cd.iter.back() ++;
+					cd.iter.back()++;
 					std::string name = "i";
 					for (auto it : cd.iter)
 						name = "_" + name;
@@ -936,8 +941,8 @@ int subtrunk(code& cd, var& ret)
 				//PRINT("iter ");
 				if (e != 0) {
 					cd.next();
-					int rettype = subtrunk(cd, ret);
-					
+					int rettype = subtrunk(cd, ret, depth + 1);
+
 					if (rettype == 2) {
 						return rettype;
 					}
@@ -953,7 +958,7 @@ int subtrunk(code& cd, var& ret)
 					finishtrunk(cd, 0);
 				}
 			}
-			else 
+			else
 			{
 				cd.iter.push_back(0);
 				int loopcnt = int(expr(cd));
@@ -970,9 +975,9 @@ int subtrunk(code& cd, var& ret)
 						gvarmapstack.addvar(name.c_str(), var(cd.iter.back()));
 					}
 					cd.ptr = cp;
-					int rettype = subtrunk(cd, ret);
+					int rettype = subtrunk(cd, ret, depth + 1);
 					//PRINTV(rettype);
-					
+
 					if (rettype == 2) {
 						return rettype;
 					}
@@ -987,8 +992,10 @@ int subtrunk(code& cd, var& ret)
 		else if (type == '$') // return
 		{
 			cd.next();
+			//PRINTV(cd.cur());
+			if (cd.cur() != ';')
+				ret = expr(cd);
 
-			ret = expr(cd);
 			return 2; // 函数返回
 		}
 		else
@@ -998,7 +1005,7 @@ int subtrunk(code& cd, var& ret)
 	}
 	return 0;
 }
-	
+
 // 函数
 var callfunc_phg(code& cd) {
 	fnname fnm = cd.getname();
@@ -1024,7 +1031,7 @@ var callfunc_phg(code& cd) {
 
 	cd.codestack.push(cd.ptr);
 
-	if (api_list.find(cd.getname()) != api_list.end() || 
+	if (api_list.find(cd.getname()) != api_list.end() ||
 		cd.funcnamemap.find(fnm) == INVALIDFUN)
 	{
 		ERRORMSG("no function named: '" << fnm << "'");
@@ -1038,7 +1045,7 @@ var callfunc_phg(code& cd) {
 	gvarmapstack.push();
 	cd.next();
 
-	//std::vector<std::string> paramnamelist;
+	std::vector<std::string> paramnamelist;
 	std::vector<var> paramvallist;
 	while (!cd.eoc()) {
 		char c = cd.cur();
@@ -1050,18 +1057,17 @@ var callfunc_phg(code& cd) {
 			cd.next();
 		}
 		else {
-			//paramnamelist.push_back(cd.getcontent('(', ')'));
-			//paramnamelist.push_back(cd.getname());
+			paramnamelist.push_back(cd.getname());
 			paramvallist.push_back(cd.valstack.back());
 			cd.valstack.pop_back();
 			cd.next2();
 		}
 	}
-	//for(int i = 0; i < paramnamelist.size(); i ++)
-	//	gvarmapstack.addvar(paramnamelist[i].c_str(), paramvallist[paramvallist.size() - 1 - i]);
+	for(int i = 0; i < paramnamelist.size(); i ++)
+		gvarmapstack.addvar(paramnamelist[i].c_str(), paramvallist[paramvallist.size() - 1 - i]);
 
 	var ret = INVALIDVAR;
-	ASSERT(subtrunk(cd, ret) == 2);
+	ASSERT(subtrunk(cd, ret, 0, true) == 2);
 	gvarmapstack.pop();
 
 	cd.ptr = cd.codestack.pop();
@@ -1083,7 +1089,7 @@ var callfunc(code& cd) {
 		cd.next();
 		while (!cd.eoc()) {
 			char c = cd.cur();
-			
+
 			if (c == ')') {
 				cd.next();
 				break;
@@ -1123,7 +1129,7 @@ void parser_default(code& cd) {
 	PRINT("--------PHG---------");
 	PRINT(cd.ptr);
 	PRINT("--------------------");
-	
+
 	rank['|'] = 1;
 	rank['^'] = 1;
 	rank['&'] = 2;
@@ -1146,7 +1152,7 @@ void parser_default(code& cd) {
 		if (type == ';') {
 			cd.nextline();
 		}
-		else if (type == '\'' || type == '#'){
+		else if (type == '\'' || type == '#') {
 			cd.nextline();
 		}
 		else if (type == '$') {
@@ -1161,7 +1167,7 @@ void parser_default(code& cd) {
 		}
 		else {
 			var ret = INVALIDVAR;
-			subtrunk(cd, ret);
+			subtrunk(cd, ret, 0);
 		}
 	}
 }
@@ -1216,7 +1222,7 @@ bool checkcode(const char* str)
 void dostring(const char* str)
 {
 	PRINT("dostring ...")
-	init();
+		init();
 
 #ifdef PHG_DEBUG
 	{// check format
