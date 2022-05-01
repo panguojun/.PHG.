@@ -202,8 +202,8 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 
 		// 逗号间隔,不能作为property的结尾！
 		else if (c == ',' && pstr != &val) {
+			if (!key.empty()) 
 			{// inhert
-				if (key.empty()) key = "me";
 				tree_t* t = GET_NODE(key, ROOT);
 				if (t)
 				{
