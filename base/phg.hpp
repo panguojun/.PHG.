@@ -12,7 +12,7 @@ $blend(a, b, alpha)
 
 #call function
 ab = blend(2,8, 0.25)
->ab;
+>ab;a
 
 #if
 ?(i = 1){
@@ -44,7 +44,7 @@ yy = yy + 1;
 // PHG
 // ----------------------------------------------------------------------
 //namespace PHG{
-#define PHG_DEBUG
+//#define PHG_DEBUG
 //#define SYNTAXERR(msg)	ERRORMSG("At: " << cd.ptr - cd.start + 1 << ", ERR: " << msg)
 #define SYNTAXERR(msg)	ERRORMSG("ERR: " << msg << "\nAt: \n" << cd.ptr)
 #define INVALIDFUN	cd.funcnamemap.end()
@@ -200,6 +200,11 @@ struct valstack_t
 	}
 	var pop() {
 		//PRINT("POP")
+		if (stack.empty())
+		{
+			ERRORMSG("Value error!");
+			return INVALIDVAR;
+		}
 		var ret = stack.back();
 		stack.pop_back();
 		return ret;
@@ -208,6 +213,11 @@ struct valstack_t
 		return stack.back();
 	}
 	void pop_back() {
+		if (stack.empty())
+		{
+			ERRORMSG("Value error!");
+			return;
+		}
 		stack.pop_back();
 	}
 	var& cur() {
@@ -216,8 +226,11 @@ struct valstack_t
 		return stack[top()];
 	}
 	var& get(int pos) {
-		ASSERT(!stack.empty());
-		ASSERT(top() - pos >= 0);
+		if (stack.empty() || top() - pos < 0)
+		{
+			ERRORMSG("Value error!");
+			return INVALIDVAR;
+		}
 		return stack[top() - pos];
 	}
 	int top() {
@@ -612,7 +625,7 @@ void getval(code& cd, short type) {
 			else
 			{
 				var v;
-				if(gvarmapstack.getvar(v,name))
+				if (gvarmapstack.getvar(v, name))
 					cd.valstack.push(v);
 			}
 			cd.next3();
@@ -841,8 +854,8 @@ void statement_default(code& cd) {
 	}
 }
 
-// subtrunk: usually a single line
-int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
+// subtrunk
+int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false)
 {
 	while (!cd.eoc()) {
 		short type = get(cd);
@@ -865,7 +878,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 			if (bfunc && depth == 0)
 			{
 				PRINT("func return}")
-				return 2; // 函数返回
+					return 2; // 函数返回
 			}
 			break;
 		}
@@ -880,13 +893,20 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 			cd.next();
 			const var& e = expr(cd);
 			cd.next();
-			if (e == 0) {
+			if (e == 0) {// else
 				finishtrunk(cd, 0);
 
-				while (checkspace(cd.cur())) cd.next();
+				if (cd.cur() == '}')
+					cd.next();
 
 				if (cd.cur() == ':')
+				{
 					cd.next();
+					if (cd.cur() == '(')
+					{
+						goto IF_STATEMENT;
+					}					
+				}
 				else
 					continue;
 			}
@@ -897,13 +917,13 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 				cd.next();
 			}
 
-			int rettype = subtrunk(cd, ret, depth + 1);
+			int rettype = subtrunk(cd, ret, depth + 1, 0, !tk);
 			if (rettype == 2) {
 				return rettype;
 			}
 			if (rettype == 3)
 			{
-				if (tk)
+				//if (tk)
 					finishtrunk(cd, 1);
 				return rettype;
 			}
@@ -911,13 +931,9 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 		else if (type == ':')
 		{
 			cd.next();
-			if (cd.cur() == '(')
-			{
-				goto IF_STATEMENT;
-			}
 			finishtrunk(cd, 0);
 
-			while (checkspace(cd.cur())) cd.next();
+			cd.next();
 
 			continue;
 		}
@@ -938,15 +954,22 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 				}
 				var e = expr(cd);
 				cd.next();
+				
 				//PRINT("iter ");
 				if (e != 0) {
-					cd.next();
-					int rettype = subtrunk(cd, ret, depth + 1);
+					bool tk = false;
+					if (cd.cur() == '{')
+					{
+						tk = true;
+						cd.next();
+					}
+					int rettype = subtrunk(cd, ret, depth + 1, 0, !tk);
+					//PRINTV(rettype);
 
 					if (rettype == 2) {
 						return rettype;
 					}
-					if (rettype == 3) {
+					else if (rettype == 3) {
 						finishtrunk(cd, 1);
 						return rettype;
 					}
@@ -963,7 +986,13 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 				cd.iter.push_back(0);
 				int loopcnt = int(expr(cd));
 				PRINT("--- loop " << loopcnt);
-				cd.next();
+				//PRINTV(cd.cur())
+				bool tk = false;
+				if (cd.cur() == '{')
+				{
+					tk = true;
+					cd.next();
+				}
 				const char* cp = cd.ptr;
 				//while(expr(cd) != 0){cd._i ++;
 				for (int i = 1; i <= loopcnt; i++) {
@@ -975,7 +1004,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 						gvarmapstack.addvar(name.c_str(), var(cd.iter.back()));
 					}
 					cd.ptr = cp;
-					int rettype = subtrunk(cd, ret, depth + 1);
+					int rettype = subtrunk(cd, ret, depth + 1, 0,!tk);
 					//PRINTV(rettype);
 
 					if (rettype == 2) {
@@ -1001,6 +1030,8 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc = 0)
 		else
 		{
 			statement(cd);
+			if(bsingleline)
+				return 0;
 		}
 	}
 	return 0;
@@ -1063,7 +1094,7 @@ var callfunc_phg(code& cd) {
 			cd.next2();
 		}
 	}
-	for(int i = 0; i < paramnamelist.size(); i ++)
+	for (int i = 0; i < paramnamelist.size(); i++)
 		gvarmapstack.addvar(paramnamelist[i].c_str(), paramvallist[paramvallist.size() - 1 - i]);
 
 	var ret = INVALIDVAR;
@@ -1167,7 +1198,7 @@ void parser_default(code& cd) {
 		}
 		else {
 			var ret = INVALIDVAR;
-			subtrunk(cd, ret, 0);
+			subtrunk(cd, ret, 0, 0);
 		}
 	}
 }
@@ -1241,7 +1272,7 @@ void dofile(const char* filename)
 		init();
 
 	FILE* f;
-	ASSERT(0 == fopen_s(&f, filename, "rb"));
+	if (0 != fopen_s(&f, filename, "rb")) return;
 
 	int sp = ftell(f);
 	fseek(f, 0, SEEK_END);
