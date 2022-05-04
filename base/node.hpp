@@ -137,7 +137,12 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 
 		// 节点开始
 		else if (c == '{' || c == '[' || c == '<') {
-			if (key.empty())
+			if (!val.empty()){
+				if (key.empty())
+					key = "pr" + to_string(tree->kv.size() + 1); // default porperty name
+				tree->kv[key] = val;
+			}
+			else if (key.empty())
 			{
 				key = to_string(depth + 1) + "_" + to_string(tree->children.size() + 1);
 			}
@@ -174,11 +179,9 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 		// 节点结束
 		else if (c == ';' || c == '}' || c == '>' || c == '\n' || c == '\r') {
 			if (!key.empty() || !val.empty()) {
-
-				tree_t* t = 0;
 				if (val.empty())
 				{// inhert
-					t = GET_NODE(key, ROOT);
+					tree_t* t = GET_NODE(key, ROOT);
 					if (t) {
 						//PRINT("inhert0: " << key);
 						//add_suffix(tree->name, key);
