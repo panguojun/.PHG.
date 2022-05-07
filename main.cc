@@ -20,22 +20,45 @@ void onrequest(const std::string& msg, const std::string& body, std::string& out
 		}
 		ss << "]}";
 		out = ss.str();
-		//out = "{'name':'ver', 'dat':[1, 0, 0, 4, 5, 6, 1, 0, 0, 4, 5, 6,11, 10, 10, 14, 25, 16]}";
 	}
 	else if (msg == "cmd")
 	{
-		ScePHG::dostring(body.c_str());
-		PRINT("");
+		//out = body + " ai zhou!";
+		//return;
+		ScePHG::strlist.clear();
+		ScePHG::dostring(body.c_str()); 
+
+		/*stringstream jsn;
+		jsn << "{\"" << "nodes" << "\":[\n";
+		ScePHG::JSON_PARSER::tojson(ROOT, jsn);
+		jsn << "]}\n";
+		out = jsn.str();*/
+		stringstream ss;
+		for (int i = 0; i < ScePHG::strlist.size(); i++)
+		{
+			auto& it = ScePHG::strlist[i];
+			PRINT(it)
+			if (i > 0)
+				ss << " ";
+			ss << it;
+		}
+		out = ss.str();
+		PRINT(ss.str());
 	}
 }
 
 // --------------------------------------------------------------------------------------
-int main(int nargs, char* args[]) {
-	if (nargs < 2)
-		return 0;
-	
+int main(int nargs, char* args[]) 
+{
 	ScePHG::setup();
-	ScePHG::dofile(args[1]);
+
+	PRINT("======= start http-server: localhost:8080\n");
+	std::thread serverthread = std::thread{ servermain, 100 };
+
+	if (nargs >= 2)
+	{
+		ScePHG::dofile(args[1]);
+	}
 	getchar();
 	return 0;
 }

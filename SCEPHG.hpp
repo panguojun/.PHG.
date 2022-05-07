@@ -26,7 +26,9 @@ namespace ScePHG
 // ---------------------------------------------------------------------
 #include "base/node.hpp"
 // ---------------------------------------------------------------------
-//#include "entity.hpp"
+std::vector<string> strlist;
+
+#include "entity/entity.hpp"
 #include "entity/sprite.hpp"
 // ---------------------------------------------------------------------
 
@@ -73,11 +75,12 @@ namespace ScePHG
 			node = GET_NODE(nodename, ROOT);
 			PRINTV(nodename);
 		}
-		if (type == "sprite")
-			sprite::setup(node, { vec2::ZERO,0, vec2(1,1) });
-		else if (type == "sprite_add")
+		if (type == "2d")
+			sprite::setup(node, { vec2::ZERO,0, 1 });
+		else if (type == "+")
 			sprite::setup_add(node);
-
+		else if (type == "3d")
+			entity::setup(ROOT, { vec3::ZERO, quaternion(), vec3::ONE });
 		POP_SPARAM;
 		return 0;
 	}
@@ -227,13 +230,14 @@ namespace ScePHG
 		POP_SPARAM;
 		return 0;
 	}
-	std::vector<string> strlist;
+	
 	API(getstr)
 	{
+		ASSERT(cd.strstack.size() > 0)
 		string param1 = GET_SPARAM(1);
 		
 		strlist.clear();
-		ScePHG::node_walker(ScePHG::ROOT, [param1](ScePHG::tree_t* tree)->void
+		ScePHG::node_walker(ROOT, [param1](ScePHG::tree_t* tree)->void
 			{
 				auto& it = tree->kv.find(param1);
 				if (it != tree->kv.end())
@@ -265,7 +269,13 @@ namespace ScePHG
 // ----------------------------------------
 #include "parsers/jsonparser.hpp"
 // ----------------------------------------
-
+	API(tojson)
+	{
+		PRINT("------------- tojson ----------------");
+		if (ROOT)
+			JSON_PARSER::tojson(ROOT);
+		return 0;
+	}
 	API(tojsonraw)
 	{
 		PRINT("------------- tojsonraw ----------------");
@@ -353,7 +363,7 @@ namespace ScePHG
 
 		REG_API(dump, dump);
 
-		REG_API(setup, setuptree);		// 生成节点树
+		REG_API(sup, setuptree);		// 生成节点树
 		
 		// NODE: 
 
@@ -362,11 +372,11 @@ namespace ScePHG
 
 		REG_API(addprop, addprop);		// 添加属性
 		
-		REG_API(getival, getival);		// 获得int value
-		REG_API(getfval, getfval);		// 获得float value
-		REG_API(getstr, getstr);		// 获得string
-		REG_API(getvec3, getvec3);		// 获得RECT
-		REG_API(getrect, getrect);		// 获得RECT
+		REG_API(ival, getival);			// 获得int value
+		REG_API(fval, getfval);			// 获得float value
+		REG_API(str, getstr);			// 获得string
+		REG_API(vec3, getvec3);			// 获得RECT
+		REG_API(rect, getrect);			// 获得RECT
 
 #ifdef XML
 		REG_API(fromXML, fromXML);		// xml读入
@@ -374,6 +384,7 @@ namespace ScePHG
 #ifdef PYTHON
 		REG_API(formImgIDF, formImgIDF);// 图像识别读入
 #endif
+		REG_API(tojson, tojson);
 
 		REG_API(tojsonraw, tojsonraw);
 
