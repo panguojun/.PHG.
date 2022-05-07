@@ -105,7 +105,7 @@ namespace sprite
 				{
 					p += vec2::UY * storeal(it->second);
 				}
-				KEY_VAL("a")
+				KEY_VAL("a") // angle
 				{
 					ang = PI / 180 * storeal(it->second);
 				}
@@ -124,15 +124,6 @@ namespace sprite
 		}
 		{// 添加到变量列表
 
-			//ent.sval = tree->name;
-			KEY_VAL("vis") // vis
-			{
-				if (it->second == "false")
-				{
-					res(ent).vis = false;
-				}
-			}
-
 			KEY_VAL("md") {
 				res(ent).md = it->second;
 			}
@@ -141,12 +132,11 @@ namespace sprite
 				res(ent).md = it->second;
 				PRINTV(it->second);
 			}
-			//if(CEHCK_CONSTR(res(ent).cstr))
+			
 			gvarmapstack.addvar(tree->name.c_str(), ent);
 		}
 
-		if (tree->children.empty())
-		{
+		if (tree->children.empty()){
 			strlist.push_back(str);
 		}
 		else {
