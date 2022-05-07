@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 							Phg2.1
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
@@ -12,7 +12,7 @@ $blend(a, b, alpha)
 
 #call function
 ab = blend(2,8, 0.25)
->ab;
+>ab;a
 
 #if
 ?(i = 1){
@@ -906,7 +906,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					if (cd.cur() == '(')
 					{
 						goto IF_STATEMENT;
-					}					
+					}
 				}
 				else
 					continue;
@@ -925,7 +925,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			if (rettype == 3)
 			{
 				//if (tk)
-					finishtrunk(cd, 1);
+				finishtrunk(cd, 1);
 				return rettype;
 			}
 		}
@@ -955,7 +955,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 				}
 				var e = expr(cd);
 				cd.next();
-				
+
 				//PRINT("iter ");
 				if (e != 0) {
 					bool tk = false;
@@ -1005,7 +1005,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 						gvarmapstack.addvar(name.c_str(), var(cd.iter.back()));
 					}
 					cd.ptr = cp;
-					int rettype = subtrunk(cd, ret, depth + 1, 0,!tk);
+					int rettype = subtrunk(cd, ret, depth + 1, 0, !tk);
 					//PRINTV(rettype);
 
 					if (rettype == 2) {
@@ -1031,7 +1031,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 		else
 		{
 			statement(cd);
-			if(bsingleline)
+			if (bsingleline)
 				return 0;
 		}
 	}

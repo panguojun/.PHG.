@@ -55,7 +55,7 @@ static var _act(code& cd, int args)
 {
 	opr o = cd.oprstack.pop();
 
-	PRINT("act:" << o << "(" << args << ")")
+	//PRINT("act:" << o << "(" << args << ")")
 
 		switch (o) {
 		case '+': {
