@@ -1,6 +1,6 @@
 /**************************************************************************
-*							¾«Áé
-*						¿É»æÖÆµÄ2D³¡¾°¶ÔÏó
+*			ç²¾çµ
+*			å¯ç»˜åˆ¶çš„2Dåœºæ™¯å¯¹è±¡
 **************************************************************************/
 struct tree_t;
 namespace sprite
@@ -8,12 +8,12 @@ namespace sprite
 	struct transform2_t { vec2 p; real ang; real s = 1; };
 	struct spriteres_t
 	{
-		// Ğ¯´øµÄÊôĞÔ
-		bool vis = true;		// ¿É¼ûĞÔ
+		// æºå¸¦çš„å±æ€§
+		bool vis = true;		// å¯è§æ€§
 
-		transform2_t trans;		// ¿Õ¼ä±ä»»
-		float phang;			// ÏàÎ»½Ç
-		string md;				// Ä£ĞÍ
+		transform2_t trans;		// ç©ºé—´å˜æ¢
+		float phang;			// ç›¸ä½è§’
+		string md;				// æ¨¡å‹
 
 		spriteres_t() {}
 		spriteres_t(const spriteres_t& v)
@@ -24,7 +24,7 @@ namespace sprite
 		};
 		~spriteres_t() {}
 	};
-	vector<spriteres_t*> reslist;			// ×ÊÔ´ÁĞ±í
+	vector<spriteres_t*> reslist;			// èµ„æºåˆ—è¡¨
 	spriteres_t& res(ENT& ent)
 	{
 		if (ent.resid == -1)
@@ -39,8 +39,8 @@ namespace sprite
 
 	struct addres_t
 	{
-		// Ğ¯´øµÄÊôĞÔ
-		string md;				// Ä£ĞÍ
+		// æºå¸¦çš„å±æ€§
+		string md;				// æ¨¡å‹
 
 		addres_t() {}
 		addres_t(const addres_t& v)
@@ -49,7 +49,7 @@ namespace sprite
 		};
 		~addres_t() {}
 	};
-	vector<addres_t*> add_reslist;		// ×ÊÔ´ÁĞ±í
+	vector<addres_t*> add_reslist;		// èµ„æºåˆ—è¡¨
 
 	void clearres()
 	{
@@ -124,7 +124,7 @@ namespace sprite
 			if (!str.empty()) str += ";";
 			str += (to_string(trans.p.x) + "," + to_string(trans.p.y) + "," + to_string(trans.ang) + "," + to_string(trans.s));
 		}
-		{// Ìí¼Óµ½±äÁ¿ÁĞ±í
+		{// æ·»åŠ åˆ°å˜é‡åˆ—è¡¨
 
 			//ent.sval = tree->name;
 			KEY_VAL("vis") // vis
@@ -159,7 +159,7 @@ namespace sprite
 		}
 	}
 
-	// ÔÚ½ÚµãÊ÷ÉÏËÑË÷¼Ó·¨¹æÔò
+	// åœ¨èŠ‚ç‚¹æ ‘ä¸Šæœç´¢åŠ æ³•è§„åˆ™
 	const char* walk_addtree(tree_t* tree, crstr a, crstr b, const char* key)
 	{
 		if (tree->children.size() >= 2)
@@ -205,7 +205,7 @@ namespace sprite
 		return ret;
 	}
 
-	// ¼Ó·¨×ÊÔ´
+	// åŠ æ³•èµ„æº
 	addres_t& addres(ENT& ent)
 	{
 		if (ent.resid == -1)
@@ -214,8 +214,8 @@ namespace sprite
 			add_reslist.push_back(rs);
 			ent.resid = add_reslist.size() - 1;
 
-			ent.type = 0; // ×Ô¶¨ÒåÔªËØÀàĞÍ
-			// ÔÚ×ÊÔ´ÉÏ¶¨Òå¼Ó·¨ÔËËã
+			ent.type = 0; // è‡ªå®šä¹‰å…ƒç´ ç±»å‹
+			// åœ¨èµ„æºä¸Šå®šä¹‰åŠ æ³•è¿ç®—
 			ent.fun_add = [](var& a, var& b)->var {
 				var ret;
 				ret.type = 3;
@@ -239,7 +239,7 @@ namespace sprite
 		work_stack.push_back(tree);
 
 		ENT ent;
-		{// Ìí¼Óµ½±äÁ¿ÁĞ±í
+		{// æ·»åŠ åˆ°å˜é‡åˆ—è¡¨
 
 			KEY_VAL("md") {
 				addres(ent).md = it->second;
@@ -303,6 +303,6 @@ API(calc_addmd)
 }
 void SPRITE_REG_API()
 {
-	REG_API(getsprloc, getspriteloc);	// »ñµÃget sprite loc
+	REG_API(getsprloc, getspriteloc);	// è·å¾—get sprite loc
 	REG_API(addmd, calc_addmd);
 }
