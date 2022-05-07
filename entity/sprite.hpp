@@ -289,12 +289,7 @@ API(calc_add)
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
 	string c = sprite::_calc_add(a, b, "pr1");
-
-	/*if (!strlist.empty() && c != a && c != b)
-	{
-		strlist.back() = c;
-	}
-	else*/
+	
 	strlist.push_back(c);
 
 	POP_SPARAM; return 0;
