@@ -3,9 +3,9 @@
 *						可绘制的2D场景对象
 **************************************************************************/
 struct tree_t;
-namespace sprite 
+namespace sprite
 {
-	struct transform2_t { vec2 p; real ang; vec2 s = vec2(1,1); };
+	struct transform2_t { vec2 p; real ang; real s = 1; };
 	struct spriteres_t
 	{
 		// 携带的属性
@@ -50,7 +50,7 @@ namespace sprite
 		~addres_t() {}
 	};
 	vector<addres_t*> add_reslist;		// 资源列表
-	
+
 	void clearres()
 	{
 		for (auto it : reslist)
@@ -83,18 +83,19 @@ namespace sprite
 		return ret;
 	}
 
-	void setup(tree_t* tree, const transform2_t& parent)
+	void setup(tree_t* tree, const transform2_t& parent, string str = "")
 	{
-		work_stack.push_back(tree);
+		ASSERT(tree)
+			work_stack.push_back(tree);
 
 		ENT ent;
 		transform2_t& trans = res(ent).trans;
 		{// transform
 			vec2 p;
 			real ang = 0;
-			vec2 s = vec2(1,1);
+			real s = 1;
 			{// transform desc
-				KEY_VAL("pos") // raw position
+				KEY_VAL("p") // raw position
 				{
 					p = stovec(it->second);
 				}
@@ -106,13 +107,13 @@ namespace sprite
 				{
 					p += vec2::UY * storeal(it->second);
 				}
-				KEY_VAL("angle")
+				KEY_VAL("a")
 				{
-					ang = storeal(it->second);
+					ang = PI / 180 * storeal(it->second);
 				}
-				KEY_VAL("scl") // scale
+				KEY_VAL("s") // scale
 				{
-					s = stovec(it->second);
+					s = storeal(it->second);
 				}
 			}
 			trans = {
@@ -120,6 +121,8 @@ namespace sprite
 				parent.ang + ang,
 				parent.s * s
 			};
+			if (!str.empty()) str += ";";
+			str += (to_string(trans.p.x) + "," + to_string(trans.p.y) + "," + to_string(trans.ang) + "," + to_string(trans.s));
 		}
 		{// 添加到变量列表
 
@@ -136,28 +139,38 @@ namespace sprite
 				res(ent).md = it->second;
 			}
 
+			KEY_VAL("pr1") {
+				res(ent).md = it->second;
+				PRINTV(it->second);
+			}
 			//if(CEHCK_CONSTR(res(ent).cstr))
 			gvarmapstack.addvar(tree->name.c_str(), ent);
 		}
 
-		// children
-		for (auto it : tree->children) {
-			setup(it.second, res(ent).trans);
+		if (tree->children.empty())
+		{
+			strlist.push_back(str);
+		}
+		else {
+			// children
+			for (auto it : tree->children) {
+				setup(it.second, res(ent).trans, str);
+			}
 		}
 	}
 
 	// 在节点树上搜索加法规则
-	const string& walk_addtree(tree_t* tree, crstr a, crstr b)
+	const char* walk_addtree(tree_t* tree, crstr a, crstr b, const char* key)
 	{
-		if (tree->children.size() == 2)
+		if (tree->children.size() >= 2)
 		{
 			int findcnt = 0;
 			for (auto it : tree->children) {
-				if (it.second->children.empty() && it.second->kv["md"] == a)
+				if (it.second->children.empty() && it.second->kv[key] == a)
 				{
 					findcnt++;
 				}
-				if (it.second->children.empty() && it.second->kv["md"] == b)
+				if (it.second->children.empty() && it.second->kv[key] == b)
 				{
 					findcnt++;
 				}
@@ -165,25 +178,31 @@ namespace sprite
 
 			if (findcnt == 2)
 			{
-				return tree->kv["md"];
+				return tree->kv[key].c_str();
 			}
 		}
 
 		// children
 		for (auto it : tree->children) {
-			if (const string& c = walk_addtree(it.second, a, b); !c.empty())
+			if (const char* c = walk_addtree(it.second, a, b, key); c != 0)
 			{
 				return c;
 			}
 		}
-
-		return "";
+		return 0;
 	}
-	string _calc_add(crstr a, crstr b)
+	const char* _calc_add(crstr a, crstr b, const char* key)
 	{
-		const string& ab = walk_addtree(ROOT, a, b);
-		PRINTV(ab);
-		return ab;
+		if (a == b)
+			return a.c_str();
+
+		MSGBOX("walk_addtree")
+			const char* ret = walk_addtree(ROOT, a, b, key);
+
+		if (ret == 0)
+			return b.c_str();
+
+		return ret;
 	}
 
 	// 加法资源
@@ -199,13 +218,13 @@ namespace sprite
 			// 在资源上定义加法运算
 			ent.fun_add = [](var& a, var& b)->var {
 				var ret;
-				
+				ret.type = 3;
+				//MSGBOX("fun_add " << addres(ret).md)
 				addres(ret).md = _calc_add(
 					addres(a).md,
-					addres(b).md
+					addres(b).md,
+					"pr1"
 				);
-				ret.ival = atoi(addres(ret).md.c_str()); // 暂时测试用
-				//MSGBOX("fun_add " << ret.ival)
 				return ret;
 			};
 
@@ -225,9 +244,10 @@ namespace sprite
 			KEY_VAL("md") {
 				addres(ent).md = it->second;
 			}
-
-			//if(CEHCK_CONSTR(res(ent).cstr))
-			gvarmapstack.addvar(tree->name.c_str(), ent);
+			KEY_VAL("pr1") {
+				addres(ent).md = it->second;
+			}
+			gvarmapstack.addvar(addres(ent).md.c_str(), ent);
 		}
 
 		// children
@@ -243,7 +263,7 @@ namespace sprite
 API(getspriteloc)
 {
 	vec3list.clear();
-	
+
 	NODE* node = ROOT;
 	if (args > 0) {
 		string name = GET_SPARAM(1);
@@ -261,24 +281,28 @@ API(getspriteloc)
 				vec3list.emplace_back(t.p.x, t.p.y, t.ang);
 			}
 		});
-	
+
 	PRINTV(vec3list.size());
 	POP_SPARAM;
 	return 0;
 }
-API(calc_add)
+API(calc_addmd)
 {
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
+	string c = sprite::_calc_add(a, b, "pr1");
 
-	intlist.push_back(atoi(
-		sprite::_calc_add(a, b).c_str()
-	)); // 暂时使用ID
+	/*if (!strlist.empty() && c != a && c != b)
+	{
+		strlist.back() = c;
+	}
+	else*/
+	strlist.push_back(c);
 
-	POP_SPARAM;return 0;
+	POP_SPARAM; return 0;
 }
 void SPRITE_REG_API()
 {
 	REG_API(getsprloc, getspriteloc);	// 获得get sprite loc
-	REG_API(add, calc_add);
+	REG_API(addmd, calc_addmd);
 }
