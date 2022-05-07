@@ -737,6 +737,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				{
 					cd.next();
 					cd.valstack.push(expr(cd));
+					cd.next();
 					args++;
 				}
 				char no = cd.getnext3();
