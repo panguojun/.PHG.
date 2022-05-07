@@ -1,4 +1,4 @@
-﻿#undef var
+#undef var
 #undef INVALIDVAR
 #undef rank
 #undef fun_t
@@ -8,7 +8,7 @@
 #undef callfunc
 #undef gvarmapstack
 
-#define var			ELEMENT
+#define var		ELEMENT
 #define INVALIDVAR	ELEMENT(0)
 #ifndef STRING2VAR
 #define STRING2VAR(str)	INVALIDVAR
@@ -60,6 +60,7 @@ struct varbase_t
 	void operator = (const varbase_t& v)
 	{
 		//PRINT("var_t ="  << v.resid);
+		type = v.type;
 		if(type == 2)
 			fval = v.fval;
 		else
@@ -111,6 +112,7 @@ struct varbase_t
 };
 #define VAR_BASE(name) \
 	name(int _ival) : varbase_t(_ival) { } \
+	name(int _fval) : varbase_t(_fval) { } \
 	bool operator == (int v) const { \
 		return varbase_t::operator==(v); \
 	} \
