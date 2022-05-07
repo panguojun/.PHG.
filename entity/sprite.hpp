@@ -61,13 +61,12 @@ namespace sprite
 			if (it) delete it;
 		add_reslist.clear();
 	}
-
 	// *********************************************************************
 	// Setup tree, generate entities
 	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
 
-// data convert
+	// data convert
 	int stoint(crstr sval)
 	{
 		return atoi(sval.c_str());
@@ -82,11 +81,10 @@ namespace sprite
 		sscanf(sval.c_str(), "%f,%f", &ret.x, &ret.y);
 		return ret;
 	}
-
 	void setup(tree_t* tree, const transform2_t& parent, string str = "")
 	{
-		ASSERT(tree)
-			work_stack.push_back(tree);
+		ASSERT(tree);
+		work_stack.push_back(tree);
 
 		ENT ent;
 		transform2_t& trans = res(ent).trans;
@@ -218,7 +216,7 @@ namespace sprite
 			// 在资源上定义加法运算
 			ent.fun_add = [](var& a, var& b)->var {
 				var ret;
-				ret.type = 3;
+				ret.type = 0;
 				//MSGBOX("fun_add " << addres(ret).md)
 				addres(ret).md = _calc_add(
 					addres(a).md,
@@ -286,7 +284,7 @@ API(getspriteloc)
 	POP_SPARAM;
 	return 0;
 }
-API(calc_addmd)
+API(calc_add)
 {
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
@@ -304,5 +302,5 @@ API(calc_addmd)
 void SPRITE_REG_API()
 {
 	REG_API(getsprloc, getspriteloc);	// 获得get sprite loc
-	REG_API(addmd, calc_addmd);
+	REG_API(add, calc_add);
 }
