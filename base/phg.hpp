@@ -12,7 +12,7 @@ $blend(a, b, alpha)
 
 #call function
 ab = blend(2,8, 0.25)
->ab;a
+>ab;
 
 #if
 ?(i = 1){
