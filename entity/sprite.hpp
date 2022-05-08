@@ -1,6 +1,6 @@
 /**************************************************************************
-*			精灵
-*			可绘制的2D场景对象
+*							精灵
+*						可绘制的2D场景对象
 **************************************************************************/
 struct tree_t;
 namespace sprite
@@ -61,12 +61,13 @@ namespace sprite
 			if (it) delete it;
 		add_reslist.clear();
 	}
+
 	// *********************************************************************
 	// Setup tree, generate entities
 	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
 
-	// data convert
+// data convert
 	int stoint(crstr sval)
 	{
 		return atoi(sval.c_str());
@@ -81,10 +82,11 @@ namespace sprite
 		sscanf(sval.c_str(), "%f,%f", &ret.x, &ret.y);
 		return ret;
 	}
+
 	void setup(tree_t* tree, const transform2_t& parent, string str = "")
 	{
-		ASSERT(tree);
-		work_stack.push_back(tree);
+		ASSERT(tree)
+			work_stack.push_back(tree);
 
 		ENT ent;
 		transform2_t& trans = res(ent).trans;
@@ -105,7 +107,7 @@ namespace sprite
 				{
 					p += vec2::UY * storeal(it->second);
 				}
-				KEY_VAL("a") // angle
+				KEY_VAL("a")
 				{
 					ang = PI / 180 * storeal(it->second);
 				}
@@ -124,6 +126,15 @@ namespace sprite
 		}
 		{// 添加到变量列表
 
+			//ent.sval = tree->name;
+			KEY_VAL("vis") // vis
+			{
+				if (it->second == "false")
+				{
+					res(ent).vis = false;
+				}
+			}
+
 			KEY_VAL("md") {
 				res(ent).md = it->second;
 			}
@@ -132,11 +143,12 @@ namespace sprite
 				res(ent).md = it->second;
 				PRINTV(it->second);
 			}
-			
+			//if(CEHCK_CONSTR(res(ent).cstr))
 			gvarmapstack.addvar(tree->name.c_str(), ent);
 		}
 
-		if (tree->children.empty()){
+		if (tree->children.empty())
+		{
 			strlist.push_back(str);
 		}
 		else {
@@ -147,6 +159,33 @@ namespace sprite
 		}
 	}
 
+	int walk_addtreex(std::string& str, tree_t* tree, crstr a, crstr b, const char* key)
+	{
+		if (tree->kv[key] == a)
+			return 1;
+		if (tree->kv[key] == b)
+			return 2;
+
+		// children
+		int flag = 0;
+		for (auto it : tree->children) {
+			int ret = walk_addtreex(str, it.second, a, b, key);
+			//PRINTV(ret);
+			if (ret == 3)
+				return ret;
+
+			if (ret)
+			{
+				flag |= ret;
+				if (flag == 3)
+				{
+					str = tree->kv[key].c_str();
+					return flag;
+				}
+			}
+		}
+		return flag;
+	}
 	// 在节点树上搜索加法规则
 	const char* walk_addtree(tree_t* tree, crstr a, crstr b, const char* key)
 	{
@@ -179,18 +218,14 @@ namespace sprite
 		}
 		return 0;
 	}
-	const char* _calc_add(crstr a, crstr b, const char* key)
+	void _calc_add(std::string& str, crstr a, crstr b, const char* key)
 	{
-		if (a == b)
-			return a.c_str();
-
-		MSGBOX("walk_addtree")
-			const char* ret = walk_addtree(ROOT, a, b, key);
-
-		if (ret == 0)
-			return b.c_str();
-
-		return ret;
+		if (a == b) {
+			str = a;
+			return;
+		}
+		//MSGBOX("walk_addtree")
+		walk_addtreex(str, ROOT, a, b, key);
 	}
 
 	// 加法资源
@@ -206,9 +241,10 @@ namespace sprite
 			// 在资源上定义加法运算
 			ent.fun_add = [](var& a, var& b)->var {
 				var ret;
-				ret.type = 0;
+				ret.type = 3;
 				//MSGBOX("fun_add " << addres(ret).md)
-				addres(ret).md = _calc_add(
+				_calc_add(
+					addres(ret).md,
 					addres(a).md,
 					addres(b).md,
 					"pr1"
@@ -274,12 +310,19 @@ API(getspriteloc)
 	POP_SPARAM;
 	return 0;
 }
-API(calc_add)
+API(calc_addmd)
 {
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
-	string c = sprite::_calc_add(a, b, "pr1");
-	
+	string c;
+	sprite::_calc_add(c, a, b, "pr1");
+
+	/*if (!strlist.empty() && c != a && c != b)
+	{
+		strlist.back() = c;
+	}
+	else*/
+	PRINTV(c);
 	strlist.push_back(c);
 
 	POP_SPARAM; return 0;
@@ -287,5 +330,5 @@ API(calc_add)
 void SPRITE_REG_API()
 {
 	REG_API(getsprloc, getspriteloc);	// 获得get sprite loc
-	REG_API(add, calc_add);
+	REG_API(add, calc_addmd);
 }
