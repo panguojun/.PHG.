@@ -1,7 +1,7 @@
-﻿/***************************************************************************
-				{PHG}
-				包含元素与节点树二元
-				本文件是一个框架，内部引用了不同模块的技术
+/***************************************************************************
+					{PHG}
+					包含元素与节点树二元
+					本文件是一个框架，内部引用了不同模块的技术
 ***************************************************************************/
 #ifdef GROUP
 #undef GROUP
@@ -15,31 +15,44 @@
 #define POP_SPARAM			for(int i = 0; i < args; i ++) cd.strstack.pop_back();
 
 #define REG_API(funname,cppfunname)	ScePHG::register_api(#funname, cppfunname)
-using namespace std;
+
+#define XML
+#ifdef XML
+#include "tinyxml.h"
+#endif
+
+#define PYTHON
+#ifdef PYTHON
+#undef real
+#include "python.hpp"
+#define real	float
+#endif
 
 namespace ScePHG
 {
-// ---------------------------------------------------------------------
-#include "base/phg_head.hpp"
-// ---------------------------------------------------------------------
-#include "base/element.hpp"
-// ---------------------------------------------------------------------
-#include "base/node.hpp"
-// ---------------------------------------------------------------------
-std::vector<string> strlist;
+	std::vector<string> strlist; // string values
 
-#include "entity/entity.hpp"
-#include "entity/sprite.hpp"
 // ---------------------------------------------------------------------
+#include "phg_head.hpp"
+// ---------------------------------------------------------------------
+#include "element.hpp"
+// ---------------------------------------------------------------------
+#include "node.hpp"
+// ---------------------------------------------------------------------
+#include "entity.hpp"
+#include "sprite.hpp"
+// ---------------------------------------------------------------------
+	
 
-	// Clear
+	// clear all
 	void clear()
 	{
-		//entity::clearres();
+		entity::clearres();
 		sprite::clearres();
 		tree_t::clear(ROOT);
 		ROOT = 0;
 		work_stack.clear();
+		strlist.clear();
 	}
 	// =================================================================
 	// API
@@ -50,7 +63,13 @@ std::vector<string> strlist;
 		renderstate = atoi(param1.c_str());
 		return 0;
 	}
-	
+	API(nform)
+	{
+		PRINT("nform");
+		tricombine::test();
+
+		return 0;
+	}
 	API(rnd)
 	{
 		string param1 = GET_SPARAM(1);
@@ -75,12 +94,13 @@ std::vector<string> strlist;
 			node = GET_NODE(nodename, ROOT);
 			PRINTV(nodename);
 		}
-		if (type == "2d")
-			sprite::setup(node, { vec2::ZERO,0, 1 });
-		else if (type == "+")
+		if (type == "sprite")
+			sprite::setup(node, { vec2::ZERO,0, vec2(1,1) });
+		else if (type == "sprite_add")
 			sprite::setup_add(node);
-		else if (type == "3d")
-			entity::setup(ROOT, { vec3::ZERO, quaternion(), vec3::ONE });
+		else if (type == "entity")
+			entity::setup(node, { vec3::ZERO, quaternion(), vec3::ONE });
+
 		POP_SPARAM;
 		return 0;
 	}
@@ -143,9 +163,118 @@ std::vector<string> strlist;
 		sscanf_s(str.c_str(), "%f,%f,%f", &v.x, &v.y, &v.z);
 		return v;
 	}
+	API(getvec3)
+	{
+		vec3list.clear();
+		NODE* node = ROOT;
+		if (args > 0)
+		{
+			string param1 = GET_SPARAM(1);
+			node = GET_NODE(param1, ROOT);
+			if (!node)
+				return 0;
+		}
+		string key = "pos";
+		if (args > 1)
+		{
+			key = GET_SPARAM(2);
+		}
+		node_walker(node, [key](tree_t* tree)->void
+			{
+				auto& it = tree->kv.find(key);
+				if (it != tree->kv.end())
+				{
+					string str = it->second;
+					fixedproperty(str);
+					vec3list.push_back(tovec3(str));
+				}
+			});
+		POP_SPARAM;
+		return 0;
+	}
+	API(getfval)
+	{
+		reallist.clear();
+		NODE* node = ROOT;
+		if (args > 0)
+		{
+			string param1 = GET_SPARAM(1);
+			node = GET_NODE(param1, ROOT);
+			if (!node)
+				return 0;
+		}
+		string key = "x";
+		if (args > 1)
+		{
+			key = GET_SPARAM(2);
+		}
+		node_walker(node, [key](tree_t* tree)->void
+			{
+				auto& it = tree->kv.find(key);
+				if (it != tree->kv.end())
+				{
+					string str = it->second;
+					fixedproperty(str);
+					reallist.push_back(atof(str.c_str()));
+				}
+			});
+		POP_SPARAM;
+		return 0;
+	}
+	API(getival)
+	{
+		intlist.clear();
+		NODE* node = ROOT;
+		if (args > 0)
+		{
+			string param1 = GET_SPARAM(1);
+			node = GET_NODE(param1, ROOT);
+			if (!node)
+				return 0;
+		}
+		string key = "x";
+		if (args > 1)
+		{
+			key = GET_SPARAM(2);
+		}
+		node_walker(node, [key](tree_t* tree)->void
+			{
+				auto& it = tree->kv.find(key);
+				if (it != tree->kv.end())
+				{
+					string str = it->second;
+					fixedproperty(str);
+					intlist.push_back(atoi(str.c_str()));
+				}
+			});
+		POP_SPARAM;
+		return 0;
+	}
+	
+	API(getstr)
+	{
+		string param1 = GET_SPARAM(1);
+		string param2 = GET_SPARAM(2);
+		
+		//strlist.clear();
+		ScePHG::node_walker(ROOT, [param1, param2](ScePHG::tree_t* tree)->void
+			{
+				if (tree->name == param1) {
+					auto& it = tree->kv.find(param2);
+					if (it != tree->kv.end())
+					{
+						strlist.push_back(it->second.c_str());
+					}
+				}
+			});
+		POP_SPARAM;
+
+		PRINTV(strlist.size());
+		return 0;
+	}
 #ifdef XML
 // ----------------------------------------
-#include "parsers/xmlparser.hpp"
+#include "xmlparser.hpp"
 // ----------------------------------------
 	API(fromXML)
 	{
@@ -160,7 +289,7 @@ std::vector<string> strlist;
 #endif
 
 // ----------------------------------------
-#include "parsers/jsonparser.hpp"
+#include "jsonparser.hpp"
 // ----------------------------------------
 	API(tojson)
 	{
@@ -217,7 +346,7 @@ std::vector<string> strlist;
 	// booloper
 	API(booloper)
 	{
-		//entity::booloper(ROOT);
+		entity::booloper(ROOT);
 
 		return 0;
 	}
@@ -228,7 +357,7 @@ std::vector<string> strlist;
 			renderstate = 0;
 		}
 
-		//entity::draw(ROOT);
+		entity::draw(ROOT);
 
 		return 0;
 	}
@@ -236,7 +365,6 @@ std::vector<string> strlist;
 	// constraint
 	/*API(constraint)
 	{
-
 		return 0;
 	}*/
 	// -----------------------------------
@@ -244,19 +372,32 @@ std::vector<string> strlist;
 	// -----------------------------------
 	void setup()
 	{
-		if (tree) return;
-
 		PRINT("setup ScePHG");
 
 		tree = _tree;
 		act = _act;
 
 		REG_API(mod, rendermod);		// 渲染模式
+		REG_API(nform, nform);
 		REG_API(rnd, rnd);
 
 		REG_API(dump, dump);
 
-		REG_API(sup, setuptree);		// 生成节点树
+		REG_API(setup, setuptree);		// 生成节点树
+		
+		// NODE: 
+
+		REG_API(cur, cur);				// ME
+		REG_API(array, array);			// 节点阵列
+		REG_API(sequ, sequ);			// 节点序列
+
+		REG_API(addprop, addprop);		// 添加属性
+		
+		REG_API(getival, getival);		// 获得int value
+		REG_API(getfval, getfval);		// 获得float value
+		REG_API(getstr, getstr);		// 获得string
+		REG_API(getvec3, getvec3);		// 获得RECT
+		REG_API(getrect, getrect);		// 获得RECT
 
 #ifdef XML
 		REG_API(fromXML, fromXML);		// xml读入
@@ -298,10 +439,10 @@ extern "C"
 {
 	int EXPORT_API _stdcall VB_doPHG(const char* script)
 	{
-		//init();
+		init();
 
 		std::string str(script);
-		PRINTV(str);
+		//PRINTV(str);
 
 		if (str.find(".r") != std::string::npos)
 		{
@@ -314,30 +455,35 @@ extern "C"
 		}
 		else
 		{
-			ScePHG::clear();
-			ScePHG::setup();
-			renderstate = 0;
-			resetsm();
-
+			if (!ROOT) {
+				ScePHG::setup();
+			}
 			ScePHG::dostring(str.c_str());
 		}
 		//MSGBOX("VB_doPHG Done!");
 		return 0;
 	}
-	int EXPORT_API getIntVar(const char* key)
+	int EXPORT_API _stdcall getIntVar(const char* key)
 	{
 		return GET_VAR(key).ival;
 	}
-	//int EXPORT_API getStringSize(const char* key)
-	//{
-	//	return ScePHG::strlist.size();
-	//}
+	int EXPORT_API _stdcall getStringSize()
+	{
+		return ScePHG::strlist.size();
+	}
 
-	//EXPORT_API const char*  getStringDat(int index)
-	//{
-	//	if (index < 0)
-	//		return "";
-	//	buff = ScePHG::strlist[index % ScePHG::strlist.size()];
-	//	return buff.c_str();
-	//}
+	int EXPORT_API _stdcall getStringDat(int index, char* buf)
+	{
+		if (ScePHG::strlist.empty() || index >= ScePHG::strlist.size())
+		{
+			//buf[0] = '\0';
+			return 0;
+		}
+
+		const string& str = ScePHG::strlist[index % ScePHG::strlist.size()];
+		if (str.length() > 16)
+			return 0;
+		memcpy(buf, str.c_str(), str.length()+1);
+		return  str.length();
+	}
 }
