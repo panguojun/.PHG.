@@ -143,113 +143,6 @@ std::vector<string> strlist;
 		sscanf_s(str.c_str(), "%f,%f,%f", &v.x, &v.y, &v.z);
 		return v;
 	}
-	API(getvec3)
-	{
-		vec3list.clear();
-		NODE* node = ROOT;
-		if (args > 0)
-		{
-			string param1 = GET_SPARAM(1);
-			node = GET_NODE(param1, ROOT);
-			if (!node)
-				return 0;
-		}
-		string key = "pos";
-		if (args > 1)
-		{
-			key = GET_SPARAM(2);
-		}
-		node_walker(node, [key](tree_t* tree)->void
-			{
-				auto& it = tree->kv.find(key);
-				if (it != tree->kv.end())
-				{
-					string str = it->second;
-					fixedproperty(str);
-					vec3list.push_back(tovec3(str));
-				}
-			});
-		POP_SPARAM;
-		return 0;
-	}
-	API(getfval)
-	{
-		reallist.clear();
-		NODE* node = ROOT;
-		if (args > 0)
-		{
-			string param1 = GET_SPARAM(1);
-			node = GET_NODE(param1, ROOT);
-			if (!node)
-				return 0;
-		}
-		string key = "x";
-		if (args > 1)
-		{
-			key = GET_SPARAM(2);
-		}
-		node_walker(node, [key](tree_t* tree)->void
-			{
-				auto& it = tree->kv.find(key);
-				if (it != tree->kv.end())
-				{
-					string str = it->second;
-					fixedproperty(str);
-					reallist.push_back(atof(str.c_str()));
-				}
-			});
-		POP_SPARAM;
-		return 0;
-	}
-	API(getival)
-	{
-		intlist.clear();
-		NODE* node = ROOT;
-		if (args > 0)
-		{
-			string param1 = GET_SPARAM(1);
-			node = GET_NODE(param1, ROOT);
-			if (!node)
-				return 0;
-		}
-		string key = "x";
-		if (args > 1)
-		{
-			key = GET_SPARAM(2);
-		}
-		node_walker(node, [key](tree_t* tree)->void
-			{
-				auto& it = tree->kv.find(key);
-				if (it != tree->kv.end())
-				{
-					string str = it->second;
-					fixedproperty(str);
-					intlist.push_back(atoi(str.c_str()));
-				}
-			});
-		POP_SPARAM;
-		return 0;
-	}
-	
-	API(getstr)
-	{
-		ASSERT(cd.strstack.size() > 0)
-		string param1 = GET_SPARAM(1);
-		
-		strlist.clear();
-		ScePHG::node_walker(ROOT, [param1](ScePHG::tree_t* tree)->void
-			{
-				auto& it = tree->kv.find(param1);
-				if (it != tree->kv.end())
-				{
-					strlist.push_back(it->second.c_str());
-				}
-			});
-		POP_SPARAM;
-
-		PRINTV(strlist.size());
-		return 0;
-	}
 #ifdef XML
 // ----------------------------------------
 #include "parsers/xmlparser.hpp"
@@ -364,19 +257,6 @@ std::vector<string> strlist;
 		REG_API(dump, dump);
 
 		REG_API(sup, setuptree);		// 生成节点树
-		
-		// NODE: 
-
-		REG_API(array, array);			// 节点阵列
-		REG_API(sequ, sequ);			// 节点序列
-
-		REG_API(addprop, addprop);		// 添加属性
-		
-		REG_API(ival, getival);			// 获得int value
-		REG_API(fval, getfval);			// 获得float value
-		REG_API(str, getstr);			// 获得string
-		REG_API(vec3, getvec3);			// 获得RECT
-		REG_API(rect, getrect);			// 获得RECT
 
 #ifdef XML
 		REG_API(fromXML, fromXML);		// xml读入
