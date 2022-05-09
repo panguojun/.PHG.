@@ -8,10 +8,10 @@
 #endif
 #define GROUP	ScePHG	// 组定义
 
-#define API(funname)		static var funname(ScePHG::code& cd, int args)
-#define SPARAM(name)		string name = cd.strstack.back(); cd.strstack.pop_back();PRINT(name)
+#define API(funname)			static var funname(ScePHG::code& cd, int args)
+#define SPARAM(name)			string name = cd.strstack.back(); cd.strstack.pop_back();PRINT(name)
 #define PARAM(name)			var& name = cd.valstack.back();
-#define GET_SPARAM(index)	cd.strstack[cd.strstack.size() - 1 - (args - index)]
+#define GET_SPARAM(index)		cd.strstack[cd.strstack.size() - 1 - (args - index)]
 #define POP_SPARAM			for(int i = 0; i < args; i ++) cd.strstack.pop_back();
 
 #define REG_API(funname,cppfunname)	ScePHG::register_api(#funname, cppfunname)
@@ -23,7 +23,7 @@
 
 namespace ScePHG
 {
-	std::vector<string> strlist; // string values
+	std::vector<string> strlist; 	// string values
 
 // ---------------------------------------------------------------------
 #include "phg_head.hpp"
