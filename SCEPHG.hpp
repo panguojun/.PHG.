@@ -21,13 +21,6 @@
 #include "tinyxml.h"
 #endif
 
-#define PYTHON
-#ifdef PYTHON
-#undef real
-#include "python.hpp"
-#define real	float
-#endif
-
 namespace ScePHG
 {
 	std::vector<string> strlist; // string values
