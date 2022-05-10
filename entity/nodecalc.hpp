@@ -104,10 +104,6 @@ namespace nodecalc
 
 		ENT ent;
 		{// 添加到变量列表
-
-			KEY_VAL("md") {
-				addres(ent).md = it->second;
-			}
 			KEY_VAL("pr1") {
 				addres(ent).md = it->second;
 			}
