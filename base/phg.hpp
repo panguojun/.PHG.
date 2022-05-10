@@ -366,10 +366,6 @@ struct code
 		while (!eoc(++ptr) && checkspace(*(ptr)));
 		return (*ptr);
 	}
-	char next0() {
-		while (!eoc(++ptr));
-		return (*ptr);
-	}
 	char next2() {
 		while (!eoc(++ptr)) {
 			if (!checkspace(*(ptr)) && !isname(*(ptr)))
@@ -682,7 +678,7 @@ inline std::string getstring(code& cd, char ed = '\"')
 		if (c != '\'' && c != '\"' && c != ed)
 		{
 			content += c;
-			cd.next0();
+			cd.ptr ++;
 			continue;
 		}
 		cd.next();
