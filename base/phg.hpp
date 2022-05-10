@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 							Phg2.1
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
@@ -12,7 +12,7 @@ $blend(a, b, alpha)
 
 #call function
 ab = blend(2,8, 0.25)
->ab;a
+>ab;
 
 #if
 ?(i = 1){
@@ -44,7 +44,7 @@ yy = yy + 1;
 // PHG
 // ----------------------------------------------------------------------
 //namespace PHG{
-//#define PHG_DEBUG
+#define PHG_DEBUG
 //#define SYNTAXERR(msg)	ERRORMSG("At: " << cd.ptr - cd.start + 1 << ", ERR: " << msg)
 #define SYNTAXERR(msg)	ERRORMSG("ERR: " << msg << "\nAt: \n" << cd.ptr)
 #define INVALIDFUN	cd.funcnamemap.end()
@@ -229,7 +229,6 @@ struct valstack_t
 		if (stack.empty() || top() - pos < 0)
 		{
 			ERRORMSG("Value error!");
-			return INVALIDVAR;
 		}
 		return stack[top() - pos];
 	}
@@ -367,6 +366,10 @@ struct code
 		while (!eoc(++ptr) && checkspace(*(ptr)));
 		return (*ptr);
 	}
+	char next0() {
+		while (!eoc(++ptr));
+		return (*ptr);
+	}
 	char next2() {
 		while (!eoc(++ptr)) {
 			if (!checkspace(*(ptr)) && !isname(*(ptr)))
@@ -436,7 +439,8 @@ struct code
 		}
 		(*pbuf) = '\0';
 		return buf;
-	}/*
+	}
+	/*
 	const char* getcontent(char st, char ed) {
 		static char buf[32];
 		char* pbuf = buf;
@@ -449,7 +453,6 @@ struct code
 
 			*(pbuf++) = *(p);
 		}
-
 		(*pbuf) = '\0';
 		return buf;
 	}*/
@@ -676,11 +679,10 @@ inline std::string getstring(code& cd, char ed = '\"')
 	std::string content;
 	while (!cd.eoc()) {
 		char c = cd.cur();
-		//PRINTV(c);
 		if (c != '\'' && c != '\"' && c != ed)
 		{
 			content += c;
-			cd.next();
+			cd.next0();
 			continue;
 		}
 		cd.next();
@@ -906,7 +908,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					if (cd.cur() == '(')
 					{
 						goto IF_STATEMENT;
-					}
+					}					
 				}
 				else
 					continue;
@@ -925,7 +927,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			if (rettype == 3)
 			{
 				//if (tk)
-				finishtrunk(cd, 1);
+					finishtrunk(cd, 1);
 				return rettype;
 			}
 		}
@@ -955,7 +957,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 				}
 				var e = expr(cd);
 				cd.next();
-
+				
 				//PRINT("iter ");
 				if (e != 0) {
 					bool tk = false;
@@ -1005,7 +1007,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 						gvarmapstack.addvar(name.c_str(), var(cd.iter.back()));
 					}
 					cd.ptr = cp;
-					int rettype = subtrunk(cd, ret, depth + 1, 0, !tk);
+					int rettype = subtrunk(cd, ret, depth + 1, 0,!tk);
 					//PRINTV(rettype);
 
 					if (rettype == 2) {
@@ -1031,7 +1033,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 		else
 		{
 			statement(cd);
-			if (bsingleline)
+			if(bsingleline)
 				return 0;
 		}
 	}
@@ -1253,8 +1255,8 @@ bool checkcode(const char* str)
 // dostring
 void dostring(const char* str)
 {
-	PRINT("dostring ...")
-		init();
+	//PRINT("dostring ...")
+	init();
 
 #ifdef PHG_DEBUG
 	{// check format
@@ -1264,16 +1266,16 @@ void dostring(const char* str)
 #endif
 
 	parser(code(str));
-	PRINT("dostring done!\n");
+	//PRINT("dostring done!\n");
 }
 
 void dofile(const char* filename)
 {
 	PRINT("dofile:" << filename)
-		init();
+	init();
 
 	FILE* f;
-	if (0 != fopen_s(&f, filename, "rb")) return;
+	ASSERT(0 == fopen_s(&f, filename, "rb"));
 
 	int sp = ftell(f);
 	fseek(f, 0, SEEK_END);
