@@ -7,15 +7,14 @@ namespace nodecalc
 {
 	struct res_t
 	{
-		// 携带的属性
 		string md;				// 模型
 
-		addres_t() {}
-		addres_t(const addres_t& v)
+		res_t() {}
+		res_t(const res_t& v)
 		{
 			md = v.md;
 		};
-		~addres_t() {}
+		~res_t() {}
 	};
 	vector<res_t*> reslist;				// 资源列表
 
@@ -69,8 +68,8 @@ namespace nodecalc
 		_walk_tree_add(str, ROOT, a, b, key);
 	}
 
-	// 加法资源
-	res_t& addres(ENT& ent)
+	// 资源
+	res_t& res(ENT& ent)
 	{
 		if (ent.resid == -1)
 		{
@@ -84,9 +83,9 @@ namespace nodecalc
 				var ret;
 				ret.type = 0;
 				_calc_add(
-					addres(ret).md,
-					addres(a).md,
-					addres(b).md,
+					res(ret).md,
+					res(a).md,
+					res(b).md,
 					"pr1"
 				);
 				return ret;
@@ -104,7 +103,7 @@ namespace nodecalc
 		ENT ent;
 		{// 添加到变量列表
 			KEY_VAL("pr1") {
-				addres(ent).md = it->second;
+				res(ent).md = it->second;
 			}
 			gvarmapstack.addvar(addres(ent).md.c_str(), ent);
 		}
@@ -124,7 +123,7 @@ API(calc_add)
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
 	string c;
-	sprite::_calc_add(c, a, b, "pr1");
+	nodecalc::_calc_add(c, a, b, "pr1");
 
 	PRINTV(c);
 	strlist.push_back(c);
