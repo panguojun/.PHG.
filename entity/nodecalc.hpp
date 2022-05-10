@@ -29,7 +29,37 @@ namespace nodecalc
 	// Setup tree
 	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
+	tree_t* _walk_tree_up(std::string& str, tree_t* tree, crstr a, const char* key)
+	{
+		if (tree->kv[key] == a)
+			return tree;
 
+		// children
+		for (auto it : tree->children) {
+			tree_t* t = _walk_tree_up(str, it.second, a, b, key);
+			if (t)
+				return t;
+		}
+		return 0;
+	}
+	tree_t* _walk_tree_down(std::string& str, tree_t* tree, crstr a, const char* key)
+	{
+		if (tree->kv[key] == a)
+		{
+			for (auto it : tree->children) {
+				return it;
+			}
+			return tree;
+		}
+
+		// children
+		for (auto it : tree->children) {
+			tree_t* t = _walk_tree_up(str, it.second, a, b, key);
+			if (t)
+				return t;
+		}
+		return 0;
+	}
 	int _walk_tree_ancestor(tree_t** ancestor, tree_t* tree, crstr a, crstr b, const char* key)
 	{
 		if (tree->kv[key] == a)
@@ -93,6 +123,15 @@ namespace nodecalc
     
 		_walk_tree_add(str, ROOT, a, b, key);
 	}
+	void _calc_addd(std::string& str, crstr a, crstr b, const char* key)
+	{
+		if (a == b) {
+			str = a;
+			return;
+		}
+    
+		_walk_tree_up(str, ROOT, a, key);
+	}
 	void _calc_sub(std::string& str, crstr a, crstr b, const char* key)
 	{
 		if (a == b) {
@@ -115,7 +154,15 @@ namespace nodecalc
 			}
 		}
 	}
-	
+	void _calc_subb(std::string& str, crstr a, crstr b, const char* key)
+	{
+		if (a == b) {
+			str = a;
+			return;
+		}
+    
+		_walk_tree_down(str, ROOT, a, key);
+	}
 	// 资源
 	res_t& res(ENT& ent)
 	{
@@ -166,12 +213,34 @@ namespace nodecalc
 // ------------------------------------
 // API
 // ------------------------------------
+API(calc_addd)
+{
+	crstr a = GET_SPARAM(1);
+	string c;
+	nodecalc::_calc_addd(c, a, "pr1");
+
+	PRINTV(c);
+	strlist.push_back(c);
+
+	POP_SPARAM; return 0;
+}
 API(calc_add)
 {
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
 	string c;
 	nodecalc::_calc_add(c, a, b, "pr1");
+
+	PRINTV(c);
+	strlist.push_back(c);
+
+	POP_SPARAM; return 0;
+}
+API(calc_subb)
+{
+	crstr a = GET_SPARAM(1);
+	string c;
+	nodecalc::_calc_subb(c, a, "pr1");
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -192,6 +261,8 @@ API(calc_sub)
 }
 void NODECALC_REG_API()
 {
+	REG_API(addd, calc_addd);
 	REG_API(add, calc_add);
+	REG_API(subb, calc_subb);
 	REG_API(sub, calc_sub);
 }
