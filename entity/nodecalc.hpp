@@ -5,7 +5,7 @@
 struct tree_t;
 namespace nodecalc
 {
-	struct addres_t
+	struct res_t
 	{
 		// 携带的属性
 		string md;				// 模型
@@ -17,13 +17,13 @@ namespace nodecalc
 		};
 		~addres_t() {}
 	};
-	vector<addres_t*> add_reslist;		// 资源列表
+	vector<res_t*> reslist;				// 资源列表
 
 	void clearres()
 	{
-		for (auto it : add_reslist)
+		for (auto it : reslist)
 			if (it) delete it;
-		add_reslist.clear();
+		reslist.clear();
 	}
 
 	// *********************************************************************
@@ -31,7 +31,7 @@ namespace nodecalc
 	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
 
-	int walk_addtreex(std::string& str, tree_t* tree, crstr a, crstr b, const char* key)
+	int _walk_tree_add(std::string& str, tree_t* tree, crstr a, crstr b, const char* key)
 	{
 		if (tree->kv[key] == a)
 			return 1;
@@ -41,7 +41,7 @@ namespace nodecalc
 		// children
 		int flag = 0;
 		for (auto it : tree->children) {
-			int ret = walk_addtreex(str, it.second, a, b, key);
+			int ret = _walk_tree_add(str, it.second, a, b, key);
 			//PRINTV(ret);
 			if (ret == 3)
 				return ret;
@@ -66,24 +66,23 @@ namespace nodecalc
 			return;
 		}
     
-		walk_addtreex(str, ROOT, a, b, key);
+		_walk_tree_add(str, ROOT, a, b, key);
 	}
 
 	// 加法资源
-	addres_t& addres(ENT& ent)
+	res_t& addres(ENT& ent)
 	{
 		if (ent.resid == -1)
 		{
-			addres_t* rs = new addres_t();
-			add_reslist.push_back(rs);
-			ent.resid = add_reslist.size() - 1;
+			res_t* rs = new res_t();
+			reslist.push_back(rs);
+			ent.resid = reslist.size() - 1;
 
 			ent.type = 0; // 自定义元素类型
 			// 在资源上定义加法运算
 			ent.fun_add = [](var& a, var& b)->var {
 				var ret;
-				ret.type = 3;
-				//MSGBOX("fun_add " << addres(ret).md)
+				ret.type = 0;
 				_calc_add(
 					addres(ret).md,
 					addres(a).md,
@@ -94,11 +93,11 @@ namespace nodecalc
 			};
 		}
 		//PRINTV(ent.resid);
-		ASSERT(ent.resid < add_reslist.size());
-		return *add_reslist[ent.resid];
+		ASSERT(ent.resid < reslist.size());
+		return *reslist[ent.resid];
 	}
 
-	void setup_add(tree_t* tree)
+	void setup(tree_t* tree)
 	{
 		work_stack.push_back(tree);
 
