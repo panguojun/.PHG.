@@ -8,6 +8,8 @@
 #define ME			work_stack.back()
 #define GET_NODE(key, node)	key == "me" ? ME : _gettree(key, node)
 
+int node_count = 0;				// 节点数量
+
 // 加前缀
 inline void add_suffix(string& name, const string& clonename) {
 
@@ -38,10 +40,9 @@ struct tree_t
 		else
 			return depth;
 	}
-	static int getcount(tree_t* tree, int count = 0)
+	static inline int genid()
 	{
-		static int sid = 0; // 静态变量
-		return ++sid;
+		return ++node_count;
 	}
 	void operator += (const tree_t& t)
 	{
@@ -51,12 +52,11 @@ struct tree_t
 		{
 			kv[it.first] = it.second;
 		}
-		int count = getcount(this);
 		for (auto& it : t.children)
 		{
 			tree_t* ntree = new tree_t();
 			
-			ntree->name = to_string(count) + "_" + to_string(children.size() + 1);
+			ntree->name = to_string(tree_t::genid()) + "_" + to_string(children.size() + 1);
 			// add_suffix(ntree->name, it.first);
 			children[ntree->name] = ntree;
 			ntree->parent = this;
@@ -145,16 +145,16 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 					key = "pr" + to_string(tree->kv.size() + 1); // default porperty name
 				tree->kv[key] = val;
 			}
-			else if (key.empty())
-			{
-				key = to_string(depth + 1) + "_" + to_string(tree->children.size() + 1);
-			}
 			
 			if (c == '{') {
 				if (val != "")
 				{
 					SYNTAXERR("missing ';' to end an property(k:v) line!");
 					cd.ptr = 0;
+				}
+				if (key.empty())
+				{
+					key = to_string(tree_t::genid()) + "_" + to_string(tree->children.size() + 1);
 				}
 				tree_t* ntree = new tree_t;
 				ntree->name = key;
@@ -325,7 +325,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 			index++;
 			if (node.empty())
 			{
-				node = to_string(depth) + "." + to_string(tree->children.size()+1);
+				node = to_string(tree_t::genid()) + "." + to_string(tree->children.size()+1);
 			}
 			work_stack.push_back(tree);
 			ntree = new tree_t;
@@ -370,7 +370,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 				work_stack.push_back(tree);
 				ntree = new tree_t;
 
-				ntree->name = to_string(depth) + "_" + to_string(tree->children.size()+1);
+				ntree->name = to_string(tree_t::genid()) + "_" + to_string(tree->children.size()+1);
 				{// inhert
 					tree_t* t = GET_NODE(node, ROOT);
 					if (t) {
@@ -442,10 +442,9 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 		}
 		else if (c == '{')
 		{
-			int count = tree_t::getcount(tree);
 			if (node.empty())
 			{
-				node = to_string(count) + "_" + to_string(tree->children.size() + 1);
+				node = to_string(tree_t::genid()) + "_" + to_string(tree->children.size() + 1);
 			}
 
 			work_stack.push_back(tree);
@@ -475,14 +474,12 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 			{// create node
 				work_stack.push_back(tree);
 				ntree = new tree_t;
-				int count = tree_t::getcount(tree);
-				ntree->name = to_string(count) + "_" + to_string(tree->children.size() + 1);
+				ntree->name = to_string(tree_t::genid()) + "_" + to_string(tree->children.size() + 1);
 				{// inhert
 					tree_t* t = GET_NODE(node, ROOT);
 					if (t) {
 						//PRINT("inhert3: " << node)
 						// add_suffix(tree->name, node);
-
 						(*ntree) += (*t);
 					}
 				}
@@ -596,7 +593,7 @@ void node_walker(tree_t* tree, std::function<void(tree_t*)> fun)
 // ====================================
 // API
 // ====================================
-API(cur)
+API(api_me)
 {
 	ASSERT(args == 1);
 	
@@ -623,15 +620,15 @@ API(array)
 	}
 	if (ME->parent && (!cd.iter.empty() && cd.iter.back() > 1))
 	{
-		int count = tree_t::getcount(ME->parent);
-		ntree->name = to_string(count) + "_" + to_string(ME->parent->children.size() + 1);
+		int id = tree_t::genid();
+		ntree->name = to_string(id) + "_" + to_string(ME->parent->children.size() + 1);
 		ME->parent->children[ntree->name] = ntree;
 		ntree->parent = ME->parent;
 	}
 	else
 	{
-		int count = tree_t::getcount(ME);
-		ntree->name = to_string(count) + "_" + to_string(ME->children.size() + 1);
+		int id = tree_t::genid();
+		ntree->name = to_string(id) + "_" + to_string(ME->children.size() + 1);
 		ME->children[ntree->name] = ntree;
 		ntree->parent = ME;
 	}
@@ -643,8 +640,8 @@ API(sequ)
 {
 	ASSERT(ME);
 	tree_t* ntree = new tree_t;
-	int count = tree_t::getcount(ME);
-	ntree->name = to_string(count) + "_" + to_string(ME->children.size() + 1);
+	int id = tree_t::genid();
+	ntree->name = to_string(id) + "_" + to_string(ME->children.size() + 1);
 	
 	if (args == 1)
 	{
@@ -717,7 +714,7 @@ API(dump)
 }
 
 // -----------------------------------
-// 数据输出
+// 数据输出 I/O
 // -----------------------------------
 inline string fixedname(crstr name)
 {
@@ -892,9 +889,9 @@ API(getstr)
 // ===================================
 void NODE_REG_API()
 {
-	REG_API(cur, cur);			// ME
-	REG_API(array, array);			// 节点阵列
-	REG_API(sequ, sequ);			// 节点序列
+	REG_API(me, api_me);			// ME
+	REG_API(array, array);			// 节点阵列 (正在放弃中...)
+	REG_API(sequ, sequ);			// 节点序列 (正在放弃中...)
 
 	REG_API(prop, property);		// 添加属性
 
