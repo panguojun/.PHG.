@@ -30,6 +30,33 @@ namespace nodecalc
 	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
 
+	int _walk_tree_ancestor(tree_t** ancestor, tree_t* tree, crstr a, crstr b, const char* key)
+	{
+		if (tree->kv[key] == a)
+			return 1;
+		if (tree->kv[key] == b)
+			return 2;
+
+		// children
+		int flag = 0;
+		for (auto it : tree->children) {
+			int ret = _walk_tree_ancestor(ancestor, it.second, a, b, key);
+			
+			if (ret == 3)
+				return ret;
+
+			if (ret)
+			{
+				flag |= ret;
+				if (flag == 3)
+				{
+					*ancestor = tree;
+					return flag;
+				}
+			}
+		}
+		return flag;
+	}
 	int _walk_tree_add(std::string& str, tree_t* tree, crstr a, crstr b, const char* key)
 	{
 		if (tree->kv[key] == a)
@@ -57,7 +84,6 @@ namespace nodecalc
 		}
 		return flag;
 	}
-	
 	void _calc_add(std::string& str, crstr a, crstr b, const char* key)
 	{
 		if (a == b) {
@@ -67,7 +93,29 @@ namespace nodecalc
     
 		_walk_tree_add(str, ROOT, a, b, key);
 	}
-
+	void _calc_sub(std::string& str, crstr a, crstr b, const char* key)
+	{
+		if (a == b) {
+			str = a;
+			return;
+		}
+		
+    		tree_t* ancestor = 0;
+		_walk_tree_ancestor(&ancestor, ROOT, a, b, key);
+		
+		if(ancestor)
+		{
+			for(auto& it : tree->children)
+			{
+				if(auto& v = it->kv[key];v != b)
+				{
+					str = v;
+					break;
+				}
+			}
+		}
+	}
+	
 	// 资源
 	res_t& res(ENT& ent)
 	{
@@ -130,7 +178,20 @@ API(calc_add)
 
 	POP_SPARAM; return 0;
 }
+API(calc_sub)
+{
+	crstr a = GET_SPARAM(1);
+	crstr b = GET_SPARAM(2);
+	string c;
+	nodecalc::_calc_sub(c, a, b, "pr1");
+
+	PRINTV(c);
+	strlist.push_back(c);
+
+	POP_SPARAM; return 0;
+}
 void NODECALC_REG_API()
 {
 	REG_API(add, calc_add);
+	REG_API(sub, calc_sub);
 }
