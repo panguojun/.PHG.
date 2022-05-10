@@ -163,6 +163,42 @@ namespace nodecalc
     
 		_walk_tree_down(str, ROOT, a, key);
 	}
+	int _walk_tree_mul(std::string& str, tree_t* tree, crstr a, crstr b, const char* key)
+	{
+		if (tree->kv[key] == a)
+			return 1;
+		if (tree->kv[key] == b)
+			return 2;
+
+		// children
+		int flag = 0;
+		for (auto it : tree->children) {
+			int ret = _walk_tree_mul(str, it.second, a, b, key);
+			if (ret == 3)
+				return ret;
+
+			if (ret)
+			{
+				flag |= ret;
+				if (flag == 3)
+				{
+					str = tree->kv[key].c_str();
+					return flag;
+				}
+			}
+		}
+		return flag;
+	}
+	void _calc_mul(std::string& str, crstr a, crstr b, const char* key)
+	{
+		if (a == b) {
+			str = a;
+			return;
+		}
+    
+		_walk_tree_mul(str, ROOT, a, key);
+	}
+	
 	// 资源
 	res_t& res(ENT& ent)
 	{
@@ -259,10 +295,23 @@ API(calc_sub)
 
 	POP_SPARAM; return 0;
 }
+API(calc_mul)
+{
+	crstr a = GET_SPARAM(1);
+	crstr b = GET_SPARAM(2);
+	string c;
+	nodecalc::_calc_mul(c, a, b, "pr1");
+
+	PRINTV(c);
+	strlist.push_back(c);
+
+	POP_SPARAM; return 0;
+}
 void NODECALC_REG_API()
 {
 	REG_API(addd, calc_addd);
 	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
 	REG_API(sub, calc_sub);
+	REG_API(sub, calc_mul);
 }
