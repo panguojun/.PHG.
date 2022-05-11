@@ -29,38 +29,17 @@ namespace nodecalc
 	// Setup tree
 	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
-	int _walk_tree_up(std::string& str, tree_t* tree, crstr a, const char* key)
+	
+	tree_t* _walk_tree_node(std::string& str, tree_t* tree, crstr a, const char* key)
 	{
 		if (tree->kv[key] == a)
 		{
-			return 1;
-		}
-		// children
-		if (tree->parent) {
-			int ret = _walk_tree_up(str, tree->parent, a, key);
-			if (ret == 1)
-			{
-				str = tree->kv[key];
-				return 2;
-			}
-			else if (ret == 2)
-				return ret;
-		}
-		return 0;
-	}
-	tree_t* _walk_tree_down(std::string& str, tree_t* tree, crstr a, const char* key)
-	{
-		if (tree->kv[key] == a)
-		{
-			for (auto& it : tree->children) {
-				return it.second;
-			}
 			return tree;
 		}
 
 		// children
 		for (auto it : tree->children) {
-			tree_t* t = _walk_tree_down(str, it.second, a, key);
+			tree_t* t = _walk_tree_node(str, it.second, a, key);
 			if (t)
 				return t;
 		}
@@ -87,6 +66,7 @@ namespace nodecalc
 				if (flag == 3)
 				{
 					*ancestor = tree;
+					PRINT("found ancestor!")
 					return flag;
 				}
 			}
@@ -131,7 +111,9 @@ namespace nodecalc
 	}
 	void _calc_addd(std::string& str, crstr a, const char* key)
 	{
-		_walk_tree_up(str, ROOT, a, key);
+		NODE* node = _walk_tree_node(str, ROOT, a, key);
+		if (node->parent)
+			str = node->parent->kv[key];
 	}
 	void _calc_sub(std::string& str, crstr a, crstr b, const char* key)
 	{
@@ -140,24 +122,42 @@ namespace nodecalc
 			return;
 		}
 
-		tree_t* ancestor = 0;
-		_walk_tree_ancestor(&ancestor, ROOT, a, b, key);
+		NODE* node = _walk_tree_node(str, ROOT, a, key);
 
-		if (ancestor)
+		if (node)
 		{
-			for (auto& it : ancestor->children)
+			bool bina = false;
+			for (auto& it : node->children)
 			{
-				if (auto& v = it.second->kv[key]; v != b)
+				if (auto& v = it.second->kv[key]; v == b)
 				{
-					str = v;
+					bina = true;
 					break;
+				}
+			}
+			if (bina) {
+				for (auto& it : node->children)
+				{
+					if (auto& v = it.second->kv[key]; v != b)
+					{
+						str = v;
+						return;
+					}
 				}
 			}
 		}
 	}
 	void _calc_subb(std::string& str, crstr a, const char* key)
 	{
-		_walk_tree_down(str, ROOT, a, key);
+		NODE* node = _walk_tree_node(str, ROOT, a, key);
+		if (!node->children.empty())
+		{
+			for (auto& it : node->children)
+			{
+				str = it.second->kv[key];
+				return;
+			}
+		}
 	}
 	// 资源
 	res_t& res(ENT& ent)
