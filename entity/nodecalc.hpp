@@ -29,16 +29,22 @@ namespace nodecalc
 	// Setup tree
 	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
-	tree_t* _walk_tree_up(std::string& str, tree_t* tree, crstr a, const char* key)
+	int _walk_tree_up(std::string& str, tree_t* tree, crstr a, const char* key)
 	{
 		if (tree->kv[key] == a)
-			return tree;
-
+		{
+			return 1;
+		}
 		// children
-		for (auto it : tree->children) {
-			tree_t* t = _walk_tree_up(str, it.second, a, b, key);
-			if (t)
-				return t;
+		if (tree->parent) {
+			int ret = _walk_tree_up(str, tree->parent, a, key);
+			if (ret == 1)
+			{
+				str = tree->kv[key];
+				return 2;
+			}
+			else if (ret == 2)
+				return ret;
 		}
 		return 0;
 	}
@@ -46,15 +52,15 @@ namespace nodecalc
 	{
 		if (tree->kv[key] == a)
 		{
-			for (auto it : tree->children) {
-				return it;
+			for (auto& it : tree->children) {
+				return it.second;
 			}
 			return tree;
 		}
 
 		// children
 		for (auto it : tree->children) {
-			tree_t* t = _walk_tree_up(str, it.second, a, b, key);
+			tree_t* t = _walk_tree_down(str, it.second, a, key);
 			if (t)
 				return t;
 		}
@@ -71,7 +77,7 @@ namespace nodecalc
 		int flag = 0;
 		for (auto it : tree->children) {
 			int ret = _walk_tree_ancestor(ancestor, it.second, a, b, key);
-			
+
 			if (ret == 3)
 				return ret;
 
@@ -120,16 +126,11 @@ namespace nodecalc
 			str = a;
 			return;
 		}
-    
+
 		_walk_tree_add(str, ROOT, a, b, key);
 	}
-	void _calc_addd(std::string& str, crstr a, crstr b, const char* key)
+	void _calc_addd(std::string& str, crstr a, const char* key)
 	{
-		if (a == b) {
-			str = a;
-			return;
-		}
-    
 		_walk_tree_up(str, ROOT, a, key);
 	}
 	void _calc_sub(std::string& str, crstr a, crstr b, const char* key)
@@ -138,15 +139,15 @@ namespace nodecalc
 			str = a;
 			return;
 		}
-		
-    		tree_t* ancestor = 0;
+
+		tree_t* ancestor = 0;
 		_walk_tree_ancestor(&ancestor, ROOT, a, b, key);
-		
-		if(ancestor)
+
+		if (ancestor)
 		{
-			for(auto& it : tree->children)
+			for (auto& it : ancestor->children)
 			{
-				if(auto& v = it->kv[key];v != b)
+				if (auto& v = it.second->kv[key]; v != b)
 				{
 					str = v;
 					break;
@@ -154,51 +155,10 @@ namespace nodecalc
 			}
 		}
 	}
-	void _calc_subb(std::string& str, crstr a, crstr b, const char* key)
+	void _calc_subb(std::string& str, crstr a, const char* key)
 	{
-		if (a == b) {
-			str = a;
-			return;
-		}
-    
 		_walk_tree_down(str, ROOT, a, key);
 	}
-	int _walk_tree_mul(std::string& str, tree_t* tree, crstr a, crstr b, const char* key)
-	{
-		if (tree->kv[key] == a)
-			return 1;
-		if (tree->kv[key] == b)
-			return 2;
-
-		// children
-		int flag = 0;
-		for (auto it : tree->children) {
-			int ret = _walk_tree_mul(str, it.second, a, b, key);
-			if (ret == 3)
-				return ret;
-
-			if (ret)
-			{
-				flag |= ret;
-				if (flag == 3)
-				{
-					str = tree->kv[key].c_str();
-					return flag;
-				}
-			}
-		}
-		return flag;
-	}
-	void _calc_mul(std::string& str, crstr a, crstr b, const char* key)
-	{
-		if (a == b) {
-			str = a;
-			return;
-		}
-    
-		_walk_tree_mul(str, ROOT, a, key);
-	}
-	
 	// 资源
 	res_t& res(ENT& ent)
 	{
@@ -236,12 +196,12 @@ namespace nodecalc
 			KEY_VAL("pr1") {
 				res(ent).md = it->second;
 			}
-			gvarmapstack.addvar(addres(ent).md.c_str(), ent);
+			gvarmapstack.addvar(res(ent).md.c_str(), ent);
 		}
 
 		// children
 		for (auto it : tree->children) {
-			setup_add(it.second);
+			setup(it.second);
 		}
 	}
 }
@@ -295,23 +255,10 @@ API(calc_sub)
 
 	POP_SPARAM; return 0;
 }
-API(calc_mul)
-{
-	crstr a = GET_SPARAM(1);
-	crstr b = GET_SPARAM(2);
-	string c;
-	nodecalc::_calc_mul(c, a, b, "pr1");
-
-	PRINTV(c);
-	strlist.push_back(c);
-
-	POP_SPARAM; return 0;
-}
 void NODECALC_REG_API()
 {
 	REG_API(addd, calc_addd);
 	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
 	REG_API(sub, calc_sub);
-	REG_API(sub, calc_mul);
 }
