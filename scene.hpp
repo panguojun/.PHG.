@@ -16,31 +16,30 @@
 
 #define REG_API(funname,cppfunname)	ScePHG::register_api(#funname, cppfunname)
 
-#define XML
+//#define XML
 #ifdef XML
 #include "tinyxml.h"
 #endif
-
+using namespace std;
 namespace ScePHG
 {
 	std::vector<string> strlist; 	// string values
 
 // ---------------------------------------------------------------------
-#include "phg_head.hpp"
+#include "base/phg_head.hpp"
 // ---------------------------------------------------------------------
-#include "element.hpp"
+#include "base/element.hpp"
 // ---------------------------------------------------------------------
-#include "node.hpp"
+#include "base/node.hpp"
 // ---------------------------------------------------------------------
-#include "entity.hpp"
-#include "sprite.hpp"
+#include "entity/sprite.hpp"
+#include "entity/nodecalc.hpp"
 // ---------------------------------------------------------------------
 	
 
 	// clear all
 	void clear()
 	{
-		entity::clearres();
 		sprite::clearres();
 		tree_t::clear(ROOT);
 		ROOT = 0;
@@ -59,7 +58,7 @@ namespace ScePHG
 	API(nform)
 	{
 		PRINT("nform");
-		tricombine::test();
+		//tricombine::test();
 
 		return 0;
 	}
@@ -69,6 +68,37 @@ namespace ScePHG
 		int maxrnd = atoi(param1.c_str());
 		POP_SPARAM;
 		return var(rand() % maxrnd);
+	}
+	API(scat)
+	{
+		ASSERT(args == 2)
+			string param1 = GET_SPARAM(1);
+		string param2 = GET_SPARAM(2);
+		POP_SPARAM;
+		cd.strstack.push_back(param1 + param2);
+		return 0;
+	}
+	API(scmp)
+	{
+		ASSERT(args == 2)
+			string param1 = GET_SPARAM(1);
+		string param2 = GET_SPARAM(2);
+		POP_SPARAM; return int(param1 == param2);
+	}
+	API(tos)
+	{
+		ASSERT(args == 1)
+			PARAM(v);
+		cd.strstack.push_back(v.type == 1 ? to_string(v.ival) : to_string(v.fval));
+		return 0;
+	}
+	API(strout)
+	{
+		ASSERT(args == 1)
+			string param1 = GET_SPARAM(1);
+		PRINT(param1);
+
+		POP_SPARAM; return 0;
 	}
 
 	// setuptree
@@ -88,11 +118,9 @@ namespace ScePHG
 			PRINTV(nodename);
 		}
 		if (type == "sprite")
-			sprite::setup(node, { vec2::ZERO,0, vec2(1,1) });
+			sprite::setup(node, { vec2::ZERO,0, 1 });
 		else if (type == "sprite_add")
 			sprite::setup_add(node);
-		else if (type == "entity")
-			entity::setup(node, { vec3::ZERO, quaternion(), vec3::ONE });
 
 		POP_SPARAM;
 		return 0;
@@ -114,6 +142,7 @@ namespace ScePHG
 	}
 #endif
 
+#ifdef JSON
 // ----------------------------------------
 #include "jsonparser.hpp"
 // ----------------------------------------
@@ -131,7 +160,7 @@ namespace ScePHG
 			JSON_PARSER::tojson_raw(ROOT);
 		return 0;
 	}
-	
+#endif	
 	// phgoper
 	void phgoper(tree_t* tree)
 	{
@@ -153,25 +182,6 @@ namespace ScePHG
 
 		return 0;
 	}
-
-	// booloper
-	API(booloper)
-	{
-		entity::booloper(ROOT);
-
-		return 0;
-	}
-
-	API(draw)
-	{
-		{ // 方便之用
-			renderstate = 0;
-		}
-
-		entity::draw(ROOT);
-
-		return 0;
-	}
 	
 	// -----------------------------------
 	// REG API
@@ -184,27 +194,24 @@ namespace ScePHG
 		act = _act;
 
 		REG_API(mod, rendermod);		// 渲染模式
-		REG_API(nform, nform);
-		REG_API(rnd, rnd);
+		REG_API(rnd, rnd);				// 随机函数
+		REG_API(scat, scat);			// 字符串拼接
+		REG_API(scmp, scmp);			// 字符串比较
+		REG_API(tos, tos);				// 转化字符串
+		REG_API(so, strout);			// 字符串打印
 
 		REG_API(dump, dump);
 
 		REG_API(setup, setuptree);		// 生成节点树
-		
-		REG_API(tojson, tojson);
-
-		REG_API(tojsonraw, tojsonraw);
 
 		// ELEMENT: 
 
-		REG_API(bool, booloper);		// 布尔运算
-
 		REG_API(phg, phgoper);			// 脚本
-
-		REG_API(draw, draw);			// 绘制
 		
 		NODE_REG_API();
-		
+
+		NODECALC_REG_API();				// node calc
+
 		SPRITE_REG_API();			// sprite 注册
 	}
 };
@@ -223,8 +230,6 @@ extern "C"
 {
 	int EXPORT_API _stdcall VB_doPHG(const char* script)
 	{
-		init();
-
 		std::string str(script);
 		//PRINTV(str);
 

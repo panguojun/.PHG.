@@ -1,6 +1,6 @@
 /**************************************************************************
-*				精灵
-*				可绘制的2D场景对象
+*							精灵
+*						可绘制的2D场景对象
 **************************************************************************/
 struct tree_t;
 namespace sprite
@@ -186,38 +186,38 @@ namespace sprite
 		}
 		return flag;
 	}
-	// 在节点树上搜索加法规则
-	const char* walk_addtree(tree_t* tree, crstr a, crstr b, const char* key)
-	{
-		if (tree->children.size() >= 2)
-		{
-			int findcnt = 0;
-			for (auto it : tree->children) {
-				if (it.second->children.empty() && it.second->kv[key] == a)
-				{
-					findcnt++;
-				}
-				if (it.second->children.empty() && it.second->kv[key] == b)
-				{
-					findcnt++;
-				}
-			}
+	//// 在节点树上搜索加法规则
+	//const char* walk_addtree(tree_t* tree, crstr a, crstr b, const char* key)
+	//{
+	//	if (tree->children.size() >= 2)
+	//	{
+	//		int findcnt = 0;
+	//		for (auto it : tree->children) {
+	//			if (it.second->children.empty() && it.second->kv[key] == a)
+	//			{
+	//				findcnt++;
+	//			}
+	//			if (it.second->children.empty() && it.second->kv[key] == b)
+	//			{
+	//				findcnt++;
+	//			}
+	//		}
 
-			if (findcnt == 2)
-			{
-				return tree->kv[key].c_str();
-			}
-		}
+	//		if (findcnt == 2)
+	//		{
+	//			return tree->kv[key].c_str();
+	//		}
+	//	}
 
-		// children
-		for (auto it : tree->children) {
-			if (const char* c = walk_addtree(it.second, a, b, key); c != 0)
-			{
-				return c;
-			}
-		}
-		return 0;
-	}
+	//	// children
+	//	for (auto it : tree->children) {
+	//		if (const char* c = walk_addtree(it.second, a, b, key); c != 0)
+	//		{
+	//			return c;
+	//		}
+	//	}
+	//	return 0;
+	//}
 	void _calc_add(std::string& str, crstr a, crstr b, const char* key)
 	{
 		if (a == b) {
@@ -243,12 +243,12 @@ namespace sprite
 				var ret;
 				ret.type = 3;
 				//MSGBOX("fun_add " << addres(ret).md)
-				_calc_add(
+				/*_calc_add(
 					addres(ret).md,
 					addres(a).md,
 					addres(b).md,
 					"pr1"
-				);
+				);*/
 				return ret;
 			};
 
@@ -330,5 +330,5 @@ API(calc_addmd)
 void SPRITE_REG_API()
 {
 	REG_API(getsprloc, getspriteloc);	// 获得get sprite loc
-	REG_API(add, calc_addmd);
+	//REG_API(add, calc_addmd);
 }

@@ -8,7 +8,7 @@
 #undef callfunc
 #undef gvarmapstack
 
-#define var		ELEMENT
+#define var			ELEMENT
 #define INVALIDVAR	ELEMENT(0)
 #ifndef STRING2VAR
 #define STRING2VAR(str)	INVALIDVAR
@@ -45,7 +45,7 @@ struct varbase_t
 		real fval;
 	};
 	int resid = -1;
-	int type = 1; // 1 -int, 2 -real
+	int type = 1; // 1 -int, 2 -real, others
 
 	varbase_t() { }
 	varbase_t(int _val) { type = 1; ival = _val; resid = -1; }
@@ -56,25 +56,35 @@ struct varbase_t
 		//PRINT("varbase_t copy " << v.resid);
 		*this = v;
 	}
-	
+
 	void operator = (const varbase_t& v)
 	{
 		//PRINT("var_t ="  << v.resid);
 		type = v.type;
-		if(type == 2)
+		if (type == 2)
 			fval = v.fval;
 		else
 			ival = v.ival;
 		resid = v.resid;
+		type = v.type;
 	}
 
 	bool operator == (int v) const
 	{
-		return ival == v;
+		return type == 1 && ival == v;
 	}
 	bool operator != (int v) const
 	{
-		return ival != v;
+		return type != 1 || ival != v;
+	}
+	bool operator == (const varbase_t& v) const
+	{
+		return type == v.type &&
+			((type == 1 && ival == v) || (type == 2 && fval == v));
+	}
+	bool operator != (const varbase_t& v) const
+	{
+		return !(*this == v);
 	}
 
 	operator int() const
@@ -112,7 +122,7 @@ struct varbase_t
 };
 #define VAR_BASE(name) \
 	name(int _ival) : varbase_t(_ival) { } \
-	name(int _fval) : varbase_t(_fval) { } \
+	name(float _fval) : varbase_t(_fval) { } \
 	bool operator == (int v) const { \
 		return varbase_t::operator==(v); \
 	} \
