@@ -1,35 +1,13 @@
 /**************************************************************************
-*			树节点运算
-*			人工智能的科学化？
+*				树节点运算
+*				人工智能的科学化？
 **************************************************************************/
 struct tree_t;
 namespace nodecalc
 {
-	struct res_t
-	{
-		string md;				// 模型
-
-		res_t() {}
-		res_t(const res_t& v)
-		{
-			md = v.md;
-		};
-		~res_t() {}
-	};
-	vector<res_t*> reslist;				// 资源列表
-
-	void clearres()
-	{
-		for (auto it : reslist)
-			if (it) delete it;
-		reslist.clear();
-	}
-
-	// *********************************************************************
-	// Setup tree
-	// *********************************************************************
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
-	
+	bool abelian_sym = true;	// 阿贝尔对称 即运算的可交换性
+
 	tree_t* _walk_tree_node(std::string& str, tree_t* tree, crstr a, const char* key)
 	{
 		if (tree->kv[key] == a)
@@ -73,41 +51,57 @@ namespace nodecalc
 		}
 		return flag;
 	}
-	int _walk_tree_add(std::string& str, tree_t* tree, crstr a, crstr b, const char* key)
+	int _walk_tree_add(tree_t** out, tree_t* tree, crstr a, crstr b, const char* key)
 	{
-		if (tree->kv[key] == a)
-			return 1;
-		if (tree->kv[key] == b)
-			return 2;
+		{// kv
+			crstr v = tree->kv[key];
+			//PRINT("key:" << key << " val:" << v);
+			if (v == a)
+				return 1;
+			if (v == b)
+				return 2;
+		}
 
 		// children
 		int flag = 0;
-		for (auto it : tree->children) {
-			int ret = _walk_tree_add(str, it.second, a, b, key);
+		tree_t* lstn = 0;
+		for (auto& it : tree->children) {
+			int ret = _walk_tree_add(out, it.second, a, b, key);
 			//PRINTV(ret);
 			if (ret == 3)
 				return ret;
 
-			if (ret)
+			if (ret && tree != ROOT)
 			{
 				flag |= ret;
 				if (flag == 3)
 				{
-					str = tree->kv[key].c_str();
+					if(!abelian_sym)
+					{// 顺序判断
+						if (lstn != 0)
+						{
+							PRINTV(it.second->getindex());
+							PRINTV(lstn->getindex());
+							if (ret == 1 && it.second->getindex() > lstn->getindex() || ret == 2 && it.second->getindex() < lstn->getindex())
+							{
+								PRINT("order failed!")
+								return 0;
+							}
+						}
+					}
+					*out = tree;
+					//str = tree->kv[key];
 					return flag;
 				}
+				lstn = it.second;
 			}
 		}
 		return flag;
 	}
-	void _calc_add(std::string& str, crstr a, crstr b, const char* key)
+	
+	void _calc_add(tree_t** out, crstr a, crstr b, const char* key)
 	{
-		if (a == b) {
-			str = a;
-			return;
-		}
-
-		_walk_tree_add(str, ROOT, a, b, key);
+		_walk_tree_add(out, ROOT, a, b, key);
 	}
 	void _calc_addd(std::string& str, crstr a, const char* key)
 	{
@@ -121,7 +115,6 @@ namespace nodecalc
 			str = a;
 			return;
 		}
-
 		NODE* node = _walk_tree_node(str, ROOT, a, key);
 
 		if (node)
@@ -159,61 +152,25 @@ namespace nodecalc
 			}
 		}
 	}
-	// 资源
-	res_t& res(ENT& ent)
-	{
-		if (ent.resid == -1)
-		{
-			res_t* rs = new res_t();
-			reslist.push_back(rs);
-			ent.resid = reslist.size() - 1;
-
-			ent.type = 0; // 自定义元素类型
-			// 在资源上定义加法运算
-			ent.fun_add = [](var& a, var& b)->var {
-				var ret;
-				ret.type = 0;
-				_calc_add(
-					res(ret).md,
-					res(a).md,
-					res(b).md,
-					"pr1"
-				);
-				return ret;
-			};
-		}
-		//PRINTV(ent.resid);
-		ASSERT(ent.resid < reslist.size());
-		return *reslist[ent.resid];
-	}
-
-	void setup(tree_t* tree)
-	{
-		work_stack.push_back(tree);
-
-		ENT ent;
-		{// 添加到变量列表
-			KEY_VAL("pr1") {
-				res(ent).md = it->second;
-			}
-			gvarmapstack.addvar(res(ent).md.c_str(), ent);
-		}
-
-		// children
-		for (auto it : tree->children) {
-			setup(it.second);
-		}
-	}
 }
 
 // ------------------------------------
 // API
 // ------------------------------------
+API(calc_set_abelian)
+{
+	crstr b = GET_SPARAM(1);
+	
+	nodecalc::abelian_sym = atoi(b.c_str());
+	PRINTV(nodecalc::abelian_sym)
+
+	POP_SPARAM; return 0;
+}
 API(calc_addd)
 {
 	crstr a = GET_SPARAM(1);
 	string c;
-	nodecalc::_calc_addd(c, a, "pr1");
+	nodecalc::_calc_addd(c, a, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -222,13 +179,36 @@ API(calc_addd)
 }
 API(calc_add)
 {
-	crstr a = GET_SPARAM(1);
-	crstr b = GET_SPARAM(2);
-	string c;
-	nodecalc::_calc_add(c, a, b, "pr1");
+	string a = GET_SPARAM(1);
+	string b = GET_SPARAM(2);
+	{
+		NODE* an = GET_NODE(a, ROOT); ASSERT(an);
+		NODE* bn = GET_NODE(b, ROOT); ASSERT(bn);
+		a = an->kv[cur_property];
+		b = bn->kv[cur_property];
+	}
 
-	PRINTV(c);
+	NODE* n = 0;
+	string c;
+	if (a == b) {
+		c = a;
+	}
+	else {
+		nodecalc::_calc_add(&n,
+			a, b,
+			cur_property.c_str());
+		if (n) {
+			c = n->kv[cur_property];
+
+			PRINTV(n->name);
+		}
+	}
 	strlist.push_back(c);
+
+	if (ME) {
+		if(n) *(work_stack.back()) += *n;
+		ME->kv[cur_property] = c;
+	}
 
 	POP_SPARAM; return 0;
 }
@@ -236,7 +216,7 @@ API(calc_subb)
 {
 	crstr a = GET_SPARAM(1);
 	string c;
-	nodecalc::_calc_subb(c, a, "pr1");
+	nodecalc::_calc_subb(c, a, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -248,15 +228,17 @@ API(calc_sub)
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
 	string c;
-	nodecalc::_calc_sub(c, a, b, "pr1");
+	nodecalc::_calc_sub(c, a, b, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
 
 	POP_SPARAM; return 0;
 }
+
 void NODECALC_REG_API()
 {
+	REG_API(abe, calc_set_abelian);
 	REG_API(addd, calc_addd);
 	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
