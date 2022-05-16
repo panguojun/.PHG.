@@ -45,7 +45,7 @@ namespace nodecalc
 				{
 					*ancestor = tree;
 					PRINT("found ancestor!")
-					return flag;
+						return flag;
 				}
 			}
 		}
@@ -76,7 +76,7 @@ namespace nodecalc
 				flag |= ret;
 				if (flag == 3)
 				{
-					if(!abelian_sym)
+					if (!abelian_sym)
 					{// 顺序判断
 						if (lstn != 0)
 						{
@@ -85,7 +85,7 @@ namespace nodecalc
 							if (ret == 1 && it.second->getindex() > lstn->getindex() || ret == 2 && it.second->getindex() < lstn->getindex())
 							{
 								PRINT("order failed!")
-								return 0;
+									return 0;
 							}
 						}
 					}
@@ -98,7 +98,7 @@ namespace nodecalc
 		}
 		return flag;
 	}
-	
+
 	void _calc_add(tree_t** out, crstr a, crstr b, const char* key)
 	{
 		_walk_tree_add(out, ROOT, a, b, key);
@@ -152,6 +152,64 @@ namespace nodecalc
 			}
 		}
 	}
+	void _wak_tree(tree_t* tree, crstr a, const char* k, const char* ok)
+	{
+		if (tree->kv[k] == a)
+		{
+			strlist.push_back(tree->kv[ok]);
+		}
+
+		// children
+		for (auto it : tree->children) {
+			_wak_tree(it.second, a, k, ok);
+		}
+	}
+	int _wak_tree_add(tree_t* tree, crstr a, crstr b, const char* key, const char* ok)
+	{
+		{// kv
+			crstr v = tree->kv[key];
+			//PRINT("key:" << key << " val:" << v);
+			if (v == a)
+				return 1;
+			if (v == b)
+				return 2;
+		}
+
+		// children
+		int flag = 0;
+		tree_t* lstn = 0;
+		for (auto& it : tree->children) {
+			int ret = _wak_tree_add(it.second, a, b, key, ok);
+			//PRINTV(ret);
+			if (ret == 3)
+				return ret;
+
+			if (ret && tree != ROOT)
+			{
+				flag |= ret;
+				if (flag == 3)
+				{
+					if (!abelian_sym)
+					{// 顺序判断
+						if (lstn != 0)
+						{
+							PRINTV(it.second->getindex());
+							PRINTV(lstn->getindex());
+							if (ret == 1 && it.second->getindex() > lstn->getindex() || ret == 2 && it.second->getindex() < lstn->getindex())
+							{
+								PRINT("order failed!")
+									return 0;
+							}
+						}
+					}
+					strlist.push_back(tree->kv[ok]);
+					return flag;
+				}
+				lstn = it.second;
+			}
+		}
+		return flag;
+	}
 }
 
 // ------------------------------------
@@ -160,11 +218,11 @@ namespace nodecalc
 API(calc_set_abelian)
 {
 	crstr b = GET_SPARAM(1);
-	
+
 	nodecalc::abelian_sym = atoi(b.c_str());
 	PRINTV(nodecalc::abelian_sym)
 
-	POP_SPARAM; return 0;
+		POP_SPARAM; return 0;
 }
 API(calc_addd)
 {
@@ -206,7 +264,7 @@ API(calc_add)
 	strlist.push_back(c);
 
 	if (ME) {
-		if(n) *(work_stack.back()) += *n;
+		if (n) *(work_stack.back()) += *n;
 		ME->kv[cur_property] = c;
 	}
 
@@ -235,12 +293,84 @@ API(calc_sub)
 
 	POP_SPARAM; return 0;
 }
+API(clearstrlist)
+{
+	strlist.clear();
 
+	return 0;
+}
+API(wak)
+{
+	crstr nm = GET_SPARAM(1);
+	NODE* n = nm == "me" ? ME : GET_NODE(nm, ROOT); ASSERT(n);
+	if (args == 3) {
+		crstr a = GET_SPARAM(2);
+		crstr ok = GET_SPARAM(3);
+
+		nodecalc::_wak_tree(n, a, cur_property.c_str(), ok.c_str());
+	}
+	else if (args == 4)
+	{
+		crstr a = GET_SPARAM(2);
+		crstr b = GET_SPARAM(3);
+		crstr ok = GET_SPARAM(4);
+
+		nodecalc::_wak_tree_add(n, a, b, cur_property.c_str(), ok.c_str());
+
+	}
+
+	POP_SPARAM; return 0;
+}
 void NODECALC_REG_API()
 {
+	CALC([](code& cd, char o, int args)->string {
+
+		PRINT("CALC: " << o << "(" << args << ")");
+		//PRINTV(ME->name);
+		if (o == '+')
+		{
+			crstr a = GET_SPARAM(1);
+			crstr b = GET_SPARAM(2);
+			string c;
+			if (a == b) {
+				c = a;
+			}
+			else
+			{
+				NODE* n = 0;
+				nodecalc::_calc_add(&n,
+					a, b,
+					cur_property.c_str());
+				if (n) {
+					c = n->kv[cur_property];
+
+					PRINTV(n->name);
+					work_stack.push_back(n);
+				}
+			}
+			strlist.push_back(c);
+			return c;
+		}
+		else if (o == '.')
+		{
+			crstr a = GET_SPARAM(1);
+			crstr b = GET_SPARAM(2);
+			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+			string c = n->kv[b];
+
+			strlist.push_back(c);
+			return c;
+		}
+		return "";
+		});
+
 	REG_API(abe, calc_set_abelian);
+
 	REG_API(addd, calc_addd);
 	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
 	REG_API(sub, calc_sub);
+
+	REG_API(cls, clearstrlist);
+	REG_API(wak, wak);
 }
