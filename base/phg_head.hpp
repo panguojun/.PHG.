@@ -48,27 +48,28 @@ struct varbase_t
 	int type = 1; // 1 -int, 2 -real, others
 
 	varbase_t() { }
-	varbase_t(int _val) { type = 1; ival = _val; resid = -1; }
-	varbase_t(real _val) { type = 2; fval = _val; resid = -1; }
-
+	varbase_t(int _val) { 
+		type = 1; ival = _val; resid = -1;
+	}
+	varbase_t(real _val) {
+		type = 2; fval = _val; resid = -1;
+	}
 	varbase_t(const varbase_t& v)
 	{
-		//PRINT("varbase_t copy " << v.resid);
-		*this = v;
+		//PRINT("varbase_t copy " << v.type);
+		(*this) = v;
 	}
-
+	
 	void operator = (const varbase_t& v)
 	{
-		//PRINT("var_t ="  << v.resid);
+		//PRINT("var_t ="  << v.type << "," << v.fval);
 		type = v.type;
-		if (type == 2)
+		if(type == 2)
 			fval = v.fval;
 		else
 			ival = v.ival;
 		resid = v.resid;
-		type = v.type;
 	}
-
 	bool operator == (int v) const
 	{
 		return type == 1 && ival == v;
@@ -79,7 +80,7 @@ struct varbase_t
 	}
 	bool operator == (const varbase_t& v) const
 	{
-		return type == v.type &&
+		return type == v.type && 
 			((type == 1 && ival == v) || (type == 2 && fval == v));
 	}
 	bool operator != (const varbase_t& v) const
@@ -93,7 +94,7 @@ struct varbase_t
 		return ival;
 	}
 
-	varbase_t operator + (varbase_t& v)
+	varbase_t operator + (varbase_t& v) const
 	{
 		varbase_t ret;
 		if (type == 2 || v.type == 2) {
@@ -106,7 +107,7 @@ struct varbase_t
 		}
 		return ret;
 	}
-	varbase_t operator - (varbase_t& v)
+	varbase_t operator - (varbase_t& v) const
 	{
 		varbase_t ret;
 		if (type == 2 || v.type == 2) {
@@ -119,10 +120,23 @@ struct varbase_t
 		}
 		return ret;
 	}
+	varbase_t operator - () const
+	{
+		varbase_t ret;
+		if (type == 2) {
+			ret.type = 2;
+			ret.fval = - fval;
+		}
+		else
+		{
+			ret.ival = - ival;
+		}
+		return ret;
+	}
 };
 #define VAR_BASE(name) \
-	name(int _ival) : varbase_t(_ival) { } \
-	name(float _fval) : varbase_t(_fval) { } \
+	name(int _ival) : varbase_t(_ival) {} \
+	name(real _fval) : varbase_t(_fval) {} \
 	bool operator == (int v) const { \
 		return varbase_t::operator==(v); \
 	} \
