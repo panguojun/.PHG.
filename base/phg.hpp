@@ -151,7 +151,7 @@ static inline bool iscalc(char c) {
 	return c == '+' || c == '-' || c == '*' || c == '/' || c == '!' || c == '&' || c == '|';
 }
 static inline bool islogic(char c) {
-	return c == '>' || c == '<' || c == '=' || c == '&' || c == '|' || c == '^';
+	return c == '>' || c == '<' || c == '=' || c == '&' || c == '|' || c == '^' || c == '.';
 }
 static inline bool isname(char c) {
 	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_';
@@ -192,11 +192,7 @@ struct valstack_t
 	std::vector<var> stack;
 	void push(const var& v) {
 		//PRINT("PUSH")
-		stack.emplace_back(v);
-	}
-	void push(var&& v) {
-		//PRINT("PUSH2")
-		stack.emplace_back(v);
+		stack.push_back(v);
 	}
 	var pop() {
 		//PRINT("POP")
@@ -375,7 +371,7 @@ struct code
 	}
 	char next3() {
 		while (!eoc(++ptr)) {
-			if (!checkspace(*(ptr)) && !isname(*(ptr)) && '.' != (*(ptr)) && !isnum(*(ptr)))
+			if (!checkspace(*(ptr)) && !isname(*(ptr)) && !isnum(*(ptr)))
 				break;
 		}
 		return (*ptr);
@@ -386,7 +382,7 @@ struct code
 	}
 	char nextline() {
 		while (!eoc(++ptr) && !checkline(*(ptr)));
-		return (*++ptr);
+		return (*ptr) == '\0' ? '\0' : *(++ptr);
 	}
 	char getnext() {
 		const char* p = ptr;
@@ -404,7 +400,7 @@ struct code
 	char getnext3() {
 		const char* p = ptr;
 		while (!eoc(++p)) {
-			if (!checkspace(*(p)) && '.' != (*(p)) && !isnum(*(p)))
+			if (!checkspace(*(p)) && !isnum(*(p)))
 				break;
 		}
 		return (*p);
@@ -430,7 +426,7 @@ struct code
 		const char* p = ptr;
 		if (!isnum(*p))
 		{
-			while (!eoc(p) && !checkspace(*p) && (isname(*p) || (*p == '.') || isnum(*p)))
+			while (!eoc(p) && !checkspace(*p) && (isname(*p) || isnum(*p)))
 				*(pbuf++) = *(p++);
 		}
 		(*pbuf) = '\0';
@@ -596,7 +592,7 @@ inline var chars2var(code& cd) {
 		//PRINTV(number);
 		return gtable[number];
 	}
-	return isreal ? var((real)atof(buff)) : var(atoi(buff));
+	return isreal ? ((real)atof(buff)) : (atoi(buff));
 }
 
 // get value
@@ -843,8 +839,7 @@ void statement_default(code& cd) {
 	}
 	else if (cd.cur() == '>') {
 		cd.next();
-		const var& v = expr(cd);
-		PHGPRINT("> ", v);
+		PHGPRINT("> ", expr(cd));
 		cd.next();
 	}
 	else
@@ -876,8 +871,8 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			cd.next();
 			if (bfunc && depth == 0)
 			{
-				PRINT("func return}")
-					return 2; // 函数返回
+				PRINT("func ret}");
+				return 2; // 函数返回
 			}
 			break;
 		}
@@ -890,7 +885,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			ASSERT(cd.next() == '(');
 		IF_STATEMENT:
 			cd.next();
-			const var& e = expr(cd);
+			int e = int(expr(cd));
 			cd.next();
 			if (e == 0) {// else
 				finishtrunk(cd, 0);
@@ -1096,12 +1091,11 @@ var callfunc_phg(code& cd) {
 	for (int i = 0; i < paramnamelist.size(); i++)
 		gvarmapstack.addvar(paramnamelist[i].c_str(), paramvallist[paramvallist.size() - 1 - i]);
 
-	var ret = INVALIDVAR;
+	var ret(0);
 	ASSERT(subtrunk(cd, ret, 0, true) == 2);
 	gvarmapstack.pop();
 
 	cd.ptr = cd.codestack.pop();
-	PRINT("return ");
 	PRINT("}");
 	return ret;
 }
@@ -1196,7 +1190,7 @@ void parser_default(code& cd) {
 			tree(cd);
 		}
 		else {
-			var ret = INVALIDVAR;
+			var ret(0);
 			subtrunk(cd, ret, 0, 0);
 		}
 	}
@@ -1211,21 +1205,39 @@ void init()
 		statement = statement_default;
 }
 
-bool incChinese(const char* str)
+bool checkChinese(const char* str)
 {
 	char c;
-	while (1)
+	while (true)
 	{
 		c = *str++;
+		//PRINT(c);
 		if (c == 0) break;
 		if (c & 0x80)
-			if (*str & 0x80) return true;
+			if (*str & 0x80)
+			{
+				//PRINTV(str);
+				return true;
+			}
 	}
 	return false;
 }
+void fixedstring(string& out, const char* str)
+{
+	out.clear();
+	char c;
+	while (true)
+	{
+		c = *str++;
+		if (c == '#') do c = (*str++); while ((*str) != '\n' && c != '\0');
+		if (c == 0) break;
+		out += c;
+	}
+}
 bool checkcode(const char* str)
 {
-	string codestr = str;
+	string codestr;
+	fixedstring(codestr, str);
 	if (count(codestr.begin(), codestr.end(), '{') != count(codestr.begin(), codestr.end(), '}'))
 	{
 		ERRORMSG("number of \'{\' != \'}\'!");
@@ -1241,7 +1253,7 @@ bool checkcode(const char* str)
 		ERRORMSG("number of \'<\' != \'>\'!");
 		return;
 	}*/
-	if (incChinese(str))
+	if (checkChinese(str))
 	{
 		ERRORMSG("include Chinese charactor!");
 		return false;
