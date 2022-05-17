@@ -1,6 +1,3 @@
-//
-//  sample.cc
-//
 //  Copyright (c) 2019 Yuji Hirose. All rights reserved.
 //  MIT License
 //
