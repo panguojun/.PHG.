@@ -3,7 +3,7 @@
 *				人工智能的科学化？
 **************************************************************************/
 struct tree_t;
-namespace nodecalc
+namespace calc
 {
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
 	bool abelian_sym = true;	// 阿贝尔对称 即运算的可交换性
@@ -219,16 +219,16 @@ API(calc_set_abelian)
 {
 	crstr b = GET_SPARAM(1);
 
-	nodecalc::abelian_sym = atoi(b.c_str());
-	PRINTV(nodecalc::abelian_sym)
+	calc::abelian_sym = atoi(b.c_str());
+	PRINTV(calc::abelian_sym)
 
-		POP_SPARAM; return 0;
+	POP_SPARAM; return 0;
 }
 API(calc_addd)
 {
 	crstr a = GET_SPARAM(1);
 	string c;
-	nodecalc::_calc_addd(c, a, cur_property.c_str());
+	calc::_calc_addd(c, a, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -252,7 +252,7 @@ API(calc_add)
 		c = a;
 	}
 	else {
-		nodecalc::_calc_add(&n,
+		calc::_calc_add(&n,
 			a, b,
 			cur_property.c_str());
 		if (n) {
@@ -274,7 +274,7 @@ API(calc_subb)
 {
 	crstr a = GET_SPARAM(1);
 	string c;
-	nodecalc::_calc_subb(c, a, cur_property.c_str());
+	calc::_calc_subb(c, a, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -286,7 +286,7 @@ API(calc_sub)
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
 	string c;
-	nodecalc::_calc_sub(c, a, b, cur_property.c_str());
+	calc::_calc_sub(c, a, b, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -307,7 +307,7 @@ API(wak)
 		crstr a = GET_SPARAM(2);
 		crstr ok = GET_SPARAM(3);
 
-		nodecalc::_wak_tree(n, a, cur_property.c_str(), ok.c_str());
+		calc::_wak_tree(n, a, cur_property.c_str(), ok.c_str());
 	}
 	else if (args == 4)
 	{
@@ -315,7 +315,7 @@ API(wak)
 		crstr b = GET_SPARAM(3);
 		crstr ok = GET_SPARAM(4);
 
-		nodecalc::_wak_tree_add(n, a, b, cur_property.c_str(), ok.c_str());
+		calc::_wak_tree_add(n, a, b, cur_property.c_str(), ok.c_str());
 
 	}
 
@@ -338,7 +338,7 @@ void NODECALC_REG_API()
 			else
 			{
 				NODE* n = 0;
-				nodecalc::_calc_add(&n,
+				calc::_calc_add(&n,
 					a, b,
 					cur_property.c_str());
 				if (n) {
