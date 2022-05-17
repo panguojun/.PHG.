@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 							Phg2.1
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
@@ -592,7 +592,7 @@ inline var chars2var(code& cd) {
 		//PRINTV(number);
 		return gtable[number];
 	}
-	return isreal ? ((real)atof(buff)) : (atoi(buff));
+	return isreal ? var((real)atof(buff)) : var(atoi(buff));
 }
 
 // get value
@@ -674,7 +674,7 @@ inline std::string getstring(code& cd, char ed = '\"')
 		if (c != '\'' && c != '\"' && c != ed)
 		{
 			content += c;
-			cd.ptr ++;
+			cd.ptr++;
 			continue;
 		}
 		cd.next();
@@ -771,6 +771,9 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				oprs++;
 			}
 			cd.next();
+			cd.valstack.push(expr(cd));
+			//cd.next();
+			args++;
 		}
 		else {
 			char c = cd.cur();
@@ -899,7 +902,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					if (cd.cur() == '(')
 					{
 						goto IF_STATEMENT;
-					}					
+					}
 				}
 				else
 					continue;
@@ -918,7 +921,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			if (rettype == 3)
 			{
 				//if (tk)
-					finishtrunk(cd, 1);
+				finishtrunk(cd, 1);
 				return rettype;
 			}
 		}
@@ -927,7 +930,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			cd.next();
 			finishtrunk(cd, 0);
 
-			cd.next();
+			//cd.next();
 
 			continue;
 		}
@@ -948,7 +951,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 				}
 				var e = expr(cd);
 				cd.next();
-				
+
 				//PRINT("iter ");
 				if (e != 0) {
 					bool tk = false;
@@ -998,7 +1001,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 						gvarmapstack.addvar(name.c_str(), var(cd.iter.back()));
 					}
 					cd.ptr = cp;
-					int rettype = subtrunk(cd, ret, depth + 1, 0,!tk);
+					int rettype = subtrunk(cd, ret, depth + 1, 0, !tk);
 					//PRINTV(rettype);
 
 					if (rettype == 2) {
@@ -1024,7 +1027,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 		else
 		{
 			statement(cd);
-			if(bsingleline)
+			if (bsingleline)
 				return 0;
 		}
 	}
@@ -1154,14 +1157,16 @@ void parser_default(code& cd) {
 	PRINT(cd.ptr);
 	PRINT("--------------------");
 
-	rank['|'] = 1;
-	rank['^'] = 1;
-	rank['&'] = 2;
-	rank['+'] = 3;
-	rank['-'] = 3;
-	rank['*'] = 4;
-	rank['/'] = 4;
-	rank['!'] = 5;
+	rank['>'] = 1;
+	rank['<'] = 1;
+	rank['|'] = 2;
+	rank['^'] = 2;
+	rank['&'] = 3;
+	rank['+'] = 4;
+	rank['-'] = 4;
+	rank['*'] = 5;
+	rank['/'] = 5;
+	rank['!'] = 6;
 
 	//getchar();
 
@@ -1280,7 +1285,7 @@ void dostring(const char* str)
 void dofile(const char* filename)
 {
 	PRINT("dofile:" << filename)
-	init();
+		init();
 
 	FILE* f;
 	ASSERT(0 == fopen_s(&f, filename, "rb"));

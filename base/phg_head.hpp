@@ -1,4 +1,4 @@
-#undef var
+﻿#undef var
 #undef INVALIDVAR
 #undef rank
 #undef fun_t
@@ -48,7 +48,7 @@ struct varbase_t
 	int type = 1; // 1 -int, 2 -real, others
 
 	varbase_t() { }
-	varbase_t(int _val) { 
+	varbase_t(int _val) {
 		type = 1; ival = _val; resid = -1;
 	}
 	varbase_t(real _val) {
@@ -59,12 +59,12 @@ struct varbase_t
 		//PRINT("varbase_t copy " << v.type);
 		(*this) = v;
 	}
-	
+
 	void operator = (const varbase_t& v)
 	{
 		//PRINT("var_t ="  << v.type << "," << v.fval);
 		type = v.type;
-		if(type == 2)
+		if (type == 2)
 			fval = v.fval;
 		else
 			ival = v.ival;
@@ -78,10 +78,18 @@ struct varbase_t
 	{
 		return type != 1 || ival != v;
 	}
+	bool operator == (real v) const
+	{
+		return type == 2 && fval == v;
+	}
+	bool operator != (real v) const
+	{
+		return type != 2 || fval != v;
+	}
 	bool operator == (const varbase_t& v) const
 	{
-		return type == v.type && 
-			((type == 1 && ival == v) || (type == 2 && fval == v));
+		return type == v.type &&
+			((type == 1 && ival == v.ival) || (type == 2 && fval == v.fval));
 	}
 	bool operator != (const varbase_t& v) const
 	{
@@ -125,11 +133,11 @@ struct varbase_t
 		varbase_t ret;
 		if (type == 2) {
 			ret.type = 2;
-			ret.fval = - fval;
+			ret.fval = -fval;
 		}
 		else
 		{
-			ret.ival = - ival;
+			ret.ival = -ival;
 		}
 		return ret;
 	}
