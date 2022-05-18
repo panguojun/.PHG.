@@ -292,7 +292,7 @@ struct varmapstack_t
 
 		stack.back()[name] = v;
 	}
-	var getvar(const char* name)
+	var& getvar(const char* name)
 	{
 		//PRINT("getvar = " << name);
 		if (stack.empty())
