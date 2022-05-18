@@ -294,7 +294,6 @@ struct varmapstack_t
 	}
 	var& getvar(const char* name)
 	{
-		static INVALIDVAR;
 		//PRINT("getvar = " << name);
 		if (stack.empty())
 		{
