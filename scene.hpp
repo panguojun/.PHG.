@@ -182,6 +182,14 @@ namespace ScePHG
 
 		return 0;
 	}
+	API(dostring)
+	{
+		SPARAM(str);
+		
+		ScePHG::dostring(str.c_str());
+
+		return 0;
+	}
 	
 	// -----------------------------------
 	// REG API
@@ -199,7 +207,9 @@ namespace ScePHG
 		REG_API(scmp, scmp);			// 字符串比较
 		REG_API(tos, tos);				// 转化字符串
 		REG_API(so, strout);			// 字符串打印
-
+		
+		REG_API(do, dostring);			// dostring
+		
 		REG_API(dump, dump);
 
 		REG_API(setup, setuptree);		// 生成节点树
@@ -210,7 +220,7 @@ namespace ScePHG
 		
 		NODE_REG_API();
 
-		NODECALC_REG_API();				// node calc
+		NODECALC_REG_API();			// node calc
 
 		SPRITE_REG_API();			// sprite 注册
 	}
