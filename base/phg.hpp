@@ -627,12 +627,10 @@ void finishtrunk(code& cd, int trunkcnt = 0)
 {
 	const char sk = '{', ek = '}';
 
-	int sk_cnt = 0;
 	while (!cd.eoc()) {
 		char c = cd.cur();
 		if (c == sk) {
 			trunkcnt++;
-			sk_cnt++;
 		}
 		else if (c == ek) {
 			trunkcnt--;
@@ -644,7 +642,7 @@ void finishtrunk(code& cd, int trunkcnt = 0)
 		}
 		else if (c == ';') // 单行 trunk
 		{
-			if (sk_cnt == 0)
+			if (trunkcnt == 0)
 			{
 				cd.next();
 				break;
@@ -853,12 +851,13 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 		if (type == '~') // break
 		{
 			PRINT("break");
+			cd.next();cd.next();
 			return 3; // 跳出
 		}
 		else if (type == ';')
 		{
-			PRINT(";")
-				cd.nextline();
+			PRINT(";");
+			cd.nextline();
 			break;
 		}
 		else if (type == '}')
