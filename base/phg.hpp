@@ -148,7 +148,7 @@ static inline bool checkspace2(char c) {
 	return (c == ' ' || c == '\t');
 }
 static inline bool iscalc(char c) {
-	return c == '+' || c == '-' || c == '*' || c == '/' || c == '!' || c == '&' || c == '|';
+	return c == '+' || c == '-' || c == '*' || c == '/' || c == '!';
 }
 static inline bool islogic(char c) {
 	return c == '>' || c == '<' || c == '=' || c == '&' || c == '|' || c == '^' || c == '.';
@@ -545,16 +545,6 @@ var act_default(code& cd, int args)
 		var a = cd.valstack.pop();
 		return a == b;
 	}
-	case '&': {
-		var b = cd.valstack.pop();
-		var a = cd.valstack.pop();
-		return a && b;
-	}
-	case '|': {
-		var b = cd.valstack.pop();
-		var a = cd.valstack.pop();
-		return a || b;
-	}
 	case '!': {
 		var a = cd.valstack.pop();
 		return !a;
@@ -704,11 +694,11 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 			getval(cd, type);
 			args++;
 		}
-		else if (type == OPR) {
+		else if (type == OPR || type == LGOPR) {
 			opr o = cd.cur();
 			if (rank[o] <= rank0)
 			{
-				PRINT("!)"); return cd.valstack.pop();
+				return cd.valstack.pop();
 			}
 			if (!cd.oprstack.empty() && cd.oprstack.cur() == '.')
 				cd.oprstack.setcur(o);
@@ -722,7 +712,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 
 			//PRINT(cd.cur());
 
-			if (iscalc(cd.cur())) {
+			if (iscalc(cd.cur()) || islogic(cd.cur())) {
 				cd.valstack.push(expr(cd));
 				args++;
 			}
@@ -736,7 +726,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				}
 				char no = cd.getnext3();
 				if (cd.cur() != '(' &&
-					iscalc(no))
+					iscalc(no) || islogic(no))
 				{
 					if (cd.cur() == ')')
 						cd.next();
@@ -762,19 +752,22 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				}
 			}
 		}
-		else if (type == LGOPR) {
-			//if (cd.oprstack.cur() == '.')
-			//	cd.oprstack.setcur(cd.cur());
-			//else
-			{
-				cd.oprstack.push(cd.cur());
-				oprs++;
-			}
-			cd.next();
-			cd.valstack.push(expr(cd));
-			//cd.next();
-			args++;
-		}
+		//else if (type == LGOPR) {
+		//	//if (cd.oprstack.cur() == '.')
+		//	//	cd.oprstack.setcur(cd.cur());
+		//	//else
+		//	{
+		//		cd.oprstack.push(cd.cur());
+		//		oprs++;
+		//	}
+		//	cd.next();
+		//	if (iscalc(cd.cur()))
+		//	{
+		//		cd.valstack.push(expr(cd));
+		//		//cd.next();
+		//		args++;
+		//	}
+		//}
 		else {
 			char c = cd.cur();
 			if (c == '(') {
@@ -1156,12 +1149,13 @@ void parser_default(code& cd) {
 	PRINT("--------PHG---------");
 	PRINT(cd.ptr);
 	PRINT("--------------------");
-
-	rank['>'] = 1;
-	rank['<'] = 1;
-	rank['|'] = 2;
-	rank['^'] = 2;
-	rank['&'] = 3;
+	
+	rank['|'] = 1;
+	rank['^'] = 1;
+	rank['&'] = 2;
+	rank['>'] = 3;
+	rank['<'] = 3;
+	rank['='] = 3;
 	rank['+'] = 4;
 	rank['-'] = 4;
 	rank['*'] = 5;
