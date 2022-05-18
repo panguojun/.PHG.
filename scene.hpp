@@ -69,10 +69,32 @@ namespace ScePHG
 		POP_SPARAM;
 		return var(rand() % maxrnd);
 	}
+	API(inc)
+	{
+		string vname = GET_SPARAM(1);
+		gvarmapstack.getvar(vname) += 1;
+		int maxrnd = atoi(param1.c_str());
+		POP_SPARAM;
+		return 0;
+	}
+	API(dec)
+	{
+		string param1 = GET_SPARAM(1);
+		gvarmapstack.getvar(vname) -= 1;
+		POP_SPARAM;
+		return 0;
+	}
+	API(rnd)
+	{
+		string param1 = GET_SPARAM(1);
+		int maxrnd = atoi(param1.c_str());
+		POP_SPARAM;
+		return var(rand() % maxrnd);
+	}
 	API(scat)
 	{
 		ASSERT(args == 2)
-			string param1 = GET_SPARAM(1);
+		string param1 = GET_SPARAM(1);
 		string param2 = GET_SPARAM(2);
 		POP_SPARAM;
 		cd.strstack.push_back(param1 + param2);
@@ -80,22 +102,22 @@ namespace ScePHG
 	}
 	API(scmp)
 	{
-		ASSERT(args == 2)
-			string param1 = GET_SPARAM(1);
+		ASSERT(args == 2);
+		string param1 = GET_SPARAM(1);
 		string param2 = GET_SPARAM(2);
 		POP_SPARAM; return int(param1 == param2);
 	}
 	API(tos)
 	{
-		ASSERT(args == 1)
-			PARAM(v);
+		ASSERT(args == 1);
+		PARAM(v);
 		cd.strstack.push_back(v.type == 1 ? to_string(v.ival) : to_string(v.fval));
 		return 0;
 	}
 	API(strout)
 	{
-		ASSERT(args == 1)
-			string param1 = GET_SPARAM(1);
+		ASSERT(args == 1);
+		string param1 = GET_SPARAM(1);
 		PRINT(param1);
 
 		POP_SPARAM; return 0;
@@ -202,10 +224,12 @@ namespace ScePHG
 		act = _act;
 
 		REG_API(mod, rendermod);		// 渲染模式
-		REG_API(rnd, rnd);				// 随机函数
+		REG_API(rnd, rnd);			// 随机函数
+		REG_API(inc, inc);			// inc
+		REG_API(dec, dec);			// dec
 		REG_API(scat, scat);			// 字符串拼接
 		REG_API(scmp, scmp);			// 字符串比较
-		REG_API(tos, tos);				// 转化字符串
+		REG_API(tos, tos);			// 转化字符串
 		REG_API(so, strout);			// 字符串打印
 		
 		REG_API(do, dostring);			// dostring
