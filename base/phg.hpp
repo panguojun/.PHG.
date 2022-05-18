@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 							Phg2.1
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
@@ -294,6 +294,7 @@ struct varmapstack_t
 	}
 	var& getvar(const char* name)
 	{
+		static INVALIDVAR;
 		//PRINT("getvar = " << name);
 		if (stack.empty())
 		{
@@ -432,22 +433,7 @@ struct code
 		(*pbuf) = '\0';
 		return buf;
 	}
-	/*
-	const char* getcontent(char st, char ed) {
-		static char buf[32];
-		char* pbuf = buf;
-		const char* p = ptr;
-
-		while (!eoc(p++))
-		{
-			if ((*p) == st) continue;
-			if ((*p) == ed) break;
-
-			*(pbuf++) = *(p);
-		}
-		(*pbuf) = '\0';
-		return buf;
-	}*/
+	
 };
 
 // get char
