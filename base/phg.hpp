@@ -1,7 +1,7 @@
 /****************************************************************************
-							Phg2.2
-							脚本是群论的扩展
-							运算式编程可以挖掘问题的内在对称性
+				Phg2.2
+				脚本是群论的扩展
+				运算式编程可以挖掘问题的内在对称性
 语法示例:
 
 #function
@@ -37,7 +37,7 @@ yy = yy + 1;
 //#define PHG_VAR(name, defaultval) (PHG::gcode.varmapstack.stack.empty() || PHG::gcode.varmapstack.stack.front().find(#name) == PHG::gcode.varmapstack.stack.front().end() ? defaultval : PHG::gcode.varmapstack.stack.front()[#name])
 //#define PHG_PARAM(index)	cd.valstack.get(args - index)
 
-//#define var			real
+//#define var		real
 //#define INVALIDVAR	(0)
 
 // ----------------------------------------------------------------------
@@ -1247,8 +1247,8 @@ void dostring(const char* str)
 
 void dofile(const char* filename)
 {
-	PRINT("dofile:" << filename)
-		init();
+	PRINT("dofile:" << filename);
+	init();
 
 	FILE* f;
 	ASSERT(0 == fopen_s(&f, filename, "rb"));
