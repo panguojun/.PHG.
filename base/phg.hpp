@@ -167,13 +167,14 @@ static inline bool isbrackets(char c) {
 struct codestack_t
 {
 	std::vector<const char*> stack;
+	string cach;
 	void push(const char* c) {
 		stack.push_back(c);
 	}
 	const char* pop() {
-		const char* ret = stack.back();
+		cach = stack.back();
 		stack.pop_back();
-		return ret;
+		return cach.c_str();
 	}
 	const char* cur() {
 		ASSERT(!stack.empty());
@@ -292,7 +293,7 @@ struct varmapstack_t
 
 		stack.back()[name] = v;
 	}
-	var& getvar(const char* name)
+	var getvar(const char* name)
 	{
 		//PRINT("getvar = " << name);
 		if (stack.empty())
@@ -432,7 +433,22 @@ struct code
 		(*pbuf) = '\0';
 		return buf;
 	}
-	
+	/*
+	const char* getcontent(char st, char ed) {
+		static char buf[32];
+		char* pbuf = buf;
+		const char* p = ptr;
+
+		while (!eoc(p++))
+		{
+			if ((*p) == st) continue;
+			if ((*p) == ed) break;
+
+			*(pbuf++) = *(p);
+		}
+		(*pbuf) = '\0';
+		return buf;
+	}*/
 };
 
 // get char
@@ -612,10 +628,12 @@ void finishtrunk(code& cd, int trunkcnt = 0)
 {
 	const char sk = '{', ek = '}';
 
+	int sk_cnt = 0;
 	while (!cd.eoc()) {
 		char c = cd.cur();
 		if (c == sk) {
 			trunkcnt++;
+			sk_cnt++;
 		}
 		else if (c == ek) {
 			trunkcnt--;
@@ -627,7 +645,7 @@ void finishtrunk(code& cd, int trunkcnt = 0)
 		}
 		else if (c == ';') // 单行 trunk
 		{
-			if (trunkcnt == 0)
+			if (sk_cnt == 0)
 			{
 				cd.next();
 				break;
@@ -835,14 +853,13 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 		//PRINTV(cd.cur());
 		if (type == '~') // break
 		{
-			PRINT("break");
-			cd.next();cd.next();
+			//PRINT("break");
 			return 3; // 跳出
 		}
 		else if (type == ';')
 		{
-			PRINT(";");
-			cd.nextline();
+			PRINT(";")
+				cd.nextline();
 			break;
 		}
 		else if (type == '}')
@@ -871,7 +888,10 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 				finishtrunk(cd, 0);
 
 				if (cd.cur() == '}')
+				{
 					cd.next();
+					break;
+				}
 
 				if (cd.cur() == ':')
 				{
@@ -945,6 +965,8 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					}
 					else if (rettype == 3) {
 						finishtrunk(cd, 1);
+						if (cd.cur() == '}')
+							cd.next();
 						return rettype;
 					}
 
@@ -954,6 +976,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 				else {
 					finishtrunk(cd, 0);
 				}
+				cd.iter.pop_back();
 			}
 			else
 			{
@@ -979,13 +1002,15 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					}
 					cd.ptr = cp;
 					int rettype = subtrunk(cd, ret, depth + 1, 0, !tk);
-					//PRINTV(rettype);
 
 					if (rettype == 2) {
 						return rettype;
 					}
 					if (rettype == 3) {// break;
 						finishtrunk(cd, 1);
+						if (cd.cur() == '}')
+							cd.next();
+						//PRINTV(i << " in " << loopcnt);
 						break;
 					}
 				}
@@ -1133,7 +1158,7 @@ void parser_default(code& cd) {
 	PRINT("--------PHG---------");
 	PRINT(cd.ptr);
 	PRINT("--------------------");
-	
+
 	rank['|'] = 1;
 	rank['^'] = 1;
 	rank['&'] = 2;
@@ -1236,7 +1261,7 @@ bool checkcode(const char* str)
 		ERRORMSG("number of \'<\' != \'>\'!");
 		return;
 	}*/
-	if (checkChinese(str))
+	if (checkChinese(codestr.c_str()))
 	{
 		ERRORMSG("include Chinese charactor!");
 		return false;
