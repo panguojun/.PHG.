@@ -965,8 +965,8 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					}
 					else if (rettype == 3) {
 						finishtrunk(cd, 1);
-						if (cd.cur() == '}') 
-							cd.next();
+						//if (cd.cur() == '}') 
+						//	cd.next();
 						return rettype;
 					}
 
@@ -1009,8 +1009,8 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					}
 					if (rettype == 3) {// break;
 						finishtrunk(cd, 1);
-						if (cd.cur() == '}') 
-							cd.next();
+						//if (cd.cur() == '}') 
+						//	cd.next();
 						//PRINTV(i << " in " << loopcnt);
 						break;
 					}
@@ -1159,7 +1159,7 @@ void parser_default(code& cd) {
 	PRINT("--------PHG---------");
 	PRINT(cd.ptr);
 	PRINT("--------------------");
-	
+
 	rank['|'] = 1;
 	rank['^'] = 1;
 	rank['&'] = 2;
