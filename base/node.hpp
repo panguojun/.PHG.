@@ -25,8 +25,8 @@ inline void add_suffix(string& name, const string& clonename) {
 struct tree_t
 {
 	tree_t* parent = 0;
-	string name;								// 名字
-	int index = 0;								// 索引
+	string name;					// 名字
+	int index = 0;					// 索引
 	std::map<std::string, std::string> ab;		// 特性字典
 	std::map<std::string, std::string> kv;		// 属性字典
 	std::map<std::string, tree_t*> children;	// 子字典
@@ -930,6 +930,8 @@ void NODE_REG_API()
 
 	REG_API(prop, property);		// 添加属性
 
+	/// stream io
+	
 	REG_API(getival, getival);		// 获得int value
 	REG_API(getfval, getfval);		// 获得float value
 	REG_API(getstr, getstr);		// 获得string
