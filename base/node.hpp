@@ -922,7 +922,7 @@ API(getstr)
 // ===================================
 void NODE_REG_API()
 {
-	REG_API(me, api_me);			// ME
+	REG_API(iam, api_me);			// ME
 	REG_API(bye, api_bye);			// ME = NULL
 	REG_API(on, api_on);			// 当前属性
 	REG_API(array, array);			// 节点阵列 (正在放弃中...)
