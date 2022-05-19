@@ -89,9 +89,9 @@ struct tree_t
 };
 
 // -----------------------------------------------------------------------
-tree_t* gtree = 0;						// 暂时使用全局树
+tree_t* gtree = 0;					// 暂时使用全局树
 vector<tree_t*>	work_stack;				// 工作栈
-std::string		cur_property = "pr1";	// 当前属性
+std::string		cur_property = "pr1";		// 当前属性
 extern void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, const string& selector);
 extern void _crt_sequ(code& cd, tree_t* tree, const string& pre);
 extern tree_t* _gettree(const string& name, tree_t* tree);
