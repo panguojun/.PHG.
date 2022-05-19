@@ -935,7 +935,7 @@ void NODE_REG_API()
 	REG_API(getival, getival);		// 获得int value
 	REG_API(getfval, getfval);		// 获得float value
 	REG_API(getstr, getstr);		// 获得string
-	REG_API(getvec3, getvec3);		// 获得RECT
+	REG_API(getvec3, getvec3);		// 获得vec3
 	REG_API(getrect, getrect);		// 获得RECT
 
 	REG_API(dump, dump);
