@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 							Phg2.1
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
@@ -63,8 +63,6 @@ yy = yy + 1;
 #define NUMBER		0x02FF
 #define OPR			0x03FF
 #define LGOPR		0x04FF
-
-static ELEMENT INVALIDVAR(0);
 
 //#ifndef code	
 struct code;
@@ -295,7 +293,7 @@ struct varmapstack_t
 
 		stack.back()[name] = v;
 	}
-	var& getvar(const char* name)
+	var getvar(const char* name)
 	{
 		//PRINT("getvar = " << name);
 		if (stack.empty())
@@ -1150,7 +1148,17 @@ var callfunc(code& cd) {
 void func(code& cd) {
 	fnname fnm = cd.getname();
 	PRINT("define func: " << fnm);
-	ASSERT(cd.funcnamemap[fnm] == 0);
+	if (cd.funcnamemap.find(fnm) != cd.funcnamemap.end())
+	{
+		ERRORMSG("function named: '" << fnm << " already exists!");
+		return;
+	}
+	if (api_list.find(fnm) != api_list.end())
+	{
+		ERRORMSG("function named: '" << fnm << " already exists!");
+		return;
+	}
+
 	cd.funcnamemap[fnm] = cd.ptr;
 	cd.next();
 	finishtrunk(cd, 0);
