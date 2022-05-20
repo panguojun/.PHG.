@@ -9,7 +9,7 @@
 #undef gvarmapstack
 
 #define var			ELEMENT
-#define INVALIDVAR	ELEMENT(0)
+//#define INVALIDVAR	ELEMENT(0)
 #ifndef STRING2VAR
 #define STRING2VAR(str)	INVALIDVAR
 #endif

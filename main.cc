@@ -1,4 +1,5 @@
 #include "com.hpp"
+extern std::string serverip;
 #include "scene.hpp"
 // --------------------------------------------------------------------------------------
 void onrequest(const std::string& msg, const std::string& body, std::string& out)
@@ -52,13 +53,18 @@ int main(int nargs, char* args[])
 {
 	ScePHG::setup();
 
-	PRINT("======= start http-server: localhost:8080\n");
-	std::thread serverthread = std::thread{ servermain, 100 };
-
 	if (nargs >= 2)
 	{
 		ScePHG::dofile(args[1]);
 	}
+	else
+	{
+
+		PRINT("======= start http-server: localhost:8080\n");
+		std::thread serverthread = std::thread{ servermain, 100 };
+
+	}
+
 	getchar();
 	return 0;
 }

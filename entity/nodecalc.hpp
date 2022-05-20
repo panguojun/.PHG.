@@ -409,7 +409,7 @@ void NODECALC_REG_API()
 			return c;
 		}
 		return "";
-		});
+	});
 
 	REG_API(abe, calc_set_abelian);
 

@@ -1,4 +1,1 @@
-{#root
-	node1:{txt: 'hello_world!'}
-}
-dump();
+server("localhost");

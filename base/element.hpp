@@ -89,6 +89,17 @@ struct var_t
 		}
 		return ret;
 	}
+	void operator += (var_t& v)
+	{
+		if (type == 2 || v.type == 2) {
+			type = 2;
+			fval += v.fval;
+		}
+		else
+		{
+			ival += v.ival;
+		}
+	}
 	var_t operator - (var_t& v) const
 	{
 		var_t ret;
@@ -101,6 +112,17 @@ struct var_t
 			ret.ival = ival - v.ival;
 		}
 		return ret;
+	}
+	void operator -= (var_t& v)
+	{
+		if (type == 2 || v.type == 2) {
+			type = 2;
+			fval -= v.fval;
+		}
+		else
+		{
+			ival -= v.ival;
+		}
 	}
 	var_t operator - () const
 	{

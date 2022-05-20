@@ -1,7 +1,7 @@
-/****************************************************************************
-				Phg2.2
-				脚本是群论的扩展
-				运算式编程可以挖掘问题的内在对称性
+﻿/****************************************************************************
+							Phg2.1
+							脚本是群论的扩展
+							运算式编程可以挖掘问题的内在对称性
 语法示例:
 
 #function
@@ -37,7 +37,7 @@ yy = yy + 1;
 //#define PHG_VAR(name, defaultval) (PHG::gcode.varmapstack.stack.empty() || PHG::gcode.varmapstack.stack.front().find(#name) == PHG::gcode.varmapstack.stack.front().end() ? defaultval : PHG::gcode.varmapstack.stack.front()[#name])
 //#define PHG_PARAM(index)	cd.valstack.get(args - index)
 
-//#define var		real
+//#define var			real
 //#define INVALIDVAR	(0)
 
 // ----------------------------------------------------------------------
@@ -63,6 +63,8 @@ yy = yy + 1;
 #define NUMBER		0x02FF
 #define OPR			0x03FF
 #define LGOPR		0x04FF
+
+static ELEMENT INVALIDVAR(0);
 
 //#ifndef code	
 struct code;
@@ -148,10 +150,10 @@ static inline bool checkspace2(char c) {
 	return (c == ' ' || c == '\t');
 }
 static inline bool iscalc(char c) {
-	return c == '+' || c == '-' || c == '*' || c == '/' || c == '!';
+	return c == '+' || c == '-' || c == '*' || c == '/' || c == '.';
 }
 static inline bool islogic(char c) {
-	return c == '>' || c == '<' || c == '=' || c == '&' || c == '|' || c == '^' || c == '.';
+	return c == '>' || c == '<' || c == '=' || c == '&' || c == '|' || c == '^' || c == '!';
 }
 static inline bool isname(char c) {
 	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_';
@@ -293,7 +295,7 @@ struct varmapstack_t
 
 		stack.back()[name] = v;
 	}
-	var getvar(const char* name)
+	var& getvar(const char* name)
 	{
 		//PRINT("getvar = " << name);
 		if (stack.empty())
@@ -433,6 +435,22 @@ struct code
 		(*pbuf) = '\0';
 		return buf;
 	}
+	/*
+	const char* getcontent(char st, char ed) {
+		static char buf[32];
+		char* pbuf = buf;
+		const char* p = ptr;
+
+		while (!eoc(p++))
+		{
+			if ((*p) == st) continue;
+			if ((*p) == ed) break;
+
+			*(pbuf++) = *(p);
+		}
+		(*pbuf) = '\0';
+		return buf;
+	}*/
 };
 
 // get char
@@ -612,10 +630,12 @@ void finishtrunk(code& cd, int trunkcnt = 0)
 {
 	const char sk = '{', ek = '}';
 
+	int sk_cnt = 0;
 	while (!cd.eoc()) {
 		char c = cd.cur();
 		if (c == sk) {
 			trunkcnt++;
+			sk_cnt++;
 		}
 		else if (c == ek) {
 			trunkcnt--;
@@ -627,7 +647,7 @@ void finishtrunk(code& cd, int trunkcnt = 0)
 		}
 		else if (c == ';') // 单行 trunk
 		{
-			if (trunkcnt == 0)
+			if (sk_cnt == 0)
 			{
 				cd.next();
 				break;
@@ -735,6 +755,22 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				}
 			}
 		}
+		//else if (type == LGOPR) {
+		//	//if (cd.oprstack.cur() == '.')
+		//	//	cd.oprstack.setcur(cd.cur());
+		//	//else
+		//	{
+		//		cd.oprstack.push(cd.cur());
+		//		oprs++;
+		//	}
+		//	cd.next();
+		//	if (iscalc(cd.cur()))
+		//	{
+		//		cd.valstack.push(expr(cd));
+		//		//cd.next();
+		//		args++;
+		//	}
+		//}
 		else {
 			char c = cd.cur();
 			if (c == '(') {
@@ -931,6 +967,8 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					}
 					else if (rettype == 3) {
 						finishtrunk(cd, 1);
+						//if (cd.cur() == '}') 
+						//	cd.next();
 						return rettype;
 					}
 
@@ -955,12 +993,14 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					cd.next();
 				}
 				const char* cp = cd.ptr;
+				//while(expr(cd) != 0){cd._i ++;
 				for (int i = 1; i <= loopcnt; i++) {
 					{ // iter
 						cd.iter.back() = i;
 						std::string name = "i";
 						for (auto it : cd.iter)
 							name = "_" + name;
+						//PRINT(name << "=" << i << " in " << loopcnt)
 						gvarmapstack.addvar(name.c_str(), var(cd.iter.back()));
 					}
 					cd.ptr = cp;
@@ -971,6 +1011,9 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 					}
 					if (rettype == 3) {// break;
 						finishtrunk(cd, 1);
+						//if (cd.cur() == '}') 
+						//	cd.next();
+						//PRINTV(i << " in " << loopcnt);
 						break;
 					}
 				}
@@ -1118,7 +1161,7 @@ void parser_default(code& cd) {
 	PRINT("--------PHG---------");
 	PRINT(cd.ptr);
 	PRINT("--------------------");
-
+	
 	rank['|'] = 1;
 	rank['^'] = 1;
 	rank['&'] = 2;
@@ -1221,11 +1264,11 @@ bool checkcode(const char* str)
 		ERRORMSG("number of \'<\' != \'>\'!");
 		return;
 	}*/
-	if (checkChinese(codestr.c_str()))
+	/*if (checkChinese(codestr.c_str()))
 	{
 		ERRORMSG("include Chinese charactor!");
 		return false;
-	}
+	}*/
 	return true;
 }
 // dostring
@@ -1247,8 +1290,8 @@ void dostring(const char* str)
 
 void dofile(const char* filename)
 {
-	PRINT("dofile:" << filename);
-	init();
+	PRINT("dofile:" << filename)
+		init();
 
 	FILE* f;
 	ASSERT(0 == fopen_s(&f, filename, "rb"));

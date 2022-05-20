@@ -15,6 +15,7 @@
 #define POP_SPARAM			for(int i = 0; i < args; i ++) cd.strstack.pop_back();
 
 #define REG_API(funname,cppfunname)	ScePHG::register_api(#funname, cppfunname)
+#define CALC	fun_calc = 
 
 //#define XML
 #ifdef XML
@@ -72,24 +73,16 @@ namespace ScePHG
 	API(inc)
 	{
 		string vname = GET_SPARAM(1);
-		gvarmapstack.getvar(vname) += 1;
-		int maxrnd = atoi(param1.c_str());
+		gvarmapstack.getvar(vname.c_str()) += var(1);
 		POP_SPARAM;
 		return 0;
 	}
 	API(dec)
 	{
-		string param1 = GET_SPARAM(1);
-		gvarmapstack.getvar(vname) -= 1;
+		string vname = GET_SPARAM(1);
+		gvarmapstack.getvar(vname.c_str()) -= var(1);
 		POP_SPARAM;
 		return 0;
-	}
-	API(rnd)
-	{
-		string param1 = GET_SPARAM(1);
-		int maxrnd = atoi(param1.c_str());
-		POP_SPARAM;
-		return var(rand() % maxrnd);
 	}
 	API(scat)
 	{
@@ -212,6 +205,17 @@ namespace ScePHG
 
 		return 0;
 	}
+
+	API(server)
+	{
+		SPARAM(ip);
+		PRINT("======= start http-server: " << ip << ":8080\n");
+		serverip = ip;
+		std::thread serverthread = std::thread{ servermain, 800 };
+		getchar();
+
+		return 0;
+	}
 	
 	// -----------------------------------
 	// REG API
@@ -237,6 +241,8 @@ namespace ScePHG
 		REG_API(dump, dump);
 
 		REG_API(setup, setuptree);		// 生成节点树
+
+		REG_API(server, server);
 
 		// ELEMENT: 
 
