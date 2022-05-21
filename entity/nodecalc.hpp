@@ -321,53 +321,7 @@ API(wak)
 
 	POP_SPARAM; return 0;
 }
-API(calc_parent)
-{
-	string a = GET_SPARAM(1);
-	string b = GET_SPARAM(2);
-	{
-		NODE* an = GET_NODE(a, ROOT); ASSERT(an);
-		NODE* bn = GET_NODE(b, ROOT); ASSERT(bn);
-		a = an->kv[cur_property];
-		b = bn->kv[cur_property];
-	}
 
-	NODE* n = 0;
-	string c;
-	if (a == b) {
-		c = a;
-	}
-	else {
-		calc::_calc_add(&n,
-			a, b,
-			cur_property.c_str());
-		if (n) {
-			c = n->kv[cur_property];
-
-			PRINTV(n->name);
-		}
-	}
-	strlist.push_back(c);
-
-	if (ME) {
-		if (n) *(work_stack.back()) += *n;
-		ME->kv[cur_property] = c;
-	}
-
-	POP_SPARAM; return 0;
-}
-API(calc_child)
-{
-	crstr a = GET_SPARAM(1);
-	crstr b = GET_SPARAM(2);
-	string c;
-	calc::_calc_sub(c, a, b, cur_property.c_str());
-
-	PRINTV(c);
-	strlist.push_back(c);
-
-	POP_SPARAM; return 0;
-}
 void NODECALC_REG_API()
 {
 	CALC([](code& cd, char o, int args)->string {
@@ -417,9 +371,6 @@ void NODECALC_REG_API()
 	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
 	REG_API(sub, calc_sub);
-	
-	REG_API(parent, calc_parent);
-	REG_API(child, calc_child);
 
 	REG_API(cls, clearstrlist);
 	REG_API(wak, wak);
