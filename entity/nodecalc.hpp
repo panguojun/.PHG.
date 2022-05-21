@@ -328,7 +328,7 @@ void NODECALC_REG_API()
 
 		PRINT("CALC: " << o << "(" << args << ")");
 		//PRINTV(ME->name);
-		if (o == '+')
+		/*if (o == '+')
 		{
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
@@ -352,7 +352,8 @@ void NODECALC_REG_API()
 			strlist.push_back(c);
 			return c;
 		}
-		else if (o == '.')
+		else */
+		if (o == '.')
 		{
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
