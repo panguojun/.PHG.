@@ -239,12 +239,12 @@ API(calc_add)
 {
 	string a = GET_SPARAM(1);
 	string b = GET_SPARAM(2);
-	{
+	/*{
 		NODE* an = GET_NODE(a, ROOT); ASSERT(an);
 		NODE* bn = GET_NODE(b, ROOT); ASSERT(bn);
 		a = an->kv[cur_property];
 		b = bn->kv[cur_property];
-	}
+	}*/
 
 	NODE* n = 0;
 	string c;
