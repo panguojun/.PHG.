@@ -1,9 +1,9 @@
 /**************************************************************************
-*				事件运算
+*							事件运算
 
 **************************************************************************/
 struct tree_t;
-namespace calc
+namespace nodecalc
 {
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
 	bool abelian_sym = true;	// 阿贝尔对称 即运算的可交换性
@@ -210,6 +210,52 @@ namespace calc
 		}
 		return flag;
 	}
+	struct res_t
+	{
+		// 携带的属性
+		NODE* node;				// 模型
+		string key;
+
+		res_t() {}
+		res_t(const res_t& v)
+		{
+			node = v.node;
+			key = v.key;
+		};
+		~res_t() {}
+	};
+	vector<res_t*> reslist;		// 资源列表
+
+	res_t& cres(const var& ent)
+	{
+		ASSERT(ent.resid >= 0 && ent.resid < reslist.size());
+		return *reslist[ent.resid];
+	}
+	res_t& res(var& ent)
+	{
+		if (ent.resid == -1)
+		{
+			res_t* rs = new res_t();
+			reslist.push_back(rs);
+			ent.resid = reslist.size() - 1;
+
+			ent.type = 0; // 自定义元素类型
+			// 在资源上定义加法运算
+			ent.fun_set = [&ent](const var& v) {
+				if (v.type == 3)
+				{
+					res(ent).node->kv[res(ent).key] = cres(v).node->kv[cres(v).key];
+				}
+				else {
+					//ent.node->kv[ent.key] = v.tostr();
+				}
+			};
+
+		}
+		//PRINTV(ent.resid);
+		ASSERT(ent.resid < reslist.size());
+		return *reslist[ent.resid];
+	}
 }
 
 // ------------------------------------
@@ -219,16 +265,16 @@ API(calc_set_abelian)
 {
 	crstr b = GET_SPARAM(1);
 
-	calc::abelian_sym = atoi(b.c_str());
-	PRINTV(calc::abelian_sym)
+	nodecalc::abelian_sym = atoi(b.c_str());
+	PRINTV(nodecalc::abelian_sym)
 
-	POP_SPARAM; return 0;
+		POP_SPARAM; return 0;
 }
 API(calc_addd)
 {
 	crstr a = GET_SPARAM(1);
 	string c;
-	calc::_calc_addd(c, a, cur_property.c_str());
+	nodecalc::_calc_addd(c, a, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -239,12 +285,12 @@ API(calc_add)
 {
 	string a = GET_SPARAM(1);
 	string b = GET_SPARAM(2);
-	/*{
+	{
 		NODE* an = GET_NODE(a, ROOT); ASSERT(an);
 		NODE* bn = GET_NODE(b, ROOT); ASSERT(bn);
 		a = an->kv[cur_property];
 		b = bn->kv[cur_property];
-	}*/
+	}
 
 	NODE* n = 0;
 	string c;
@@ -252,7 +298,7 @@ API(calc_add)
 		c = a;
 	}
 	else {
-		calc::_calc_add(&n,
+		nodecalc::_calc_add(&n,
 			a, b,
 			cur_property.c_str());
 		if (n) {
@@ -274,7 +320,7 @@ API(calc_subb)
 {
 	crstr a = GET_SPARAM(1);
 	string c;
-	calc::_calc_subb(c, a, cur_property.c_str());
+	nodecalc::_calc_subb(c, a, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
@@ -286,20 +332,14 @@ API(calc_sub)
 	crstr a = GET_SPARAM(1);
 	crstr b = GET_SPARAM(2);
 	string c;
-	calc::_calc_sub(c, a, b, cur_property.c_str());
+	nodecalc::_calc_sub(c, a, b, cur_property.c_str());
 
 	PRINTV(c);
 	strlist.push_back(c);
 
 	POP_SPARAM; return 0;
 }
-API(clearstrlist)
-{
-	strlist.clear();
-
-	return 0;
-}
-API(wak)
+API(calc_wak)
 {
 	crstr nm = GET_SPARAM(1);
 	NODE* n = nm == "me" ? ME : GET_NODE(nm, ROOT); ASSERT(n);
@@ -307,7 +347,7 @@ API(wak)
 		crstr a = GET_SPARAM(2);
 		crstr ok = GET_SPARAM(3);
 
-		calc::_wak_tree(n, a, cur_property.c_str(), ok.c_str());
+		nodecalc::_wak_tree(n, a, cur_property.c_str(), ok.c_str());
 	}
 	else if (args == 4)
 	{
@@ -315,13 +355,57 @@ API(wak)
 		crstr b = GET_SPARAM(3);
 		crstr ok = GET_SPARAM(4);
 
-		calc::_wak_tree_add(n, a, b, cur_property.c_str(), ok.c_str());
+		nodecalc::_wak_tree_add(n, a, b, cur_property.c_str(), ok.c_str());
 
 	}
 
 	POP_SPARAM; return 0;
 }
 
+API(clearstrlist)
+{
+	strlist.clear();
+
+	return 0;
+}
+API(calc_expr)
+{
+	ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
+		{
+			for (auto& it : tree->kv) {
+				string result;
+				const char* ps = it.second.c_str();
+				const char* start  = ps;
+				while (*ps != '\0') {
+					
+					if ((*ps) == '(')
+					{
+						int offset = ps - start + 1;
+						int cnt = 0;
+						while (*(++ps) != ')') cnt++;
+						{
+							// 内部变量
+							gvarmapstack.addvar("_i", tree->index);
+							gvarmapstack.addvar("_t", tree_t::getdepth(tree));
+						}
+						string str = it.second.substr(offset, cnt) + ";";
+						var v = ScePHG::doexpr(str.c_str());
+
+						result += VAR2STR(v);
+					}
+					else
+					{
+						result += *ps;
+					}
+					++ps;
+				}
+				PRINTV(result);
+			}
+		});
+	POP_SPARAM;
+
+	return 0;
+}
 void NODECALC_REG_API()
 {
 	CALC([](code& cd, char o, int args)->var {
@@ -364,7 +448,9 @@ void NODECALC_REG_API()
 	REG_API(add,  calc_add);
 	REG_API(subb, calc_subb);
 	REG_API(sub,  calc_sub);
+	REG_API(wak,  calc_wak);
 
 	REG_API(cls, clearstrlist);
-	REG_API(wak, wak);
+
+	REG_API(doexpr, calc_expr);
 }
