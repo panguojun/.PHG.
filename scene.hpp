@@ -248,7 +248,7 @@ namespace ScePHG
 
 		// ELEMENT: 
 
-		REG_API(phg, phgoper);			// 脚本
+		REG_API(phg, phgoper);			// 脚本(正在放弃中...)
 		
 		NODE_REG_API();
 
