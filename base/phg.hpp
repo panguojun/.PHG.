@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 							Phg2.2
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
@@ -701,9 +701,9 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 			{
 				return cd.valstack.pop();
 			}
-			if (!cd.oprstack.empty() && cd.oprstack.cur() == '.')
+			/*if (!cd.oprstack.empty() && cd.oprstack.cur() == '.')
 				cd.oprstack.setcur(o);
-			else
+			else*/
 			{
 				cd.oprstack.push(o);
 				oprs++;
@@ -1181,7 +1181,7 @@ void parser_default(code& cd) {
 	rank['*'] = 5;
 	rank['/'] = 5;
 	rank['!'] = 6;
-
+	rank['.'] = 6;
 	//getchar();
 
 	//(gvarmapstack.stack.size());
