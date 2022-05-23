@@ -89,6 +89,9 @@ get_var_fun get_var = 0;
 typedef void(*add_var_fun)(const char*, var&);
 add_var_fun add_var = 0;
 
+typedef void(*add_var_fun2)(code& cd, const char*, const char*, var&);
+add_var_fun2 add_var2 = 0;
+
 std::vector<std::string> gstable;
 
 #ifndef gvarmapstack
@@ -376,9 +379,16 @@ struct code
 				break;
 		}
 		return (*ptr);
-	}
+	}	
 	char next4() {
 		while (!eoc(++ptr) && checkspace2(*(ptr)));
+		return (*ptr);
+	}
+	char next5() {
+		while (!eoc(++ptr)) {
+			if (!checkspace(*(ptr)) && !isname(*(ptr)) && !isnum(*(ptr)) && (*ptr) != '.')
+				break;
+		}
 		return (*ptr);
 	}
 	char nextline() {
@@ -414,6 +424,14 @@ struct code
 		}
 		return (*p);
 	}
+	char getnext5() {
+		const char* p = ptr;
+		while (!eoc(++p)) {
+			if (!checkspace(*(p)) && (!isname(*(p)) && !isnum(*(p)) && (*p) != '.'))
+				break;
+		}
+		return (*p);
+	}
 	bool eoc(const char* p = 0) {
 		p == 0 ? p = ptr : 0;
 		return (p == 0 || (*p) == '\0');
@@ -425,7 +443,7 @@ struct code
 		static char buf[32];// 暂不支持多线程！
 		char* pbuf = buf;
 		const char* p = ptr;
-		if (!isnum(*p))
+		if (isname(*p))
 		{
 			while (!eoc(p) && !checkspace(*p) && (isname(*p) || isnum(*p)))
 				*(pbuf++) = *(p++);
@@ -433,22 +451,6 @@ struct code
 		(*pbuf) = '\0';
 		return buf;
 	}
-	/*
-	const char* getcontent(char st, char ed) {
-		static char buf[32];
-		char* pbuf = buf;
-		const char* p = ptr;
-
-		while (!eoc(p++))
-		{
-			if ((*p) == st) continue;
-			if ((*p) == ed) break;
-
-			*(pbuf++) = *(p);
-		}
-		(*pbuf) = '\0';
-		return buf;
-	}*/
 };
 
 // get char
@@ -570,7 +572,7 @@ inline var chars2var(code& cd) {
 	}
 	buff[i] = '\0';
 	//PRINTV(buff);
-	cd.strstack.push_back(buff);
+	//cd.strstack.push_back(buff);
 
 	if (!isreal && !gtable.empty())
 	{
@@ -613,10 +615,16 @@ void getval(code& cd, short type) {
 				var v;
 				if (gvarmapstack.getvar(v, name))
 					cd.valstack.push(v);
+				else
+				{
+					PRINT("var: " << name << " not found!");
+					//cd.valstack.push(INVALIDVAR);
+				}
 			}
 			cd.next3();
 
 			cd.strstack.push_back(name);
+			PRINT("PUSH2")
 		}
 		//if (cd.oprstack.empty() || !(iscalc(cd.oprstack.cur()) || islogic(cd.oprstack.cur()))) {
 		//	cd.oprstack.push('.');
@@ -726,6 +734,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 					args++;
 				}
 				char no = cd.getnext4();
+				//PRINTV(no);
 				if (cd.cur() != '(' &&
 					iscalc(no) || islogic(no))
 				{
@@ -753,22 +762,6 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				}
 			}
 		}
-		//else if (type == LGOPR) {
-		//	//if (cd.oprstack.cur() == '.')
-		//	//	cd.oprstack.setcur(cd.cur());
-		//	//else
-		//	{
-		//		cd.oprstack.push(cd.cur());
-		//		oprs++;
-		//	}
-		//	cd.next();
-		//	if (iscalc(cd.cur()))
-		//	{
-		//		cd.valstack.push(expr(cd));
-		//		//cd.next();
-		//		args++;
-		//	}
-		//}
 		else {
 			char c = cd.cur();
 			if (c == '(') {
@@ -802,17 +795,32 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 // single var
 void singvar(code& cd) {
 	std::string name = cd.getname();
-	//PRINT("singvar: " << name);
+	PRINT("singvar: " << name);
 	cd.next3();
-	ASSERT(cd.cur() == '=');
-	cd.next();
+	if (cd.cur() == '=')
+	{
+		cd.next();
 
-	var v = expr(cd);
-	cd.next();
-	if (add_var)
-		add_var(name.c_str(), v);
-	else
-		gvarmapstack.addvar(name.c_str(), v);
+		var v = expr(cd);
+		cd.next();
+		if (add_var)
+			add_var(name.c_str(), v);
+		else
+			gvarmapstack.addvar(name.c_str(), v);
+	}
+	else if (cd.cur() == '.')
+	{
+		cd.next();
+		std::string prop = cd.getname();
+		//PRINTV(prop);
+		cd.next3();
+		ASSERT(cd.cur() == '=');
+		cd.next();
+		var v = expr(cd);
+		cd.next();
+		if (add_var2)
+			add_var2(cd, name.c_str(), prop.c_str(), v);
+	}
 }
 
 // statement
@@ -820,7 +828,7 @@ void statement_default(code& cd) {
 
 	short type = get(cd);
 	if (type == NAME) {
-		char nc = cd.getnext4();
+		char nc = cd.getnext5();
 		if (nc == '=') {
 			singvar(cd);
 		}
@@ -1169,7 +1177,7 @@ void parser_default(code& cd) {
 	PRINT("--------PHG---------");
 	PRINT(cd.ptr);
 	PRINT("--------------------");
-	
+
 	rank['|'] = 1;
 	rank['^'] = 1;
 	rank['&'] = 2;
@@ -1182,6 +1190,7 @@ void parser_default(code& cd) {
 	rank['/'] = 5;
 	rank['!'] = 6;
 	rank['.'] = 7;
+
 	//getchar();
 
 	//(gvarmapstack.stack.size());
