@@ -324,54 +324,46 @@ API(wak)
 
 void NODECALC_REG_API()
 {
-	CALC([](code& cd, char o, int args)->string {
+	CALC([](code& cd, char o, int args)->var {
 
 		PRINT("CALC: " << o << "(" << args << ")");
 		//PRINTV(ME->name);
-		/*if (o == '+')
-		{
-			crstr a = GET_SPARAM(1);
-			crstr b = GET_SPARAM(2);
-			string c;
-			if (a == b) {
-				c = a;
-			}
-			else
-			{
-				NODE* n = 0;
-				calc::_calc_add(&n,
-					a, b,
-					cur_property.c_str());
-				if (n) {
-					c = n->kv[cur_property];
-
-					PRINTV(n->name);
-					work_stack.push_back(n);
-				}
-			}
-			strlist.push_back(c);
-			return c;
-		}
-		else */
+		
 		if (o == '.')
 		{
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
+			
 			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
 			string c = n->kv[b];
-
+			PRINT(a << "." << b << "=" << c)
+			var v;v.type = 3; nodecalc::res(v).node = n; nodecalc::res(v).key = b;
 			strlist.push_back(c);
-			return c;
+			POP_SPARAM;
+			//PHG_VALPOP(2);
+			cd.strstack.push_back(c);
+			return v;
 		}
-		return "";
-	});
+		return 0;
+		});
+
+	PROP([](code& cd, const char* a, const char* b, var& v) {
+			int args = 1;
+			PRINT("PROP: " << a << "." << b);
+
+			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+			PRINTV(cd.strstack.size());
+			string sv = GET_SPARAM(1);
+			n->kv[b] = sv;
+			POP_SPARAM;
+		});
 
 	REG_API(abe, calc_set_abelian);
 
 	REG_API(addd, calc_addd);
-	REG_API(add, calc_add);
+	REG_API(add,  calc_add);
 	REG_API(subb, calc_subb);
-	REG_API(sub, calc_sub);
+	REG_API(sub,  calc_sub);
 
 	REG_API(cls, clearstrlist);
 	REG_API(wak, wak);
