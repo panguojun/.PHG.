@@ -1181,7 +1181,7 @@ void parser_default(code& cd) {
 	rank['*'] = 5;
 	rank['/'] = 5;
 	rank['!'] = 6;
-	rank['.'] = 6;
+	rank['.'] = 7;
 	//getchar();
 
 	//(gvarmapstack.stack.size());
