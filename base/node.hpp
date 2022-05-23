@@ -923,12 +923,12 @@ API(getstr)
 void NODE_REG_API()
 {
 	REG_API(iam, api_me);			// ME
-	REG_API(bye, api_bye);			// ME = NULL
-	REG_API(on, api_on);			// 当前属性
+	REG_API(bye, api_bye);			// ME = NULL(正在放弃中...)
+	REG_API(on, api_on);			// 当前属性 (正在放弃中...)
 	REG_API(array, array);			// 节点阵列 (正在放弃中...)
 	REG_API(sequ, sequ);			// 节点序列 (正在放弃中...)
 
-	REG_API(prop, property);		// 添加属性
+	REG_API(prop, property);		// 添加属性 (正在放弃中...)
 
 	/// stream io
 	
