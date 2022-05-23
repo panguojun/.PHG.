@@ -624,7 +624,6 @@ void getval(code& cd, short type) {
 			cd.next3();
 
 			cd.strstack.push_back(name);
-			PRINT("PUSH2")
 		}
 		//if (cd.oprstack.empty() || !(iscalc(cd.oprstack.cur()) || islogic(cd.oprstack.cur()))) {
 		//	cd.oprstack.push('.');
@@ -1288,6 +1287,15 @@ bool checkcode(const char* str)
 	}*/
 	return true;
 }
+// doexpr
+var doexpr(const char* str)
+{
+	PRINT("doexpr " << str)
+	code cd(str);
+
+	return expr(cd);
+}
+
 // dostring
 void dostring(const char* str)
 {
