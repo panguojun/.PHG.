@@ -635,7 +635,7 @@ API(api_me)
 
 	NODE* me = 0;
 	crstr expr = GET_SPARAM(1);
-	if (expr[0] == ':')
+	if (expr[0] == '.')
 	{
 		code ccd(expr.c_str()); ccd.next();
 		string key = ccd.getname();
