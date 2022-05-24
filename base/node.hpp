@@ -1,16 +1,16 @@
 /**************************************************************************
-*				èŠ‚ç‚¹æ ‘çš„è§£æ
-*			èŠ‚ç‚¹æ ‘å°±æ˜¯æŠŠä¸ªä½“ç»„æˆå®¶æ—
-*			åŒ…æ‹¬é˜µåˆ—ï¼Œåºåˆ—, é€‰æ‹©å­ç­‰é‡è¦æ¦‚å¿µ
+*			½ÚµãÊ÷µÄ½âÎö
+*		½ÚµãÊ÷¾ÍÊÇ°Ñ¸öÌå×é³É¼Ò×å
+*		°üÀ¨ÕóÁĞ£¬ĞòÁĞ, Ñ¡Ôñ×ÓµÈÖØÒª¸ÅÄî
 **************************************************************************/
 #define NODE		tree_t
 #define ROOT		ScePHG::gtree
 #define ME			work_stack.empty() ? 0 : work_stack.back()
 #define GET_NODE(name, node)	name == "me" ? ME : _gettree(name, node)
 
-int node_count = 0;				// èŠ‚ç‚¹æ•°é‡
+int node_count = 0;				// ½ÚµãÊıÁ¿
 
-// åŠ å‰ç¼€
+// ¼ÓÇ°×º
 inline void add_suffix(string& name, const string& clonename) {
 
 	string suffix;
@@ -25,16 +25,16 @@ inline void add_suffix(string& name, const string& clonename) {
 struct tree_t
 {
 	tree_t* parent = 0;
-	string name;					// åå­—
-	int index = 0;					// ç´¢å¼•
-	std::map<std::string, std::string> ab;		// ç‰¹æ€§å­—å…¸
-	std::map<std::string, std::string> kv;		// å±æ€§å­—å…¸
-	std::map<std::string, tree_t*> children;	// å­å­—å…¸
-	std::vector<tree_t*>	childrenlist;		// å­åˆ—è¡¨ï¼Œç”¨äºjson/xmlç­‰æ ¼å¼è½¬åŒ–
+	string name;								// Ãû×Ö
+	int index = 0;								// Ë÷Òı
+	std::map<std::string, std::string> ab;		// ÌØĞÔ×Öµä
+	std::map<std::string, std::string> kv;		// ÊôĞÔ×Öµä
+	std::map<std::string, tree_t*> children;	// ×Ó×Öµä
+	std::vector<tree_t*>	childrenlist;		// ×ÓÁĞ±í£¬ÓÃÓÚjson/xmlµÈ¸ñÊ½×ª»¯
 			
 	tree_t() {}
 
-	static int getdepth(tree_t* tree, int depth = 0)
+	static inline int getdepth(tree_t* tree, int depth = 0)
 	{
 		//PRINT("getdepth: " << tree->name);
 		if (tree->parent)
@@ -57,7 +57,7 @@ struct tree_t
 	}
 	void operator += (const tree_t& t)
 	{
-		// æš‚æ—¶æ‹·è´ï¼Œä»¥åå¯ä»¥åšè¿ç®—
+		// ÔİÊ±¿½±´£¬ÒÔºó¿ÉÒÔ×öÔËËã
 
 		for (auto it : t.kv)
 		{
@@ -75,7 +75,13 @@ struct tree_t
 			*ntree += *it.second;
 		}
 	}
-
+	void copyprop (tree_t* t)
+	{
+		for (auto& it : kv)
+		{
+			t->kv[it.first]= it.second;
+		}
+	}
 	static void clear(tree_t* ot)
 	{
 		if (!ot) return;
@@ -89,9 +95,9 @@ struct tree_t
 };
 
 // -----------------------------------------------------------------------
-tree_t* gtree = 0;					// æš‚æ—¶ä½¿ç”¨å…¨å±€æ ‘
-vector<tree_t*>	work_stack;				// å·¥ä½œæ ˆ
-std::string		cur_property = "pr1";		// å½“å‰å±æ€§
+tree_t* gtree = 0;						// ÔİÊ±Ê¹ÓÃÈ«¾ÖÊ÷
+vector<tree_t*>	work_stack;				// ¹¤×÷Õ»
+std::string		cur_property = "pr1";	// µ±Ç°ÊôĞÔ
 extern void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, const string& selector);
 extern void _crt_sequ(code& cd, tree_t* tree, const string& pre);
 extern tree_t* _gettree(const string& name, tree_t* tree);
@@ -110,14 +116,14 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 		char c = cd.cur();
 		//PRINT("c=" << c );
 
-		// æ³¨è§£
+		// ×¢½â
 		if (c == '#') {
 			cd.nextline();
 			//cd.next();
 			continue;
 		}
 
-		// PHGè¡¨è¾¾å¼
+		// PHG±í´ïÊ½
 		else if (c == '(' && pstr != &val)
 		{
 			int bracket_d = 1;
@@ -142,14 +148,14 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			cd.next();
 		}
 
-		// é€‰æ‹©å­
+		// Ñ¡Ôñ×Ó
 		else if (c == '?' && pstr == &key) {
 			cd.next();
 			selector = getstring(cd,'[');
 			cd.ptr--; // move back
 		}
 
-		// èŠ‚ç‚¹å¼€å§‹
+		// ½Úµã¿ªÊ¼
 		else if (c == '{' || c == '[' || c == '<') {
 			if (!val.empty()){
 				if (key.empty())
@@ -176,11 +182,11 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 				//PRINT(pre << key << " : ");
 				_tree(cd, ntree, pre + "\t", depth + 1);
 			}
-			else if (c == '[') // é˜µåˆ—
+			else if (c == '[') // ÕóÁĞ
 			{
 				_crt_array(cd, tree, pre, depth + 1, selector);
 			}
-			else if (c == '<') // åºåˆ—
+			else if (c == '<') // ĞòÁĞ
 			{
 				_crt_sequ(cd, tree, pre);
 			}
@@ -189,7 +195,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			pstr = &key;
 		}
 
-		// èŠ‚ç‚¹ç»“æŸ
+		// ½Úµã½áÊø
 		else if (c == ';' || c == '}' || c == '>' || c == '\n' || c == '\r') {
 			if (!key.empty() || !val.empty()) {
 				if (val.empty())
@@ -216,7 +222,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			}
 		}
 
-		// é€—å·é—´éš”,ä¸èƒ½ä½œä¸ºpropertyçš„ç»“å°¾ï¼
+		// ¶ººÅ¼ä¸ô,²»ÄÜ×÷ÎªpropertyµÄ½áÎ²£¡
 		else if (c == ',' && pstr != &val) {
 			if (!key.empty()) 
 			{// inhert
@@ -235,7 +241,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			cd.next();
 		}
 
-		// åå­— ä¸ æ•°å€¼/å­èŠ‚ç‚¹
+		// Ãû×Ö Óë ÊıÖµ/×Ó½Úµã
 		else if (c == ':') {
 			if (key.empty()) 
 			{
@@ -251,7 +257,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 			cd.next4();
 		}
 
-		// å­—ç¬¦ä¸²
+		// ×Ö·û´®
 		else if (c == '\'' || c == '\"') {
 
 			cd.next();
@@ -292,7 +298,7 @@ int select(int ind, int rnd, crstr selector)
 	sscanf_s(selector.c_str(), "%d/%d", &pa, &len);
 	ASSERT(len != 0);
 
-	if (rnd % len == ind) // éšæœºé€‰æ‹©ä¸€ä¸ª
+	if (rnd % len == ind) // Ëæ»úÑ¡ÔñÒ»¸ö
 	{
 		PRINT("selected!")
 		return 1; // select one
@@ -302,7 +308,7 @@ int select(int ind, int rnd, crstr selector)
 	return 0;
 }
 
-// é˜µåˆ—
+// ÕóÁĞ
 static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, const string& selector)
 {
 	cd.next();
@@ -424,7 +430,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 	}
 }
 
-// åºåˆ—
+// ĞòÁĞ
 static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 {
 	cd.next();
@@ -516,7 +522,7 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 	}
 }
 
-// å…¥å£
+// Èë¿Ú
 void _tree(code& cd)
 {
 	//tree_t* tree = new tree_t;
@@ -529,8 +535,8 @@ void _tree(code& cd)
 }
 
 // ------------------------------------
-// å¯»æºå¼åŠ æ³•
-// ä¸¤ä¸ªèŠ‚ç‚¹ä¹‹å’Œä¸ºæœ€è¿‘çš„ç›¸åŒç¥–å…ˆ
+// Ñ°Ô´Ê½¼Ó·¨
+// Á½¸ö½ÚµãÖ®ºÍÎª×î½üµÄÏàÍ¬×æÏÈ
 // ------------------------------------
 bool porperty_intree(tree_t* tree, const char* key, crstr val)
 {
@@ -548,7 +554,7 @@ bool porperty_intree(tree_t* tree, const char* key, crstr val)
 	return false;
 }
 
-// åœ¨èŠ‚ç‚¹æ ‘ä¸Šæœç´¢åŠ æ³•è§„åˆ™
+// ÔÚ½ÚµãÊ÷ÉÏËÑË÷¼Ó·¨¹æÔò
 tree_t* walk_addtreeEX(tree_t* tree, crstr v_a, crstr v_b, const char* key)
 {
 	// children
@@ -747,7 +753,7 @@ API(dump)
 }
 
 // -----------------------------------
-// æ•°æ®è¾“å‡º I/O
+// Êı¾İÊä³ö I/O
 // -----------------------------------
 inline string fixedname(crstr name)
 {
@@ -781,7 +787,10 @@ API(getrect)
 		string param1 = GET_SPARAM(1);
 		node = GET_NODE(param1, ROOT);
 		if (!node)
+		{
+			ERRORMSG("Node:" << param1 << " not found!")
 			return 0;
+		}
 	}
 	string key = "rect";
 	if (args > 1)
@@ -923,20 +932,18 @@ API(getstr)
 void NODE_REG_API()
 {
 	REG_API(iam, api_me);			// ME
-	REG_API(bye, api_bye);			// ME = NULL(æ­£åœ¨æ”¾å¼ƒä¸­...)
-	REG_API(on, api_on);			// å½“å‰å±æ€§ (æ­£åœ¨æ”¾å¼ƒä¸­...)
-	REG_API(array, array);			// èŠ‚ç‚¹é˜µåˆ— (æ­£åœ¨æ”¾å¼ƒä¸­...)
-	REG_API(sequ, sequ);			// èŠ‚ç‚¹åºåˆ— (æ­£åœ¨æ”¾å¼ƒä¸­...)
+	REG_API(bye, api_bye);			// ME = NULL
+	REG_API(on, api_on);			// µ±Ç°ÊôĞÔ
+	REG_API(array, array);			// ½ÚµãÕóÁĞ (ÕıÔÚ·ÅÆúÖĞ...)
+	REG_API(sequ, sequ);			// ½ÚµãĞòÁĞ (ÕıÔÚ·ÅÆúÖĞ...)
 
-	REG_API(prop, property);		// æ·»åŠ å±æ€§ (æ­£åœ¨æ”¾å¼ƒä¸­...)
+	REG_API(prop, property);		// Ìí¼ÓÊôĞÔ
 
-	/// stream io
-	
-	REG_API(getival, getival);		// è·å¾—int value
-	REG_API(getfval, getfval);		// è·å¾—float value
-	REG_API(getstr, getstr);		// è·å¾—string
-	REG_API(getvec3, getvec3);		// è·å¾—vec3
-	REG_API(getrect, getrect);		// è·å¾—RECT
+	REG_API(getival, getival);		// »ñµÃint value
+	REG_API(getfval, getfval);		// »ñµÃfloat value
+	REG_API(getstr, getstr);		// »ñµÃstring
+	REG_API(getvec3, getvec3);		// »ñµÃRECT
+	REG_API(getrect, getrect);		// »ñµÃRECT
 
 	REG_API(dump, dump);
 }
