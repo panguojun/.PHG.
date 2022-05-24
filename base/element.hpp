@@ -19,9 +19,8 @@
 // var
 struct var_t
 {
-	// 资源加法函数
-	std::function<var_t(var_t& a, var_t& b)> fun_add = 0;
-
+	std::function<var_t(var_t& a, var_t& b)> fun_add = 0;	// 资源加法函数
+	std::function<void(const var_t& v)> fun_set = 0;		// 资源set函数
 	union {
 		int ival = 0;
 		real fval;
@@ -31,22 +30,36 @@ struct var_t
 
 	var_t() { }
 	var_t(int _val) {
-		type = 1; ival = _val; resid = -1;
+		type = 1; ival = _val;
 	}
 	var_t(real _val) {
-		type = 2; fval = _val; resid = -1;
+		type = 2; fval = _val;
+	}
+	var_t(bool _val) {
+		type = 1; ival = (int)_val;
 	}
 	var_t(const var_t& v)
 	{
 		//PRINT("var_t copy " << v.type);
 		(*this) = v;
 	}
-
+	void operator = (int v)
+	{
+		type = 1; ival = v; resid = -1;
+	}
+	void operator = (real v)
+	{
+		type = 2; fval = v; resid = -1;
+	}
 	void operator = (const var_t& v)
 	{
 		//PRINT("var_t ="  << v.type << "," << v.fval);
 		type = v.type;
-		if (type == 2)
+		if (type == 3 && fun_set)
+		{
+			fun_set(v);
+		}
+		else if (type == 2)
 			fval = v.fval;
 		else
 			ival = v.ival;
@@ -62,18 +75,22 @@ struct var_t
 	}
 	bool operator == (const var_t& v) const
 	{
-		return type == v.type &&
-			((type == 1 && ival == v) || (type == 2 && fval == v));
+		return  (type == v.type && ((type == 1 && ival == v.ival) || (type == 2 && fval == v.fval))) ||
+			(type != v.type && float(*this) == float(v));
 	}
 	bool operator != (const var_t& v) const
 	{
 		return !(*this == v);
 	}
-
 	operator int() const
 	{
 		//PRINT("var_t::int " << ival)
 		return ival;
+	}
+	operator float() const
+	{
+		//PRINT("var_t::int " << ival)
+		return type == 2 ? fval : float(ival);
 	}
 
 	var_t operator + (var_t& v) const
@@ -81,7 +98,7 @@ struct var_t
 		var_t ret;
 		if (type == 2 || v.type == 2) {
 			ret.type = 2;
-			ret.fval = fval + v.fval;
+			ret.fval = float(*this) + float(v);
 		}
 		else
 		{
@@ -105,7 +122,7 @@ struct var_t
 		var_t ret;
 		if (type == 2 || v.type == 2) {
 			ret.type = 2;
-			ret.fval = fval - v.fval;
+			ret.fval = float(*this) - float(v);
 		}
 		else
 		{
@@ -142,7 +159,7 @@ struct var_t
 		var_t ret;
 		if (type == 2 || v.type == 2) {
 			ret.type = 2;
-			ret.fval = fval * v.fval;
+			ret.fval = float(*this) * float(v);
 		}
 		else
 		{
@@ -155,13 +172,33 @@ struct var_t
 		var_t ret;
 		if (type == 2 || v.type == 2) {
 			ret.type = 2;
-			ret.fval = fval / v.fval;
+			ret.fval = float(*this) / float(v);
 		}
 		else
 		{
 			ret.ival = ival / v.ival;
 		}
 		return ret;
+	}
+	bool operator > (const var_t& v) const
+	{
+		if (type == 2 || v.type == 2) {
+			return float(*this) > float(v);
+		}
+		else
+		{
+			return ival > v.ival;
+		}
+	}
+	bool operator < (const var_t& v) const
+	{
+		if (type == 2 || v.type == 2) {
+			return float(*this) < float(v);
+		}
+		else
+		{
+			return ival < v.ival;
+		}
 	}
 };
 
@@ -179,7 +216,7 @@ inline void _PHGPRINT(const std::string& pre, const var& v)
 #include "phg.hpp"
 // ------------------------------------------
 // 运算
-using fun_calc_t = std::function<string(code& cd, char o, int args)>;
+using fun_calc_t = std::function<var(code& cd, char o, int args)>;
 fun_calc_t fun_calc = 0;
 static var _act(code& cd, int args)
 {
@@ -187,96 +224,110 @@ static var _act(code& cd, int args)
 
 	if (fun_calc)
 	{
-		if (!fun_calc(cd, o, args).empty())
-			return 0;
+		if (var ret = fun_calc(cd, o, args);ret != 0)
+			return ret;
 	}
 
 	PRINT("calc:" << o << "(" << args << ")")
 
-		switch (o) {
-		case '+': {
-			if (args > 1) {
-				var& b = PHG_VALSTACK(1);
-				var& a = PHG_VALSTACK(2);
-				var ret = a + b;
-				PHG_VALPOP(2);
-				return ret;
-			}
-			else {
-				return cd.valstack.pop();
-			}
-		}
-		case '-': {
-			if (args > 1) {
-				var& b = PHG_VALSTACK(1);
-				var& a = PHG_VALSTACK(2);
-				var ret = a - b;
-				PHG_VALPOP(2);
-				return ret;
-			}
-			else {
-				return -cd.valstack.pop();
-			}
-		}
-		case '*': {
-			if (args > 1) {
-				var& b = PHG_VALSTACK(1);
-				var& a = PHG_VALSTACK(2);
-				var ret = a * b;
-				PHG_VALPOP(2);
-				return ret;
-			}
-			else {
-				return cd.valstack.pop();
-			}
-		}
-		case '/': {
-			if (args > 1) {
-				var& b = PHG_VALSTACK(1);
-				var& a = PHG_VALSTACK(2);
-				var ret = a / b;
-				PHG_VALPOP(2);
-				return ret;
-			}
-			else {
-				return cd.valstack.pop();
-			}
-		}
-		case '=': {
+	switch (o) {
+	case '+': {
+		if (args > 1) {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = var(int(a == b));
+			var ret = a + b;
 			PHG_VALPOP(2);
 			return ret;
 		}
-		case '>': {
+		else {
+			return cd.valstack.pop();
+		}
+	}
+	case '-': {
+		if (args > 1) {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = a > b;
+			var ret = a - b;
 			PHG_VALPOP(2);
 			return ret;
 		}
-		case '<': {
+		else {
+			return -cd.valstack.pop();
+		}
+	}
+	case '*': {
+		if (args > 1) {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = a < b;
+			var ret = a * b;
 			PHG_VALPOP(2);
 			return ret;
 		}
-		case '!': {
-			if (args > 1) {
-				var& b = PHG_VALSTACK(1);
-				var& a = PHG_VALSTACK(2);
-				var ret = !(a == b);
-				PHG_VALPOP(2);
-				return ret;
-			}
-			else {
-				var a = cd.valstack.pop();
-				return !a;
-			}
+		else {
+			return cd.valstack.pop();
 		}
-		default: {}
+	}
+	case '/': {
+		if (args > 1) {
+			var& b = PHG_VALSTACK(1);
+			var& a = PHG_VALSTACK(2);
+			var ret = a / b;
+			PHG_VALPOP(2);
+			return ret;
 		}
+		else {
+			return cd.valstack.pop();
+		}
+	}
+	case '=': {
+		var& b = PHG_VALSTACK(1);
+		var& a = PHG_VALSTACK(2);
+		var ret = var(int(a == b));
+		PHG_VALPOP(2);
+		return ret;
+	}
+	case '>': {
+		var& b = PHG_VALSTACK(1);
+		var& a = PHG_VALSTACK(2);
+		var ret = a > b;
+		PHG_VALPOP(2);
+		return ret;
+	}
+	case '<': {
+		var& b = PHG_VALSTACK(1);
+		var& a = PHG_VALSTACK(2);
+		var ret = a < b;
+		PHG_VALPOP(2);
+		return ret;
+	}
+	case '&': {
+		var& b = PHG_VALSTACK(1);
+		var& a = PHG_VALSTACK(2);
+		var ret = int(a) && int(b);
+		PHG_VALPOP(2);
+		return ret;
+	}
+	case '|': {
+		var& b = PHG_VALSTACK(1);
+		var& a = PHG_VALSTACK(2);
+		var ret = int(a) || int(b);
+		PHG_VALPOP(2);
+		return ret;
+	}
+	case '!': {
+		if (args > 1) {
+			var& b = PHG_VALSTACK(1);
+			var& a = PHG_VALSTACK(2);
+			var ret = !(a == b);
+			PHG_VALPOP(2);
+			return ret;
+		}
+		else {
+			var a = cd.valstack.pop();
+			return !int(a);
+		}
+	}
+	default: {}
+	}
 	return INVALIDVAR;
 }
