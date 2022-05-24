@@ -10,7 +10,7 @@
 
 #define API(funname)		static var funname(ScePHG::code& cd, int args)
 #define SPARAM(name)		string name = cd.strstack.back(); cd.strstack.pop_back();
-#define PARAM(name)			var name = cd.valstack.back();cd.valstack.pop_back();
+#define PARAM(name)			var name = cd.valstack.back();
 #define GET_SPARAM(index)	cd.strstack[cd.strstack.size() - 1 - (args - index)]
 #define POP_SPARAM			for(int i = 0; i < args; i ++) cd.strstack.pop_back();
 #define POP_SPARAMN(n)		for(int i = 0; i < n; i ++) cd.strstack.pop_back();
