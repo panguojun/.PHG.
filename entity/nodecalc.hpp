@@ -418,7 +418,8 @@ API(calc_expr)
 					}
 					++ps;
 				}
-				PRINTV(result);
+				it.second = result;
+				//PRINTV(result);
 			}
 		});
 	POP_SPARAM;
