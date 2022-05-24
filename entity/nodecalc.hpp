@@ -1,12 +1,12 @@
 /**************************************************************************
-*				‰∫ã‰ª∂ËøêÁÆó
+*							 ¬º˛‘ÀÀ„
 
 **************************************************************************/
 struct tree_t;
 namespace nodecalc
 {
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
-	bool abelian_sym = true;	// ÈòøË¥ùÂ∞îÂØπÁß∞ Âç≥ËøêÁÆóÁöÑÂèØ‰∫§Êç¢ÊÄß
+	bool abelian_sym = true;	// ∞¢±¥∂˚∂‘≥∆ º¥‘ÀÀ„µƒø…Ωªªª–‘
 
 	tree_t* _walk_tree_node(std::string& str, tree_t* tree, crstr a, const char* key)
 	{
@@ -51,7 +51,7 @@ namespace nodecalc
 		}
 		return flag;
 	}
-	int _walk_tree_add(tree_t** out, tree_t* tree, crstr a, crstr b, const char* key)
+	int _calc_add(tree_t** out, tree_t* tree, crstr a, crstr b, const char* key)
 	{
 		{// kv
 			crstr v = tree->kv[key];
@@ -66,7 +66,7 @@ namespace nodecalc
 		int flag = 0;
 		tree_t* lstn = 0;
 		for (auto& it : tree->children) {
-			int ret = _walk_tree_add(out, it.second, a, b, key);
+			int ret = _calc_add(out, it.second, a, b, key);
 			//PRINTV(ret);
 			if (ret == 3)
 				return ret;
@@ -77,7 +77,7 @@ namespace nodecalc
 				if (flag == 3)
 				{
 					if (!abelian_sym)
-					{// È°∫Â∫èÂà§Êñ≠
+					{// À≥–Ú≈–∂œ
 						if (lstn != 0)
 						{
 							PRINTV(it.second->getindex());
@@ -97,11 +97,6 @@ namespace nodecalc
 			}
 		}
 		return flag;
-	}
-
-	void _calc_add(tree_t** out, crstr a, crstr b, const char* key)
-	{
-		_walk_tree_add(out, ROOT, a, b, key);
 	}
 	void _calc_addd(std::string& str, crstr a, const char* key)
 	{
@@ -164,7 +159,7 @@ namespace nodecalc
 			_wak_tree(it.second, a, k, ok);
 		}
 	}
-	int _wak_tree_add(tree_t* tree, crstr a, crstr b, const char* key, const char* ok)
+	int _calc_add(tree_t* tree, crstr a, crstr b, const char* key, const char* ok)
 	{
 		{// kv
 			crstr v = tree->kv[key];
@@ -179,7 +174,7 @@ namespace nodecalc
 		int flag = 0;
 		tree_t* lstn = 0;
 		for (auto& it : tree->children) {
-			int ret = _wak_tree_add(it.second, a, b, key, ok);
+			int ret = _calc_add(it.second, a, b, key, ok);
 			//PRINTV(ret);
 			if (ret == 3)
 				return ret;
@@ -190,7 +185,7 @@ namespace nodecalc
 				if (flag == 3)
 				{
 					if (!abelian_sym)
-					{// È°∫Â∫èÂà§Êñ≠
+					{// À≥–Ú≈–∂œ
 						if (lstn != 0)
 						{
 							PRINTV(it.second->getindex());
@@ -212,19 +207,11 @@ namespace nodecalc
 	}
 	struct res_t
 	{
-		// Êê∫Â∏¶ÁöÑÂ±ûÊÄß
-		NODE* node;				// Ê®°Âûã
+		// –Ø¥¯µƒ Ù–‘
+		NODE* node;
 		string key;
-
-		res_t() {}
-		res_t(const res_t& v)
-		{
-			node = v.node;
-			key = v.key;
-		};
-		~res_t() {}
 	};
-	vector<res_t*> reslist;		// ËµÑÊ∫êÂàóË°®
+	vector<res_t*> reslist;		// ◊ ‘¥¡–±Ì
 
 	res_t& cres(const var& ent)
 	{
@@ -239,8 +226,8 @@ namespace nodecalc
 			reslist.push_back(rs);
 			ent.resid = reslist.size() - 1;
 
-			ent.type = 0; // Ëá™ÂÆö‰πâÂÖÉÁ¥†Á±ªÂûã
-			// Âú®ËµÑÊ∫ê‰∏äÂÆö‰πâÂä†Ê≥ïËøêÁÆó
+			ent.type = 0; // ◊‘∂®“Â‘™Àÿ¿‡–Õ
+			// ‘⁄◊ ‘¥…œ∂®“Âº”∑®‘ÀÀ„
 			ent.fun_set = [&ent](const var& v) {
 				if (v.type == 3)
 				{
@@ -298,7 +285,7 @@ API(calc_add)
 		c = a;
 	}
 	else {
-		nodecalc::_calc_add(&n,
+		nodecalc::_calc_add(&n, ROOT,
 			a, b,
 			cur_property.c_str());
 		if (n) {
@@ -341,22 +328,46 @@ API(calc_sub)
 }
 API(calc_wak)
 {
-	crstr nm = GET_SPARAM(1);
-	NODE* n = nm == "me" ? ME : GET_NODE(nm, ROOT); ASSERT(n);
-	if (args == 3) {
-		crstr a = GET_SPARAM(2);
-		crstr ok = GET_SPARAM(3);
-
-		nodecalc::_wak_tree(n, a, cur_property.c_str(), ok.c_str());
-	}
-	else if (args == 4)
+	if (args == 2)
 	{
-		crstr a = GET_SPARAM(2);
-		crstr b = GET_SPARAM(3);
-		crstr ok = GET_SPARAM(4);
+		NODE* n = 0;
+		crstr ok = GET_SPARAM(1);
+		crstr expr = GET_SPARAM(2);
+		code ccd(expr.c_str());
+		string a = ccd.getname();
+		ccd.next3();
+		char op = ccd.cur();
+		ccd.next();
+		string b = ccd.getname();
+		if (op == '+')
+			nodecalc::_calc_add(n, a, b, cur_property.c_str(), ok.c_str());
+		else if (op == '-')
+		{
+			string c;
+			nodecalc::_calc_sub(c, a, b, cur_property.c_str());
 
-		nodecalc::_wak_tree_add(n, a, b, cur_property.c_str(), ok.c_str());
+			PRINTV(c);
+			strlist.push_back(c);
+		}
+	}
+	else
+	{
+		crstr nm = GET_SPARAM(1);
+		NODE* n = nm == "me" ? ME : GET_NODE(nm, ROOT); ASSERT(n);
+		if (args == 3) {
+			crstr a = GET_SPARAM(2);
+			crstr ok = GET_SPARAM(3);
 
+			nodecalc::_wak_tree(n, a, cur_property.c_str(), ok.c_str());
+		}
+		else if (args == 4)
+		{
+			crstr a = GET_SPARAM(2);
+			crstr b = GET_SPARAM(3);
+			crstr ok = GET_SPARAM(4);
+
+			nodecalc::_calc_add(n, a, b, cur_property.c_str(), ok.c_str());
+		}
 	}
 
 	POP_SPARAM; return 0;
@@ -375,16 +386,16 @@ API(calc_expr)
 			for (auto& it : tree->kv) {
 				string result;
 				const char* ps = it.second.c_str();
-				const char* start  = ps;
+				const char* start = ps;
 				while (*ps != '\0') {
-					
+
 					if ((*ps) == '(')
 					{
 						int offset = ps - start + 1;
 						int cnt = 0;
 						while (*(++ps) != ')') cnt++;
 						{
-							// ÂÜÖÈÉ®ÂèòÈáè
+							// ƒ⁄≤ø±‰¡ø
 							gvarmapstack.addvar("_i", tree->index);
 							gvarmapstack.addvar("_t", tree_t::getdepth(tree));
 						}
@@ -412,16 +423,16 @@ void NODECALC_REG_API()
 
 		PRINT("CALC: " << o << "(" << args << ")");
 		//PRINTV(ME->name);
-		
+
 		if (o == '.')
 		{
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
-			
+
 			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
 			string c = n->kv[b];
 			PRINT(a << "." << b << "=" << c)
-			var v;v.type = 3; nodecalc::res(v).node = n; nodecalc::res(v).key = b;
+				var v; v.type = 3; nodecalc::res(v).node = n; nodecalc::res(v).key = b;
 			strlist.push_back(c);
 			POP_SPARAM;
 			//PHG_VALPOP(2);
@@ -432,23 +443,23 @@ void NODECALC_REG_API()
 		});
 
 	PROP([](code& cd, const char* a, const char* b, var& v) {
-			int args = 1;
-			PRINT("PROP: " << a << "." << b);
+		int args = 1;
+		PRINT("PROP: " << a << "." << b);
 
-			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
-			PRINTV(cd.strstack.size());
-			string sv = GET_SPARAM(1);
-			n->kv[b] = sv;
-			POP_SPARAM;
+		NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+		PRINTV(cd.strstack.size());
+		string sv = GET_SPARAM(1);
+		n->kv[b] = sv;
+		POP_SPARAM;
 		});
 
 	REG_API(abe, calc_set_abelian);
 
 	REG_API(addd, calc_addd);
-	REG_API(add,  calc_add);
+	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
-	REG_API(sub,  calc_sub);
-	REG_API(wak,  calc_wak);
+	REG_API(sub, calc_sub);
+	REG_API(wak, calc_wak);
 
 	REG_API(cls, clearstrlist);
 

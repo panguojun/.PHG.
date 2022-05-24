@@ -1,25 +1,23 @@
 /**************************************************************************
-*				å®ä½“èµ„æº
-*			å®ä½“èµ„æºæ˜¯å¯ç»˜åˆ¶çš„åœºæ™¯å¯¹è±¡
+*							ÊµÌå×ÊÔ´
+*					ÊµÌå×ÊÔ´ÊÇ¿É»æÖÆµÄ³¡¾°¶ÔÏó
 **************************************************************************/
+#define	MODEL res(ent).md
+
 struct tree_t;
 namespace entity {
 	struct transform_t { vec3 p; quaternion q; vec3 pyr; vec3 s = vec3::ONE; };
 	struct enityres_t
 	{
 		int type = 1; // 1.subemsh 2. node
-		// æºå¸¦çš„å±æ€§
-		bool vis = true;	// å¯è§æ€§
-		union {
-			struct { // submesh
-				transform_t trans;	// ç©ºé—´å˜æ¢
-				float angle;		// ç›¸ä½è§’
-				string md;		// æ¨¡å‹
-				string cstr;		// çº¦æŸ
-				submesh sm;		// submesh
-			};
-			tree_t* node;
-		};
+		// Ğ¯´øµÄÊôĞÔ
+		bool vis = true;	// ¿É¼ûĞÔ
+		transform_t trans;	// ¿Õ¼ä±ä»»
+		float angle;		// ÏàÎ»½Ç
+		string md;			// Ä£ĞÍ
+		string cstr;		// Ô¼Êø
+		submesh sm;			// submesh
+	
 		enityres_t() {}
 		enityres_t(const enityres_t& v)
 		{
@@ -30,7 +28,7 @@ namespace entity {
 		};
 		~enityres_t() {}
 	};
-	vector<enityres_t*> reslist;			// èµ„æºåˆ—è¡¨
+	vector<enityres_t*> reslist;			// ×ÊÔ´ÁĞ±í
 	void clearres()
 	{
 		for (auto it : reslist)
@@ -41,7 +39,7 @@ namespace entity {
 		reslist.clear();
 	}
 
-	enityres_t& res(ENT& ent)
+	inline	enityres_t& res(ENT& ent)
 	{
 		if (ent.resid == -1)
 		{
@@ -53,29 +51,37 @@ namespace entity {
 		return *reslist[ent.resid];
 	}
 
+
 	// *********************************************************************
 	// Setup tree, generate entities
 	// *********************************************************************
-	#define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
+#define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
 
 	// data convert
-	int stoint(crstr sval)
+	inline int stoint(crstr sval)
 	{
 		return atoi(sval.c_str());
 	}
-	real storeal(crstr sval)
+	inline real storeal(crstr sval)
 	{
 		return atof(sval.c_str());
 	}
-	vec3 stovec(crstr sval)
+	inline vec3 stovec(crstr sval)
 	{
 		vec3 ret;
 		sscanf(sval.c_str(), "%f,%f,%f", &ret.x, &ret.y, &ret.z);
 		return ret;
 	}
-
+	inline quaternion stoq(crstr sval)
+	{
+		quaternion ret;
+		sscanf(sval.c_str(), "%f,%f,%f,%f", &ret.x, &ret.y, &ret.z, &ret.w);
+		return ret;
+	}
+	
 	void setup(tree_t* tree, const transform_t& parent)
 	{
+		PRINT("setup")
 		work_stack.push_back(tree);
 
 		ENT ent;
@@ -86,9 +92,9 @@ namespace entity {
 			vec3 pyr;
 			vec3 s = vec3::ONE;
 			{// transform desc
-				KEY_VAL("pos") // raw position
+				KEY_VAL("p") // raw position
 				{
-					p = stovec(it->second);
+					p += stovec(it->second);
 				}
 				KEY_VAL("x") // move x
 				{
@@ -107,30 +113,36 @@ namespace entity {
 					pyr = stovec(it->second);
 					q.fromeuler(pyr.x * PI / 180.0f, pyr.y * PI / 180.0f, pyr.z * PI / 180.0f);
 				}
-				KEY_VAL("pitch") // pitch
+				KEY_VAL("pit") // pitch
 				{
 					quaternion _q;
-					real ang = storeal(it->second);
+					real ang = storeal(it->second) * PI / 180.0f;
 					_q.fromangleaxis(ang, vec::UX);
 					q = _q * q;
 				}
 				KEY_VAL("yaw") // yaw
 				{
 					quaternion _q;
-					real ang = storeal(it->second);
+					real ang = storeal(it->second) * PI / 180.0f;
 					_q.fromangleaxis(ang, vec::UY);
 					q = _q * q;
 				}
-				KEY_VAL("roll") // roll
+				KEY_VAL("rol") // roll
 				{
 					quaternion _q;
-					real ang = storeal(it->second);
+					real ang = storeal(it->second) * PI / 180.0f;
 					_q.fromangleaxis(ang, vec::UZ);
 					q = _q * q;
 				}
-				KEY_VAL("scl") // scale
+				KEY_VAL("q") // q
 				{
-					s = stovec(it->second);
+					quaternion _q;
+					_q = stoq(it->second);
+					q = _q * q;
+				}
+				KEY_VAL("s") // scale
+				{
+					s = storeal(it->second);
 
 					PRINTVEC3(s);
 				}
@@ -138,29 +150,59 @@ namespace entity {
 			//PRINTVEC3(p);
 			trans = {
 				parent.p + (parent.q * vec3::UX) * p.x + (parent.q * vec3::UY) * p.y + (parent.q * vec3::UZ) * p.z,
-				q * parent.q,
-				parent.pyr + pyr, // å åŠ ï¼Ÿ
+				q ,
+				parent.pyr + pyr, // µş¼Ó£¿
 				parent.s * s
 			};
 		}
-		{// æ·»åŠ åˆ°å˜é‡åˆ—è¡¨			
-
+		{// Ìí¼Óµ½±äÁ¿ÁĞ±í
+			//ent.sval = tree->name;
+			KEY_VAL("vis") // vis
+			{
+				if (it->second == "false")
+				{
+					res(ent).vis = false;
+				}
+			}
+			
 			KEY_VAL("md") {
-				res(ent).md = it->second;
+				
 			}
 
 			KEY_VAL("cstr") {
 				res(ent).cstr = it->second;
 			}
-
-			//if(CEHCK_CONSTR(res(ent).cstr))
 			gvarmapstack.addvar(tree->name.c_str(), ent);
 		}
 
 		// children
 		for (auto it : tree->children) {
-			setup(it.second, res(ent).trans);
+			setup(it.second, trans);
 		}
 	}
 
+	
+}
+
+// ------------------------------------
+// API
+// ------------------------------------
+// phgoper
+void phgoper(tree_t* tree)
+{
+	work_stack.push_back(tree);
+	{// bool
+		KEY_VAL("phg")
+		{
+			ScePHG::dostring((it->second + ";").c_str());
+		}
+	}
+	// children
+	for (auto it : tree->children) {
+		phgoper(it.second);
+	}
+}
+
+void ENTITY_REG_API()
+{
 }

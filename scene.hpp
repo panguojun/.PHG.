@@ -14,6 +14,7 @@
 #define GET_SPARAM(index)	cd.strstack[cd.strstack.size() - 1 - (args - index)]
 #define POP_SPARAM			for(int i = 0; i < args; i ++) cd.strstack.pop_back();
 #define POP_SPARAMN(n)		for(int i = 0; i < n; i ++) cd.strstack.pop_back();
+#define VAR2STR(v)			v.type == 1 ? to_string(v.ival) : to_string(v.fval)
 
 #define REG_API(funname,cppfunname)	ScePHG::register_api(#funname, cppfunname)
 #define CALC	fun_calc = 
@@ -36,6 +37,7 @@ namespace ScePHG
 #include "base/node.hpp"
 // ---------------------------------------------------------------------
 #include "entity/sprite.hpp"
+#include "entity/entity.hpp"
 #include "entity/nodecalc.hpp"
 // ---------------------------------------------------------------------
 	
@@ -178,27 +180,6 @@ namespace ScePHG
 		return 0;
 	}
 #endif	
-	// phgoper
-	void phgoper(tree_t* tree)
-	{
-		work_stack.push_back(tree);
-		{// bool
-			KEY_VAL("phg")
-			{
-				ScePHG::dostring((it->second + ";").c_str());
-			}
-		}
-		// children
-		for (auto it : tree->children) {
-			phgoper(it.second);
-		}
-	}
-	API(phgoper)
-	{
-		phgoper(ROOT);
-
-		return 0;
-	}
 	API(dostring)
 	{
 		SPARAM(str);
@@ -248,8 +229,6 @@ namespace ScePHG
 
 		// ELEMENT: 
 
-		REG_API(phg, phgoper);			// 脚本(正在放弃中...)
-		
 		NODE_REG_API();
 
 		NODECALC_REG_API();			// node calc

@@ -224,110 +224,110 @@ static var _act(code& cd, int args)
 
 	if (fun_calc)
 	{
-		if (var ret = fun_calc(cd, o, args);ret != 0)
+		if (var ret = fun_calc(cd, o, args); ret != 0)
 			return ret;
 	}
 
 	PRINT("calc:" << o << "(" << args << ")")
 
-	switch (o) {
-	case '+': {
-		if (args > 1) {
+		switch (o) {
+		case '+': {
+			if (args > 1) {
+				var& b = PHG_VALSTACK(1);
+				var& a = PHG_VALSTACK(2);
+				var ret = a + b;
+				PHG_VALPOP(2);
+				return ret;
+			}
+			else {
+				return cd.valstack.pop();
+			}
+		}
+		case '-': {
+			if (args > 1) {
+				var& b = PHG_VALSTACK(1);
+				var& a = PHG_VALSTACK(2);
+				var ret = a - b;
+				PHG_VALPOP(2);
+				return ret;
+			}
+			else {
+				return -cd.valstack.pop();
+			}
+		}
+		case '*': {
+			if (args > 1) {
+				var& b = PHG_VALSTACK(1);
+				var& a = PHG_VALSTACK(2);
+				var ret = a * b;
+				PHG_VALPOP(2);
+				return ret;
+			}
+			else {
+				return cd.valstack.pop();
+			}
+		}
+		case '/': {
+			if (args > 1) {
+				var& b = PHG_VALSTACK(1);
+				var& a = PHG_VALSTACK(2);
+				var ret = a / b;
+				PHG_VALPOP(2);
+				return ret;
+			}
+			else {
+				return cd.valstack.pop();
+			}
+		}
+		case '=': {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = a + b;
+			var ret = var(int(a == b));
 			PHG_VALPOP(2);
 			return ret;
 		}
-		else {
-			return cd.valstack.pop();
-		}
-	}
-	case '-': {
-		if (args > 1) {
+		case '>': {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = a - b;
+			var ret = a > b;
 			PHG_VALPOP(2);
 			return ret;
 		}
-		else {
-			return -cd.valstack.pop();
-		}
-	}
-	case '*': {
-		if (args > 1) {
+		case '<': {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = a * b;
+			var ret = a < b;
 			PHG_VALPOP(2);
 			return ret;
 		}
-		else {
-			return cd.valstack.pop();
-		}
-	}
-	case '/': {
-		if (args > 1) {
+		case '&': {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = a / b;
+			var ret = int(a) && int(b);
 			PHG_VALPOP(2);
 			return ret;
 		}
-		else {
-			return cd.valstack.pop();
-		}
-	}
-	case '=': {
-		var& b = PHG_VALSTACK(1);
-		var& a = PHG_VALSTACK(2);
-		var ret = var(int(a == b));
-		PHG_VALPOP(2);
-		return ret;
-	}
-	case '>': {
-		var& b = PHG_VALSTACK(1);
-		var& a = PHG_VALSTACK(2);
-		var ret = a > b;
-		PHG_VALPOP(2);
-		return ret;
-	}
-	case '<': {
-		var& b = PHG_VALSTACK(1);
-		var& a = PHG_VALSTACK(2);
-		var ret = a < b;
-		PHG_VALPOP(2);
-		return ret;
-	}
-	case '&': {
-		var& b = PHG_VALSTACK(1);
-		var& a = PHG_VALSTACK(2);
-		var ret = int(a) && int(b);
-		PHG_VALPOP(2);
-		return ret;
-	}
-	case '|': {
-		var& b = PHG_VALSTACK(1);
-		var& a = PHG_VALSTACK(2);
-		var ret = int(a) || int(b);
-		PHG_VALPOP(2);
-		return ret;
-	}
-	case '!': {
-		if (args > 1) {
+		case '|': {
 			var& b = PHG_VALSTACK(1);
 			var& a = PHG_VALSTACK(2);
-			var ret = !(a == b);
+			var ret = int(a) || int(b);
 			PHG_VALPOP(2);
 			return ret;
 		}
-		else {
-			var a = cd.valstack.pop();
-			return !int(a);
+		case '!': {
+			if (args > 1) {
+				var& b = PHG_VALSTACK(1);
+				var& a = PHG_VALSTACK(2);
+				var ret = !(a == b);
+				PHG_VALPOP(2);
+				return ret;
+			}
+			else {
+				var a = cd.valstack.pop();
+				return !int(a);
+			}
 		}
-	}
-	default: {}
-	}
+		default: {}
+		}
 	return INVALIDVAR;
 }

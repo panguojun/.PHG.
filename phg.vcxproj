@@ -28,6 +28,7 @@
     <ClInclude Include="net\httplib.hpp" />
     <ClInclude Include="parsers\jsonparser.hpp" />
     <ClInclude Include="parsers\xmlparser.hpp" />
+    <ClInclude Include="scene.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cc" />

@@ -31,7 +31,7 @@ struct tree_t
 	std::map<std::string, std::string> kv;		// 属性字典
 	std::map<std::string, tree_t*> children;	// 子字典
 	std::vector<tree_t*>	childrenlist;		// 子列表，用于json/xml等格式转化
-			
+
 	tree_t() {}
 
 	static inline int getdepth(tree_t* tree, int depth = 0)
@@ -44,7 +44,7 @@ struct tree_t
 	}
 	static inline int genid()
 	{
-		return ++ node_count;
+		return ++node_count;
 	}
 
 	inline int getindex()
@@ -75,11 +75,11 @@ struct tree_t
 			*ntree += *it.second;
 		}
 	}
-	void copyprop (tree_t* t)
+	void copyprop(tree_t* t)
 	{
 		for (auto& it : kv)
 		{
-			t->kv[it.first]= it.second;
+			t->kv[it.first] = it.second;
 		}
 	}
 	static void clear(tree_t* ot)
@@ -151,18 +151,18 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 		// 选择子
 		else if (c == '?' && pstr == &key) {
 			cd.next();
-			selector = getstring(cd,'[');
+			selector = getstring(cd, '[');
 			cd.ptr--; // move back
 		}
 
 		// 节点开始
 		else if (c == '{' || c == '[' || c == '<') {
-			if (!val.empty()){
+			if (!val.empty()) {
 				if (key.empty())
 					key = "pr" + to_string(tree->kv.size() + 1); // default porperty name
 				tree->kv[key] = val;
 			}
-			
+
 			if (c == '{') {
 				if (val != "")
 				{
@@ -224,7 +224,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 
 		// 逗号间隔,不能作为property的结尾！
 		else if (c == ',' && pstr != &val) {
-			if (!key.empty()) 
+			if (!key.empty())
 			{// inhert
 				tree_t* t = GET_NODE(key, ROOT);
 				if (t)
@@ -243,7 +243,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 
 		// 名字 与 数值/子节点
 		else if (c == ':') {
-			if (key.empty()) 
+			if (key.empty())
 			{
 				//SYNTAXERR("key is missing before ':' !");cd.ptr = 0;return;
 				key = "pr" + to_string(tree->kv.size() + 1); // default porperty name
@@ -301,11 +301,11 @@ int select(int ind, int rnd, crstr selector)
 	if (rnd % len == ind) // 随机选择一个
 	{
 		PRINT("selected!")
-		return 1; // select one
+			return 1; // select one
 	}
 
 	PRINT("select failed! " << ind)
-	return 0;
+		return 0;
 }
 
 // 阵列
@@ -343,7 +343,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 			index++;
 			if (node.empty())
 			{
-				node = to_string(tree_t::genid()) + "." + to_string(tree->children.size()+1);
+				node = to_string(tree_t::genid()) + "." + to_string(tree->children.size() + 1);
 			}
 			work_stack.push_back(tree);
 			ntree = new tree_t;
@@ -398,7 +398,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 						(*ntree) += (*t);
 					}
 				}
-				
+
 				//PRINTV(ntree->name)
 				if (int ret = select(index, rnd, selector); ret) {
 
@@ -408,7 +408,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 					{
 						cd.next();
 						PRINTV(ret)
-						return;
+							return;
 					}
 				}
 				else
@@ -434,7 +434,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 {
 	cd.next();
-	
+
 	//vector<string> nodes;
 	string node;
 	while (!cd.eoc()) {
@@ -614,13 +614,40 @@ void node_walker(tree_t* tree, std::function<void(tree_t*)> fun)
 // ====================================
 // API
 // ====================================
+tree_t* _getbyprop(tree_t* tree, crstr a, const char* key)
+{
+	if (tree->kv[key] == a)
+	{
+		return tree;
+	}
+
+	// children
+	for (auto it : tree->children) {
+		tree_t* t = _getbyprop(it.second, a, key);
+		if (t)
+			return t;
+	}
+	return 0;
+}
 API(api_me)
 {
 	ASSERT(args == 1);
-	
-	SPARAM(node);
-	NODE* me = _gettree(node, ROOT);
-	if(me)
+
+	NODE* me = 0;
+	crstr expr = GET_SPARAM(1);
+	if (expr[0] == ':')
+	{
+		code ccd(expr.c_str());
+		string key = ccd.getname();
+		ccd.next3();
+		string val = getstring(ccd);
+		me = _getbyprop(ROOT, key, val.c_str());
+	}
+	else {
+		SPARAM(node);
+		me = _gettree(node, ROOT);
+	}
+	if (me)
 		work_stack.push_back(me);
 	return 0;
 }
@@ -643,7 +670,7 @@ API(array)
 {
 	ASSERT(ME);
 	tree_t* ntree = new tree_t;
-	
+
 	if (args == 1)
 	{
 		SPARAM(clonenode);
@@ -681,7 +708,7 @@ API(sequ)
 	ntree->index = ME->children.size() + 1;
 	int id = tree_t::genid();
 	ntree->name = to_string(id) + "_" + to_string(ME->children.size() + 1);
-	
+
 	if (args == 1)
 	{
 		SPARAM(clonenode);
@@ -704,7 +731,7 @@ API(sequ)
 void property(tree_t* tree, const string& key, const string& val, const string& filter = "")
 {
 	const char* p = 0;
-	if(!filter.empty())
+	if (!filter.empty())
 		p = filter.c_str();
 	if (p == 0 ||
 		(*p) != '!' && tree->name.find(filter) != std::string::npos ||
@@ -721,7 +748,7 @@ API(property)
 	string& key = GET_SPARAM(1);
 	string& val = GET_SPARAM(2);
 	string filter = "";
-	if(args >= 3)
+	if (args >= 3)
 		filter = GET_SPARAM(3);
 	property(ROOT, key, val, filter);
 
@@ -789,7 +816,7 @@ API(getrect)
 		if (!node)
 		{
 			ERRORMSG("Node:" << param1 << " not found!")
-			return 0;
+				return 0;
 		}
 	}
 	string key = "rect";
@@ -934,9 +961,7 @@ void NODE_REG_API()
 	REG_API(iam, api_me);			// ME
 	REG_API(bye, api_bye);			// ME = NULL
 	REG_API(on, api_on);			// 当前属性
-	REG_API(array, array);			// 节点阵列 (正在放弃中...)
-	REG_API(sequ, sequ);			// 节点序列 (正在放弃中...)
-
+	
 	REG_API(prop, property);		// 添加属性
 
 	REG_API(getival, getival);		// 获得int value

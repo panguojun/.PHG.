@@ -379,7 +379,7 @@ struct code
 				break;
 		}
 		return (*ptr);
-	}	
+	}
 	char next4() {
 		while (!eoc(++ptr) && checkspace2(*(ptr)));
 		return (*ptr);
@@ -1291,7 +1291,7 @@ bool checkcode(const char* str)
 var doexpr(const char* str)
 {
 	PRINT("doexpr " << str)
-	code cd(str);
+		code cd(str);
 
 	return expr(cd);
 }
