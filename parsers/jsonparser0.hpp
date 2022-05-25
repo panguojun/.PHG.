@@ -6,18 +6,6 @@
 
 namespace JSON_PARSER
 {
-	inline string vec3tos(crvec v)
-	{
-		stringstream ss;
-		ss << "{\"x\":" << v.x << ",\"y\":" << v.y << ",\"z\":" << v.z << "}";
-		return ss.str();
-	}
-	inline string qtos(const quaternion& q)
-	{
-		stringstream ss;
-		ss << "{\"x\":" << q.x << ",\"y\":" << q.y << ",\"z\":" << q.z << ",\"w\":" << q.w << "}";
-		return ss.str();
-	}
 	inline std::string read_arraynumbers(code& cd)
 	{
 		cd.next();
@@ -260,66 +248,6 @@ namespace JSON_PARSER
 		}
 	}
 
-	// to JSON (flat for unity3d)
-	void tojson(NODE* me, std::stringstream& jsn, const string& pre = "")
-	{
-		if (me->parent) {
-			jsn << "{\n";
-			{
-				jsn << pre << "\t" << "\"" << "name" << "\":\"" << me->name << "\"";
-
-				for (auto& it : me->kv)
-				{
-					if (it.first == "pos" || it.first == "q")
-					{
-					}
-					else
-					{
-						jsn << ",\n";
-						jsn << pre << "\t" << "\"" << it.first << "\":\"" << it.second << "\"";
-					}
-				}
-				{
-					var& v = gvarmapstack.getvar(me->name.c_str());
-					{
-						jsn << ",\n";
-						vec3 ret = entity::res(v).trans.p;
-						jsn << pre << "\t" << "\"" << "pos" << "\":" << vec3tos(ret);
-					}
-					{
-						jsn << ",\n";
-						jsn << pre << "\t" << "\"" << "q" << "\":" << qtos(entity::res(v).trans.q);
-					}
-				}
-				if (me->parent && me->parent != ROOT)
-				{
-					jsn << ",\n";
-					jsn << pre << "\t" << "\"" << "parent" << "\":\"" << me->parent->name << "\"";
-				}
-			}
-			jsn << "\n}";
-		}
-		{// children
-			for (auto& it : me->children) {
-				if (jsn.str().back() == '}')
-					jsn << ",\n";
-				tojson(it.second, jsn, "\t");
-			}
-		}
-	}
-
-	void tojson(NODE* me)
-	{
-		stringstream jsn;
-		jsn << "{\"" << "nodes" << "\":[\n";
-		tojson(me, jsn);
-
-		jsn << "]}\n";
-
-		PRINTV(jsn.str());
-		strlist.push_back(jsn.str());
-	}
-
 	void tojson_raw(NODE* me)
 	{
 		stringstream jsn;
@@ -328,12 +256,17 @@ namespace JSON_PARSER
 		PRINT(jsn.str());
 	}
 
+	void _paserJSON(NODE* me)
+	{
+		
+	}
+
 	// from JSON
 	void fromJSON(NODE* me, const string& json)
 	{
 		tree = _walk_JSON;
 		ScePHG::dostring(json.c_str());
 
-		//_paserJSON(me);
+		_paserJSON(me);
 	}
 }

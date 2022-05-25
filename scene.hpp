@@ -138,8 +138,8 @@ namespace ScePHG
 		}
 		if (type == "sprite")
 			sprite::setup(node, { vec2::ZERO,0, 1 });
-		else if (type == "sprite_add")
-			sprite::setup_add(node);
+		else if (type == "entity")
+			entity::setup(node, { vec3::ZERO, quaternion(), vec3::ZERO, vec3::ONE });
 
 		POP_SPARAM;
 		return 0;
@@ -147,7 +147,7 @@ namespace ScePHG
 	
 #ifdef XML
 // ----------------------------------------
-#include "xmlparser.hpp"
+#include "parsers/xmlparser.hpp"
 // ----------------------------------------
 	API(fromXML)
 	{
@@ -160,10 +160,10 @@ namespace ScePHG
 		return 0;
 	}
 #endif
-
+#define JSON
 #ifdef JSON
 // ----------------------------------------
-#include "jsonparser.hpp"
+#include "parsers/jsonparser.hpp"
 // ----------------------------------------
 	API(tojson)
 	{
@@ -210,20 +210,22 @@ namespace ScePHG
 		tree = _tree;
 		act = _act;
 
-		REG_API(mod, rendermod);		// 渲染模式
+		REG_API(mod, rendermod);	// 渲染模式
 		REG_API(rnd, rnd);			// 随机函数
 		REG_API(inc, inc);			// inc
 		REG_API(dec, dec);			// dec
-		REG_API(scat, scat);			// 字符串拼接
-		REG_API(scmp, scmp);			// 字符串比较
+		REG_API(scat, scat);		// 字符串拼接
+		REG_API(scmp, scmp);		// 字符串比较
 		REG_API(tos, tos);			// 转化字符串
-		REG_API(so, strout);			// 字符串打印
+		REG_API(so, strout);		// 字符串打印
 		
-		REG_API(do, dostring);			// dostring
+		REG_API(do, dostring);		// dostring
+
+		REG_API(tojson, tojson);
 		
 		REG_API(dump, dump);
 
-		REG_API(setup, setuptree);		// 生成节点树
+		REG_API(setup, setuptree);	// 生成节点树
 
 		REG_API(server, server);
 

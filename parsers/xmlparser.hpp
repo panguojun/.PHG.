@@ -2,13 +2,8 @@
 *						解析XML文件
 *						TODO: 如何通用化？
 **********************************************************************************/
-inline string tovec3(crvec v)
-{
-	stringstream ss;
-	ss << "{\"x\":" << v.x << ",\"y\":" << v.y << ",\"z\":" << v.z << "}";
-	return ss.str();
-}
-inline string torect(int x, int y, int width, int height)
+
+inline string recttos(int x, int y, int width, int height)
 {
 	stringstream ss;
 	ss << "{\"x\":\"" << x << "\",\"y\":\"" << y << "\",\"width\":\"" << width << "\",\"height\":\"" << height << "\"}";
@@ -48,7 +43,7 @@ bool fromXML(crstr filename, NODE* me)
 			sscanf(elem_cab->Attribute("y"), "%f", &(pos.z));
 			sscanf(elem_cab->Attribute("width"), "%f", &(sz.x));
 			sscanf(elem_cab->Attribute("length"), "%f", &(sz.y));
-			cab->kv["rect"] = torect(pos.x, pos.z, sz.x, sz.y);
+			cab->kv["rect"] = recttos(pos.x, pos.z, sz.x, sz.y);
 		}
 
 		int devindex = 0;
@@ -69,7 +64,7 @@ bool fromXML(crstr filename, NODE* me)
 				sscanf(elem_dev->Attribute("y"), "%f", &(pos.z));
 				sscanf(elem_dev->Attribute("width"), "%f", &(sz.x));
 				sscanf(elem_dev->Attribute("length"), "%f", &(sz.y));
-				dev->kv["rect"] = torect(pos.x, pos.z, sz.x, sz.y);
+				dev->kv["rect"] = recttos(pos.x, pos.z, sz.x, sz.y);
 			}
 			elem_dev = elem_dev->NextSiblingElement();
 		}
