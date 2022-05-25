@@ -3,6 +3,12 @@
 *				可绘制的2D场景对象
 **************************************************************************/
 struct tree_t;
+inline string vec3tos(crvec v)
+{
+	stringstream ss;
+	ss << "{\"x\":" << v.x << ",\"y\":" << v.y << ",\"z\":" << v.z << "}";
+	return ss.str();
+}
 namespace sprite
 {
 	struct transform2_t { vec2 p; real ang; real s = 1; };
@@ -147,7 +153,7 @@ namespace sprite
 API(getspriteloc)
 {
 	vec3list.clear();
-
+	strlist.clear();
 	NODE* node = ROOT;
 	if (args > 0) {
 		string name = GET_SPARAM(1);
@@ -161,7 +167,7 @@ API(getspriteloc)
 			if (var v; gvarmapstack.getvar(v, tree->name.c_str()))
 			{
 				sprite::transform2_t& t = sprite::res(v).trans;
-
+				strlist.push_back(vec3tos(t.p.x, t.p.y, t.ang));
 				vec3list.emplace_back(t.p.x, t.p.y, t.ang);
 			}
 		});
