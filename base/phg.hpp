@@ -362,6 +362,9 @@ struct code
 		//varmapstack.clear();
 		funcnamemap.clear();
 	}
+	char next0() {
+		return (*(++ptr));
+	}
 	char next() {
 		while (!eoc(++ptr) && checkspace(*(ptr)));
 		return (*ptr);
@@ -692,11 +695,13 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 		//PRINTV(cd.cur())
 		if (cd.cur() == '\"' || cd.cur() == '\'')
 		{
-			cd.next();
+			cd.next0();
 			string str = getstring(cd);
 			cd.strstack.push_back(str);
 #ifdef USE_STRING			
-			return var(str.c_str());
+			cd.valstack.push(var(str.c_str()));
+			args++;
+			//	PRINTV(cd.cur());
 #else
 			return INVALIDVAR;
 #endif

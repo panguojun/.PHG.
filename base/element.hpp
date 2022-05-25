@@ -41,6 +41,7 @@ struct var_t
 	}
 	var_t(const char* _val) {
 		type = 3; sval = _val;
+		//PRINTV(sval);
 	}
 	var_t(const var_t& v)
 	{
@@ -59,14 +60,16 @@ struct var_t
 	{
 		//PRINT("var_t ="  << v.type << "," << v.fval);
 		type = v.type;
-		if (type == 3 && fun_set)
+		if (type == 3)
+			sval = v.sval;
+		else if (type == 2)
+			fval = v.fval;
+		else if (type == 1)
+			ival = v.ival;
+		else if (fun_set)
 		{
 			fun_set(v);
 		}
-		else if (type == 2)
-			fval = v.fval;
-		else
-			ival = v.ival;
 		resid = v.resid;
 	}
 	bool operator == (int v) const
@@ -101,18 +104,28 @@ struct var_t
 		if (type == 3)
 			return atof(sval.c_str());
 	}
-
+	inline string tostr() const
+	{
+		//PRINT(type << ":" << sval);
+		if (type == 2)
+			return to_string(fval);
+		if (type == 1)
+			return to_string(ival);
+		if (type == 3)
+			return sval;
+	}
 	var_t operator + (var_t& v) const
 	{
 		var_t ret;
-		if (type == 3 || v.type == 3)
-		{
-			ERRORMSG("use '.' for string +");
-			throw;
-		}
 
 		if (type == 1 && v.type == 1)
 			ret.ival = ival + v.ival;
+		else if (type == 3 || v.type == 3)
+		{
+			ret.type = 3;
+			ret.sval = tostr() + v.tostr();
+			//PRINTV(ret.sval)
+		}
 		else {
 			ret.type = 2;
 			ret.fval = float(*this) + float(v);
