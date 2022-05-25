@@ -168,15 +168,25 @@ namespace ScePHG
 	API(tojson)
 	{
 		PRINT("------------- tojson ----------------");
-		if (ROOT)
-			JSON_PARSER::tojson(ROOT);
+		NODE* node = ROOT;
+		if (args > 0)
+		{
+			string nodename = GET_SPARAM(1);
+			node = GET_NODE(nodename, ROOT);
+		}
+		JSON_PARSER::tojson(node);
 		return 0;
 	}
 	API(tojsonraw)
 	{
 		PRINT("------------- tojsonraw ----------------");
-		if (ROOT)
-			JSON_PARSER::tojson_raw(ROOT);
+		NODE* node = ROOT;
+		if (args > 0)
+		{
+			string nodename = GET_SPARAM(1);
+			node = GET_NODE(nodename, ROOT);
+		}
+		JSON_PARSER::tojson_raw(node);
 		return 0;
 	}
 #endif	

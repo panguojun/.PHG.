@@ -149,8 +149,8 @@ namespace entity {
 			}
 			//PRINTVEC3(p);
 			trans = {
-				parent.p + (parent.q * vec3::UX) * p.x + (parent.q * vec3::UY) * p.y + (parent.q * vec3::UZ) * p.z,
-				parent.q * q,
+				parent.p + (parent.q * vec3::UX) * parent.s.x * p.x + (parent.q * vec3::UY) * parent.s.y * p.y + (parent.q * vec3::UZ) * parent.s.z * p.z,
+				q * parent.q,
 				parent.pyr + pyr, // µş¼Ó£¿
 				parent.s * s
 			};
