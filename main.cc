@@ -62,7 +62,7 @@ int main(int nargs, char* args[])
 
 		PRINT("======= start http-server: localhost:8080\n");
 		std::thread serverthread = std::thread{ servermain, 100 };
-
+		getchar();
 	}
 
 	getchar();

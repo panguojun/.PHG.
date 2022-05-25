@@ -1,12 +1,12 @@
 /**************************************************************************
-				‰∫ã‰ª∂ËøêÁÆó
+				 ¬º˛‘ÀÀ„
 
 **************************************************************************/
 struct tree_t;
 namespace nodecalc
 {
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
-	bool abelian_sym = true;	// ÈòøË¥ùÂ∞îÂØπÁß∞ Âç≥ËøêÁÆóÁöÑÂèØ‰∫§Êç¢ÊÄß
+	bool abelian_sym = true;	// ∞¢±¥∂˚∂‘≥∆ º¥‘ÀÀ„µƒø…Ωªªª–‘
 
 	tree_t* _walk_tree_node(std::string& str, tree_t* tree, crstr a, const char* key)
 	{
@@ -77,7 +77,7 @@ namespace nodecalc
 				if (flag == 3)
 				{
 					if (!abelian_sym)
-					{// È°∫Â∫èÂà§Êñ≠
+					{// À≥–Ú≈–∂œ
 						if (lstn != 0)
 						{
 							PRINTV(it.second->getindex());
@@ -185,7 +185,7 @@ namespace nodecalc
 				if (flag == 3)
 				{
 					if (!abelian_sym)
-					{// È°∫Â∫èÂà§Êñ≠
+					{// À≥–Ú≈–∂œ
 						if (lstn != 0)
 						{
 							PRINTV(it.second->getindex());
@@ -207,8 +207,8 @@ namespace nodecalc
 	}
 	struct res_t
 	{
-		// Êê∫Â∏¶ÁöÑÂ±ûÊÄß
-		NODE* node;	
+		// –Ø¥¯µƒ Ù–‘
+		NODE* node;
 		string key;
 
 		res_t() {}
@@ -219,7 +219,7 @@ namespace nodecalc
 		};
 		~res_t() {}
 	};
-	vector<res_t*> reslist;		// ËµÑÊ∫êÂàóË°®
+	vector<res_t*> reslist;		// ◊ ‘¥¡–±Ì
 
 	res_t& cres(const var& ent)
 	{
@@ -234,10 +234,10 @@ namespace nodecalc
 			reslist.push_back(rs);
 			ent.resid = reslist.size() - 1;
 
-			ent.type = 0; // Ëá™ÂÆö‰πâÂÖÉÁ¥†Á±ªÂûã
-			// Âú®ËµÑÊ∫ê‰∏äÂÆö‰πâÂä†Ê≥ïËøêÁÆó
+			ent.type = 0; // ◊‘∂®“Â‘™Àÿ¿‡–Õ
+			// ‘⁄◊ ‘¥…œ∂®“Âº”∑®‘ÀÀ„
 			ent.fun_set = [&ent](const var& v) {
-				if (v.type == 3)
+				if (v.type == 0)
 				{
 					res(ent).node->kv[res(ent).key] = cres(v).node->kv[cres(v).key];
 				}
@@ -338,8 +338,9 @@ API(calc_wak)
 {
 	if (args == 2)
 	{
+		// on('md');wak('pr1','a + b');
 		NODE* n = 0;
-		crstr ok = GET_SPARAM(1);
+		crstr key = GET_SPARAM(1);
 		crstr expr = GET_SPARAM(2);
 		code ccd(expr.c_str());
 		string a = ccd.getname();
@@ -348,11 +349,11 @@ API(calc_wak)
 		ccd.next();
 		string b = ccd.getname();
 		if (op == '+')
-			nodecalc::_calc_add(n, a, b, cur_property.c_str(), ok.c_str());
+			nodecalc::_calc_add(n, a, b, key.c_str(), cur_property.c_str());
 		else if (op == '-')
 		{
 			string c;
-			nodecalc::_calc_sub(c, a, b, cur_property.c_str());
+			nodecalc::_calc_sub(c, a, b, key.c_str());
 
 			PRINTV(c);
 			strlist.push_back(c);
@@ -387,61 +388,21 @@ API(clearstrlist)
 
 	return 0;
 }
-API(calc_expr)
-{
-	ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
-		{
-			for (auto& it : tree->kv) {
-				string result;
-				const char* ps = it.second.c_str();
-				const char* start  = ps;
-				while (*ps != '\0') {
-					
-					if ((*ps) == '(')
-					{
-						int offset = ps - start + 1;
-						int cnt = 0;
-						while (*(++ps) != ')') cnt++;
-						{
-							// ÂÜÖÈÉ®ÂèòÈáè
-							gvarmapstack.addvar("_i", tree->index);
-							gvarmapstack.addvar("_t", tree_t::getdepth(tree));
-						}
-						string str = it.second.substr(offset, cnt) + ";";
-						var v = ScePHG::doexpr(str.c_str());
-
-						result += VAR2STR(v);
-					}
-					else
-					{
-						result += *ps;
-					}
-					++ps;
-				}
-				it.second = result;
-				//PRINTV(result);
-			}
-		});
-	POP_SPARAM;
-
-	return 0;
-}
 void NODECALC_REG_API()
 {
 	CALC([](code& cd, char o, int args)->var {
 
-		PRINT("CALC: " << o << "(" << args << ")");
+		//PRINT("CALC: " << o << "(" << args << ")");
 		//PRINTV(ME->name);
-		
 		if (o == '.')
 		{
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
-			
+
 			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
 			string c = n->kv[b];
-			PRINT(a << "." << b << "=" << c)
-			var v;v.type = 3; nodecalc::res(v).node = n; nodecalc::res(v).key = b;
+			PRINT(a << "." << b << "=" << c);
+			var v; v.type = 0; nodecalc::res(v).node = n; nodecalc::res(v).key = b;
 			strlist.push_back(c);
 			POP_SPARAM;
 			//PHG_VALPOP(2);
@@ -450,27 +411,30 @@ void NODECALC_REG_API()
 		}
 		return 0;
 		});
-
 	PROP([](code& cd, const char* a, const char* b, var& v) {
-			int args = 1;
-			PRINT("PROP: " << a << "." << b);
+		int args = 1;
+		PRINT("PROP: " << a << "." << b);
 
-			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
-			//PRINTV(cd.strstack.size());
-			string sv = GET_SPARAM(1);
-			n->kv[b] = sv;
-			POP_SPARAM;
+		NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+		//PRINTV(cd.strstack.size());
+		string sv = GET_SPARAM(1);
+		n->kv[b] = sv;
+		POP_SPARAM;
 		});
 
 	REG_API(abe, calc_set_abelian);
 
 	REG_API(addd, calc_addd);
-	REG_API(add,  calc_add);
+	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
-	REG_API(sub,  calc_sub);
-	REG_API(wak,  calc_wak);
+	REG_API(sub, calc_sub);
+	REG_API(wak, calc_wak);
+
+	REG_API(getival, getival);		// ªÒµ√int value
+	REG_API(getfval, getfval);		// ªÒµ√float value
+	REG_API(getstr, getstr);		// ªÒµ√string
+	REG_API(getvec3, getvec3);		// ªÒµ√RECT
+	REG_API(getrect, getrect);		// ªÒµ√RECT
 
 	REG_API(cls, clearstrlist);
-
-	REG_API(doexpr, calc_expr);
 }

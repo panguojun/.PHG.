@@ -572,7 +572,6 @@ inline var chars2var(code& cd) {
 	}
 	buff[i] = '\0';
 	//PRINTV(buff);
-	//cd.strstack.push_back(buff);
 
 	if (!isreal && !gtable.empty())
 	{
@@ -617,7 +616,7 @@ void getval(code& cd, short type) {
 					cd.valstack.push(v);
 				else
 				{
-					PRINT("var: " << name << " not found!");
+					//PRINT("var: " << name << " not found!");
 					//cd.valstack.push(INVALIDVAR);
 				}
 			}
@@ -696,7 +695,11 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 			cd.next();
 			string str = getstring(cd);
 			cd.strstack.push_back(str);
-			return INVALIDVAR;// STRING2VAR(str);
+#ifdef USE_STRING			
+			return var(str.c_str());
+#else
+			return INVALIDVAR;
+#endif
 		}
 		else if (type == NAME || type == NUMBER) {
 			getval(cd, type);
@@ -794,10 +797,10 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 // single var
 void singvar(code& cd) {
 	std::string name = cd.getname();
-	PRINT("singvar: " << name);
 	cd.next3();
 	if (cd.cur() == '=')
 	{
+		//PRINT("singvar: " << name);
 		cd.next();
 
 		var v = expr(cd);

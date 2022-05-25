@@ -25,8 +25,9 @@ struct var_t
 		int ival = 0;
 		real fval;
 	};
+	string sval;
 	int resid = -1;
-	int type = 1; // 1 -int, 2 -real, others
+	int type = 1; // 1 -int, 2 -real, 3 -string
 
 	var_t() { }
 	var_t(int _val) {
@@ -37,6 +38,9 @@ struct var_t
 	}
 	var_t(bool _val) {
 		type = 1; ival = (int)_val;
+	}
+	var_t(const char* _val) {
+		type = 3; sval = _val;
 	}
 	var_t(const var_t& v)
 	{
@@ -90,85 +94,92 @@ struct var_t
 	operator float() const
 	{
 		//PRINT("var_t::int " << ival)
-		return type == 2 ? fval : float(ival);
+		if (type == 2)
+			return fval;
+		if (type == 1)
+			float(ival);
+		if (type == 3)
+			return atof(sval.c_str());
 	}
 
 	var_t operator + (var_t& v) const
 	{
 		var_t ret;
-		if (type == 2 || v.type == 2) {
+		if (type == 3 || v.type == 3)
+		{
+			ERRORMSG("use '.' for string +");
+			throw;
+		}
+
+		if (type == 1 && v.type == 1)
+			ret.ival = ival + v.ival;
+		else {
 			ret.type = 2;
 			ret.fval = float(*this) + float(v);
-		}
-		else
-		{
-			ret.ival = ival + v.ival;
 		}
 		return ret;
 	}
 	void operator += (var_t& v)
 	{
-		if (type == 2 || v.type == 2) {
-			type = 2;
-			fval += v.fval;
-		}
-		else
-		{
+		ASSERT(type != 3 && v.type != 3);
+		if (type == 1 && v.type == 1)
 			ival += v.ival;
+		else if (type == 2) {
+			fval += float(v);
 		}
 	}
 	var_t operator - (var_t& v) const
 	{
+		ASSERT(type != 3 && v.type != 3);
 		var_t ret;
-		if (type == 2 || v.type == 2) {
+
+		if (type == 1 && v.type == 1)
+			ret.ival = ival - v.ival;
+		else {
 			ret.type = 2;
 			ret.fval = float(*this) - float(v);
-		}
-		else
-		{
-			ret.ival = ival - v.ival;
 		}
 		return ret;
 	}
 	void operator -= (var_t& v)
 	{
-		if (type == 2 || v.type == 2) {
-			type = 2;
-			fval -= v.fval;
-		}
-		else
-		{
+		ASSERT(type != 3 && v.type != 3);
+		if (type == 1 && v.type == 1) {
 			ival -= v.ival;
+		}
+		else if (type == 2) {
+			fval -= v.fval;
 		}
 	}
 	var_t operator - () const
 	{
+		ASSERT(type != 3);
 		var_t ret;
-		if (type == 2) {
-			ret.type = 2;
-			ret.fval = -fval;
-		}
-		else
-		{
+		ret.type = type;
+		if (type == 1) {
 			ret.ival = -ival;
+		}
+		else if (type == 2) {
+			ret.fval = -fval;
 		}
 		return ret;
 	}
 	var_t operator * (var_t& v) const
 	{
+		ASSERT(type != 3 && v.type != 3);
 		var_t ret;
-		if (type == 2 || v.type == 2) {
+		if (type == 1 && v.type == 1) {
+			ret.ival = ival * v.ival;
+		}
+		else {
 			ret.type = 2;
 			ret.fval = float(*this) * float(v);
-		}
-		else
-		{
-			ret.ival = ival * v.ival;
 		}
 		return ret;
 	}
 	var_t operator / (var_t& v) const
 	{
+		ASSERT(type != 3 && v.type != 3);
 		var_t ret;
 		if (type == 2 || v.type == 2) {
 			ret.type = 2;
@@ -182,6 +193,7 @@ struct var_t
 	}
 	bool operator > (const var_t& v) const
 	{
+		ASSERT(type != 3 && v.type != 3);
 		if (type == 2 || v.type == 2) {
 			return float(*this) > float(v);
 		}
@@ -192,6 +204,7 @@ struct var_t
 	}
 	bool operator < (const var_t& v) const
 	{
+		ASSERT(type != 3 && v.type != 3);
 		if (type == 2 || v.type == 2) {
 			return float(*this) < float(v);
 		}
@@ -208,12 +221,16 @@ inline void _PHGPRINT(const std::string& pre, const var& v)
 		PRINT(pre << v.ival)
 	else if (v.type == 2)
 		PRINT(pre << v.fval)
+	else if (v.type == 3)
+		PRINT(pre << v.sval)
 	else
 		PRINT(pre << "unkown type")
 }
 
 // ------------------------------------------
+#define USE_STRING
 #include "phg.hpp"
+#undef USE_STRING
 // ------------------------------------------
 // ÔËËã
 using fun_calc_t = std::function<var(code& cd, char o, int args)>;
