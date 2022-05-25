@@ -24,8 +24,6 @@ void onrequest(const std::string& msg, const std::string& body, std::string& out
 	}
 	else if (msg == "cmd")
 	{
-		//out = body + " ai zhou!";
-		//return;
 		ScePHG::strlist.clear();
 		ScePHG::dostring(body.c_str()); 
 
@@ -59,7 +57,6 @@ int main(int nargs, char* args[])
 	}
 	else
 	{
-
 		PRINT("======= start http-server: localhost:8080\n");
 		std::thread serverthread = std::thread{ servermain, 100 };
 		getchar();
