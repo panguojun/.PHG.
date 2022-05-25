@@ -1,7 +1,7 @@
 /**********************************************************************************
-*						Ê¹ÓÃPHGÀ´½âÎöJSON
-*						ÔİÊ±²»ÄÜ½âÎö¸¡µãÊı±í´ïÊ½Èç1E-2
-*						½âÎöÍê±ÏĞÎ³ÉÒ»¿ÃÊ÷¼ÓÉÏÊôĞÔKV
+*						ä½¿ç”¨PHGæ¥è§£æJSON
+*						æš‚æ—¶ä¸èƒ½è§£ææµ®ç‚¹æ•°è¡¨è¾¾å¼å¦‚1E-2
+*						è§£æå®Œæ¯•å½¢æˆä¸€æ£µæ ‘åŠ ä¸Šå±æ€§KV
 **********************************************************************************/
 
 namespace JSON_PARSER
@@ -15,7 +15,7 @@ namespace JSON_PARSER
 	inline string qtos(const quaternion& q)
 	{
 		stringstream ss;
-		ss << "{\"x\":" << -q.x << ",\"y\":" << -q.y << ",\"z\":" << -q.z << ",\"w\":" << q.w << "}"; // ÓÒÊÖ »» ×óÊÖ(unity ×óÊÖ×ø±êÏµ)
+		ss << "{\"x\":" << -q.x << ",\"y\":" << -q.y << ",\"z\":" << -q.z << ",\"w\":" << q.w << "}"; // å³æ‰‹ æ¢ å·¦æ‰‹(unity å·¦æ‰‹åæ ‡ç³»)
 		return ss.str();
 	}
 	inline std::string read_arraynumbers(code& cd)
@@ -190,17 +190,17 @@ namespace JSON_PARSER
 		if (jsn.str().back() == '}' || jsn.str().back() == ']')
 			jsn << ",\n";
 
-		if (tree->parent == 0) // ¸ù½Úµã
+		if (tree->parent == 0) // æ ¹èŠ‚ç‚¹
 			jsn << "{\n";
 		else 
 		{
-			// Êı×é
+			// æ•°ç»„
 			if (tree->parent->childrenlist.empty())
 			{
 				jsn << pre << "\"" << fixedname(tree->name) << "\":[\n";
 			}
 
-			// ´øÓĞÊôĞÔ
+			// å¸¦æœ‰å±æ€§
 			if (tree->childrenlist.empty() || !tree->kv.empty())
 			{
 				if (jsn.str().back() != '[')
@@ -209,7 +209,7 @@ namespace JSON_PARSER
 			}
 		}
 
-		{// ÊôĞÔ
+		{// å±æ€§
 			for (auto& it : tree->kv)
 			{
 				{
@@ -225,11 +225,11 @@ namespace JSON_PARSER
 			}
 		}
 
-		// ÔÚÊôĞÔÓë×Ó½ÚµãÖ®¼ä
+		// åœ¨å±æ€§ä¸å­èŠ‚ç‚¹ä¹‹é—´
 		if (jsn.str().back() == '\"' && tree->children.size() > 0)
 			jsn << ",\n";
 
-		// Êı×éÄ£Ê½
+		// æ•°ç»„æ¨¡å¼
 		if (!tree->childrenlist.empty())
 		{
 			if (!tree->kv.empty())
@@ -242,13 +242,13 @@ namespace JSON_PARSER
 			tojson_raw_list(it.second, jsn, pre + "\t");
 		}
 
-		// Êı×éÄ£Ê½ÊÕÎ²
+		// æ•°ç»„æ¨¡å¼æ”¶å°¾
 		if (!tree->childrenlist.empty())
 		{
 			jsn << "\n" << pre << "]";
 		}
 
-		// ÊÕÎ²
+		// æ”¶å°¾
 		if (tree->childrenlist.empty() || !tree->kv.empty())
 		{
 			if (jsn.str().back() == ']')
@@ -312,6 +312,64 @@ namespace JSON_PARSER
 		stringstream jsn;
 		jsn << "{\"" << "nodes" << "\":[\n";
 		tojson(me, jsn);
+
+		jsn << "]}\n";
+
+		PRINTV(jsn.str());
+		strlist.push_back(jsn.str());
+	}
+	// to JSON (flat for unity2d)
+	void tojson2d(NODE* me, std::stringstream& jsn, const string& pre = "")
+	{
+		if (me->parent) {
+			jsn << "{\n";
+			{
+				jsn << pre << "\t" << "\"" << "name" << "\":\"" << me->name << "\"";
+
+				if (auto& it = me->kv.find("img"); it != me->kv.end())
+				{
+					jsn << ",\n";
+					jsn << pre << "\t" << "\"" << it->first << "\":\"" << it->second << "\"";
+				}
+				{
+					var& v = gvarmapstack.getvar(me->name.c_str());
+					{
+						jsn << ",\n";
+						vec2 ret = sprite::res(v).trans.p;
+						jsn << pre << "\t" << "\"" << "p" << "\":" << vec3tos(ret);
+					}
+					{
+						jsn << ",\n";
+						jsn << pre << "\t" << "\"" << "ang" << "\":" << sprite::res(v).trans.ang;
+					}
+					{
+						jsn << ",\n";
+						vec2 ret = sprite::res(v).trans.s;
+						jsn << pre << "\t" << "\"" << "s" << "\":" << vec3tos(ret);
+					}
+				}
+				if (me->parent && me->parent != ROOT)
+				{
+					jsn << ",\n";
+					jsn << pre << "\t" << "\"" << "parent" << "\":\"" << me->parent->name << "\"";
+				}
+			}
+			jsn << "\n}";
+		}
+		{// children
+			for (auto& it : me->children) {
+				if (jsn.str().back() == '}')
+					jsn << ",\n";
+				tojson2d(it.second, jsn, "\t");
+			}
+		}
+	}
+	
+	void tojson2d(NODE* me)
+	{
+		stringstream jsn;
+		jsn << "{\"" << "nodes" << "\":[\n";
+		tojson2d(me, jsn);
 
 		jsn << "]}\n";
 
