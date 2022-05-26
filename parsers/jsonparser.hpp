@@ -21,7 +21,7 @@ namespace JSON_PARSER
 	inline string qtos(const quaternion& q)
 	{
 		stringstream ss;
-		ss << "{\"x\":" << q.x << ",\"y\":" << q.y << ",\"z\":" << q.z << ",\"w\":" << q.w << "}";
+		ss << "{\"x\":" << -q.x << ",\"y\":" << -q.y << ",\"z\":" << -q.z << ",\"w\":" << q.w << "}"; // 右手 换 左手(unity 左手坐标系)
 		return ss.str();
 	}
 	inline std::string read_arraynumbers(code& cd)
