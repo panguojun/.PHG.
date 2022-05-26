@@ -6,6 +6,12 @@
 
 namespace JSON_PARSER
 {
+	inline string vec2tos(crvec2 v)
+	{
+		stringstream ss;
+		ss << "{\"x\":" << v.x << ",\"y\":" << v.y << "}";
+		return ss.str();
+	}
 	inline string vec3tos(crvec v)
 	{
 		stringstream ss;
@@ -15,7 +21,7 @@ namespace JSON_PARSER
 	inline string qtos(const quaternion& q)
 	{
 		stringstream ss;
-		ss << "{\"x\":" << -q.x << ",\"y\":" << -q.y << ",\"z\":" << -q.z << ",\"w\":" << q.w << "}"; // 右手 换 左手(unity 左手坐标系)
+		ss << "{\"x\":" << q.x << ",\"y\":" << q.y << ",\"z\":" << q.z << ",\"w\":" << q.w << "}";
 		return ss.str();
 	}
 	inline std::string read_arraynumbers(code& cd)
@@ -192,7 +198,7 @@ namespace JSON_PARSER
 
 		if (tree->parent == 0) // 根节点
 			jsn << "{\n";
-		else 
+		else
 		{
 			// 数组
 			if (tree->parent->childrenlist.empty())
@@ -268,26 +274,27 @@ namespace JSON_PARSER
 			{
 				jsn << pre << "\t" << "\"" << "name" << "\":\"" << me->name << "\"";
 
-				if (auto& it = me->kv.find("md"); it != me->kv.end())
+				for (auto& it : me->kv)
 				{
-					jsn << ",\n";
-					jsn << pre << "\t" << "\"" << it->first << "\":\"" << it->second << "\"";
+					if (it.first == "pos" || it.first == "q")
+					{
+					}
+					else
+					{
+						jsn << ",\n";
+						jsn << pre << "\t" << "\"" << it.first << "\":\"" << it.second << "\"";
+					}
 				}
 				{
 					var& v = gvarmapstack.getvar(me->name.c_str());
 					{
 						jsn << ",\n";
 						vec3 ret = entity::res(v).trans.p;
-						jsn << pre << "\t" << "\"" << "p" << "\":" << vec3tos(ret);
+						jsn << pre << "\t" << "\"" << "pos" << "\":" << vec3tos(ret);
 					}
 					{
 						jsn << ",\n";
 						jsn << pre << "\t" << "\"" << "q" << "\":" << qtos(entity::res(v).trans.q);
-					}
-					{
-						jsn << ",\n";
-						vec3 ret = entity::res(v).trans.s;
-						jsn << pre << "\t" << "\"" << "s" << "\":" << vec3tos(ret);
 					}
 				}
 				if (me->parent && me->parent != ROOT)
@@ -336,7 +343,7 @@ namespace JSON_PARSER
 					{
 						jsn << ",\n";
 						vec2 ret = sprite::res(v).trans.p;
-						jsn << pre << "\t" << "\"" << "p" << "\":" << vec3tos(ret);
+						jsn << pre << "\t" << "\"" << "p" << "\":" << vec2tos(ret);
 					}
 					{
 						jsn << ",\n";
@@ -345,7 +352,7 @@ namespace JSON_PARSER
 					{
 						jsn << ",\n";
 						vec2 ret = sprite::res(v).trans.s;
-						jsn << pre << "\t" << "\"" << "s" << "\":" << vec3tos(ret);
+						jsn << pre << "\t" << "\"" << "s" << "\":" << vec2tos(ret);
 					}
 				}
 				if (me->parent && me->parent != ROOT)
@@ -364,7 +371,7 @@ namespace JSON_PARSER
 			}
 		}
 	}
-	
+
 	void tojson2d(NODE* me)
 	{
 		stringstream jsn;
