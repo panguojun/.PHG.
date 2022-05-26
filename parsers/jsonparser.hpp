@@ -322,6 +322,7 @@ namespace JSON_PARSER
 		jsn << "]}\n";
 
 		PRINTV(jsn.str());
+		strlist.clear();
 		strlist.push_back(jsn.str());
 	}
 	// to JSON (flat for unity2d)
@@ -385,6 +386,7 @@ namespace JSON_PARSER
 		jsn << "]}\n";
 
 		PRINTV(jsn.str());
+		strlist.clear();
 		strlist.push_back(jsn.str());
 	}
 
