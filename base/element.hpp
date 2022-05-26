@@ -1,6 +1,6 @@
 /**************************************************************************
-*							元素
-*						  用于运算
+*							鍏冪礌
+*						  鐢ㄤ簬杩愮畻
 **************************************************************************/
 #ifdef ELEMENT
 #undef ELEMENT
@@ -19,8 +19,8 @@
 // var
 struct var_t
 {
-	std::function<var_t(var_t& a, var_t& b)> fun_add = 0;	// 资源加法函数
-	std::function<void(const var_t& v)> fun_set = 0;		// 资源set函数
+	std::function<var_t(var_t& a, var_t& b)> fun_add = 0;	// 璧勬簮鍔犳硶鍑芥暟
+	std::function<void(const var_t& v)> fun_set = 0;		// 璧勬簮set鍑芥暟
 	union {
 		int ival = 0;
 		real fval;
@@ -62,11 +62,11 @@ struct var_t
 		type = v.type;
 		if (type == 3)
 			sval = v.sval;
-		else if (type == 2)
+		else if(type == 2)
 			fval = v.fval;
-		else if (type == 1)
+		else if(type == 1)
 			ival = v.ival;
-		else if (fun_set)
+		else if(fun_set)
 		{
 			fun_set(v);
 		}
@@ -97,36 +97,38 @@ struct var_t
 	operator float() const
 	{
 		//PRINT("var_t::int " << ival)
-		if (type == 2)
-			return fval;
 		if (type == 1)
 			float(ival);
+		if (type == 2)
+			return fval;
 		if (type == 3)
 			return atof(sval.c_str());
+		return 0.0f;
 	}
 	inline string tostr() const
 	{
 		//PRINT(type << ":" << sval);
-		if (type == 2)
-			return to_string(fval);
 		if (type == 1)
 			return to_string(ival);
+		if (type == 2)
+			return to_string(fval);
 		if (type == 3)
 			return sval;
+		return "";
 	}
 	var_t operator + (var_t& v) const
 	{
 		var_t ret;
-
-		if (type == 1 && v.type == 1)
-			ret.ival = ival + v.ival;
+		
+		if (type == 1 && v.type == 1) 
+			ret.ival = ival + v.ival; 
 		else if (type == 3 || v.type == 3)
 		{
 			ret.type = 3;
 			ret.sval = tostr() + v.tostr();
 			//PRINTV(ret.sval)
 		}
-		else {
+		else{
 			ret.type = 2;
 			ret.fval = float(*this) + float(v);
 		}
@@ -137,7 +139,7 @@ struct var_t
 		ASSERT(type != 3 && v.type != 3);
 		if (type == 1 && v.type == 1)
 			ival += v.ival;
-		else if (type == 2) {
+		else if(type == 2){
 			fval += float(v);
 		}
 	}
@@ -145,10 +147,10 @@ struct var_t
 	{
 		ASSERT(type != 3 && v.type != 3);
 		var_t ret;
-
+		
 		if (type == 1 && v.type == 1)
 			ret.ival = ival - v.ival;
-		else {
+		else{
 			ret.type = 2;
 			ret.fval = float(*this) - float(v);
 		}
@@ -181,10 +183,10 @@ struct var_t
 	{
 		ASSERT(type != 3 && v.type != 3);
 		var_t ret;
-		if (type == 1 && v.type == 1) {
+		if (type == 1 && v.type == 1){
 			ret.ival = ival * v.ival;
 		}
-		else {
+		else{
 			ret.type = 2;
 			ret.fval = float(*this) * float(v);
 		}
@@ -245,7 +247,7 @@ inline void _PHGPRINT(const std::string& pre, const var& v)
 #include "phg.hpp"
 #undef USE_STRING
 // ------------------------------------------
-// 运算
+// 杩愮畻
 using fun_calc_t = std::function<var(code& cd, char o, int args)>;
 fun_calc_t fun_calc = 0;
 static var _act(code& cd, int args)
