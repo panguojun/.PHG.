@@ -177,6 +177,18 @@ namespace ScePHG
 		JSON_PARSER::tojson(node);
 		return 0;
 	}
+	API(tojson2d)
+	{
+		PRINT("------------- tojson ----------------");
+		NODE* node = ROOT;
+		if (args > 0)
+		{
+			string nodename = GET_SPARAM(1);
+			node = GET_NODE(nodename, ROOT);
+		}
+		JSON_PARSER::tojson2d(node);
+		return 0;
+	}
 	API(tojsonraw)
 	{
 		PRINT("------------- tojsonraw ----------------");
@@ -220,22 +232,23 @@ namespace ScePHG
 		tree = _tree;
 		act = _act;
 
-		REG_API(mod, rendermod);	// 渲染模式
-		REG_API(rnd, rnd);			// 随机函数
-		REG_API(inc, inc);			// inc
-		REG_API(dec, dec);			// dec
-		REG_API(scat, scat);		// 字符串拼接
-		REG_API(scmp, scmp);		// 字符串比较
-		REG_API(tos, tos);			// 转化字符串
-		REG_API(so, strout);		// 字符串打印
+		REG_API(mod, rendermod);		// 渲染模式
+		REG_API(rnd, rnd);				// 随机函数
+		REG_API(inc, inc);				// inc
+		REG_API(dec, dec);				// dec
+		REG_API(scat, scat);			// 字符串拼接
+		REG_API(scmp, scmp);			// 字符串比较
+		REG_API(tos, tos);				// 转化字符串
+		REG_API(so, strout);			// 字符串打印
 		
-		REG_API(do, dostring);		// dostring
+		REG_API(do, dostring);			// dostring
 
-		REG_API(tojson, tojson);
+		REG_API(tojson, tojson);		
+		REG_API(tojson2d, tojson2d);
 		
 		REG_API(dump, dump);
 
-		REG_API(setup, setuptree);	// 生成节点树
+		REG_API(setup, setuptree);		// 生成节点树
 
 		REG_API(server, server);
 
@@ -243,9 +256,9 @@ namespace ScePHG
 
 		NODE_REG_API();
 
-		NODECALC_REG_API();			// node calc
+		NODECALC_REG_API();				// node calc
 
-		SPRITE_REG_API();			// sprite 注册
+		SPRITE_REG_API();				// sprite 注册
 	}
 };
 // ====================================

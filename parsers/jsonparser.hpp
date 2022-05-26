@@ -274,27 +274,26 @@ namespace JSON_PARSER
 			{
 				jsn << pre << "\t" << "\"" << "name" << "\":\"" << me->name << "\"";
 
-				for (auto& it : me->kv)
+				if (auto& it = me->kv.find("md"); it != me->kv.end())
 				{
-					if (it.first == "pos" || it.first == "q")
-					{
-					}
-					else
-					{
-						jsn << ",\n";
-						jsn << pre << "\t" << "\"" << it.first << "\":\"" << it.second << "\"";
-					}
+					jsn << ",\n";
+					jsn << pre << "\t" << "\"" << it->first << "\":\"" << it->second << "\"";
 				}
 				{
 					var& v = gvarmapstack.getvar(me->name.c_str());
 					{
 						jsn << ",\n";
 						vec3 ret = entity::res(v).trans.p;
-						jsn << pre << "\t" << "\"" << "pos" << "\":" << vec3tos(ret);
+						jsn << pre << "\t" << "\"" << "p" << "\":" << vec3tos(ret);
 					}
 					{
 						jsn << ",\n";
 						jsn << pre << "\t" << "\"" << "q" << "\":" << qtos(entity::res(v).trans.q);
+					}
+					{
+						jsn << ",\n";
+						vec3 ret = entity::res(v).trans.s;
+						jsn << pre << "\t" << "\"" << "s" << "\":" << vec3tos(ret);
 					}
 				}
 				if (me->parent && me->parent != ROOT)
@@ -333,10 +332,15 @@ namespace JSON_PARSER
 			{
 				jsn << pre << "\t" << "\"" << "name" << "\":\"" << me->name << "\"";
 
-				if (auto& it = me->kv.find("img"); it != me->kv.end())
+				for (auto& it : me->kv)
 				{
-					jsn << ",\n";
-					jsn << pre << "\t" << "\"" << it->first << "\":\"" << it->second << "\"";
+					if (it.first == "p" || it.first == "ang" || it.first == "s")
+					{
+					}
+					else {
+						jsn << ",\n";
+						jsn << pre << "\t" << "\"" << it.first << "\":\"" << it.second << "\"";
+					}
 				}
 				{
 					var& v = gvarmapstack.getvar(me->name.c_str());
