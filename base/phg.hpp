@@ -693,10 +693,10 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 	while (!cd.eoc()) {
 		short type = get(cd);
 		//PRINTV(cd.cur())
-		if (cd.cur() == '\"' || cd.cur() == '\'')
+		if (type == '\"' || type == '\'')
 		{
 			cd.next0();
-			string str = getstring(cd, cd.cur(), cd.cur(), cd.cur());
+			string str = getstring(cd, type, type, type);
 			cd.strstack.push_back(str);
 #ifdef USE_STRING			
 			cd.valstack.push(var(str.c_str()));
