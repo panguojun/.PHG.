@@ -439,7 +439,7 @@ struct code
 		p == 0 ? p = ptr : 0;
 		return (p == 0 || (*p) == '\0');
 	}
-	char cur() {
+	inline char cur() {
 		return *ptr;
 	}
 	const char* getname() {
@@ -575,7 +575,7 @@ inline var chars2var(code& cd) {
 	}
 	buff[i] = '\0';
 	//PRINTV(buff);
-	
+
 	if (!isreal && !gtable.empty())
 	{
 		int number = atoi(buff);
@@ -693,15 +693,15 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 	while (!cd.eoc()) {
 		short type = get(cd);
 		//PRINTV(cd.cur())
-		if (cd.cur() == '\"' || cd.cur() == '\'')
+		if (type == '\"' || type == '\'')
 		{
 			cd.next0();
-			string str = getstring(cd);
+			string str = getstring(cd, type, type, type);
 			cd.strstack.push_back(str);
 #ifdef USE_STRING			
 			cd.valstack.push(var(str.c_str()));
 			args++;
-		//	PRINTV(cd.cur());
+			//	PRINTV(cd.cur());
 #else
 			return INVALIDVAR;
 #endif
