@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 							Phg2.2
 							脚本是群论的扩展
 							运算式编程可以挖掘问题的内在对称性
@@ -439,7 +439,7 @@ struct code
 		p == 0 ? p = ptr : 0;
 		return (p == 0 || (*p) == '\0');
 	}
-	char cur() {
+	inline char cur() {
 		return *ptr;
 	}
 	const char* getname() {
@@ -665,13 +665,13 @@ void finishtrunk(code& cd, int trunkcnt = 0)
 }
 
 // get string
-inline std::string getstring(code& cd, char ed = '\"')
+inline std::string getstring(code& cd, char s1 = '\'', char s2 = '\"', char ed = '\"')
 {
 	//PRINT("getstring...")
 	std::string content;
 	while (!cd.eoc()) {
 		char c = cd.cur();
-		if (c != '\'' && c != '\"' && c != ed)
+		if (c != s1 && c != s2 && c != ed)
 		{
 			content += c;
 			cd.ptr++;
@@ -696,7 +696,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 		if (cd.cur() == '\"' || cd.cur() == '\'')
 		{
 			cd.next0();
-			string str = getstring(cd);
+			string str = getstring(cd, cd.cur(), cd.cur(), cd.cur());
 			cd.strstack.push_back(str);
 #ifdef USE_STRING			
 			cd.valstack.push(var(str.c_str()));
