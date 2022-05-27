@@ -1,7 +1,7 @@
 /**********************************************************************************
-*				使用PHG来解析JSON
-*				暂时不能解析浮点数表达式如1E-2
-*				解析完毕形成一棵树加上属性KV
+*						使用PHG来解析JSON
+*						暂时不能解析浮点数表达式如1E-2
+*						解析完毕形成一棵树加上属性KV
 **********************************************************************************/
 
 namespace JSON_PARSER
@@ -138,7 +138,7 @@ namespace JSON_PARSER
 			else if (c == '\'' || c == '\"') {
 
 				cd.next();
-				*pstr += getstring(cd);
+				*pstr += getstring(cd, c, c, c);
 			}
 			else {
 				*pstr += cd.cur();
@@ -274,10 +274,15 @@ namespace JSON_PARSER
 			{
 				jsn << pre << "\t" << "\"" << "name" << "\":\"" << me->name << "\"";
 
-				if (auto& it = me->kv.find("md"); it != me->kv.end())
+				for (auto& it : me->kv)
 				{
-					jsn << ",\n";
-					jsn << pre << "\t" << "\"" << it->first << "\":\"" << it->second << "\"";
+					if (it.first == "p" || it.first == "q" || it.first == "s")
+					{
+					}
+					else {
+						jsn << ",\n";
+						jsn << pre << "\t" << "\"" << it.first << "\":\"" << it.second << "\"";
+					}
 				}
 				{
 					var& v = gvarmapstack.getvar(me->name.c_str());
