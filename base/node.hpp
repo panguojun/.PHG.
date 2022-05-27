@@ -555,17 +555,6 @@ bool porperty_intree(tree_t* tree, const char* key, crstr val)
 }
 
 // 在节点树上搜索加法规则
-tree_t* walk_addtreeEX(tree_t* tree, crstr v_a, crstr v_b, const char* key)
-{
-	// children
-	for (auto it : tree->children) {
-		if (porperty_intree(tree, key, v_a) && porperty_intree(tree, key, v_b)) {
-
-			return walk_addtreeEX(it.second, v_a, v_b, key);
-		}
-	}
-	return tree;
-}
 
 const char* walk_addtree(tree_t* tree, crstr v_a, crstr v_b, const char* key)
 {
@@ -629,7 +618,7 @@ tree_t* _getbyprop(tree_t* tree, crstr key, crstr val)
 	}
 	return 0;
 }
-API(api_me)
+API(api_im)
 {
 	ASSERT(args == 1);
 
@@ -651,7 +640,18 @@ API(api_me)
 	}
 	else {
 		SPARAM(node);
-		me = _gettree(node, ROOT);
+		if(node == "parent")
+		{
+			if (me) me = me->parent;
+		}
+		else if(node == "child")
+		{
+			if (me && !me->children.empty()) me = *me->children.begin();
+		}
+		else
+		{
+			me = _gettree(node, ROOT);
+		}
 		if (me)
 			PRINTV(me->name);
 	}
@@ -1006,7 +1006,7 @@ API(calc_expr)
 void NODE_REG_API()
 {
 
-	REG_API(iam, api_me);			// ME
+	REG_API(im, api_im);			// ME
 	REG_API(bye, api_bye);			// ME = NULL
 	REG_API(on, api_on);			// 当前属性
 	REG_API(array, array);			// 节点阵列 (正在放弃中...)
