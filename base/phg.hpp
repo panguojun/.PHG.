@@ -575,7 +575,7 @@ inline var chars2var(code& cd) {
 	}
 	buff[i] = '\0';
 	//PRINTV(buff);
-
+	cd.strstack.push_back(buff);
 	if (!isreal && !gtable.empty())
 	{
 		int number = atoi(buff);
