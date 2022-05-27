@@ -151,7 +151,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 		// 选择子
 		else if (c == '?' && pstr == &key) {
 			cd.next();
-			selector = getstring(cd, '[');
+			selector = getstring(cd, '\'', '\"', '[');
 			cd.ptr--; // move back
 		}
 
