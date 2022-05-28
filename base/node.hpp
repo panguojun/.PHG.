@@ -244,7 +244,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 		else if (c == '\'' || c == '\"') {
 
 			cd.next();
-			*pstr += getstring(cd);
+			*pstr += getstring(cd,c,c,c);
 		}
 
 		// default
