@@ -166,7 +166,7 @@ namespace ScePHG
 // ----------------------------------------
 	API(tojson)
 	{
-		PRINT("------------- tojson ----------------");
+		//PRINT("------------- tojson ----------------");
 		NODE* node = ROOT;
 		if (args > 0)
 		{
@@ -178,7 +178,7 @@ namespace ScePHG
 	}
 	API(tojson2d)
 	{
-		PRINT("------------- tojson ----------------");
+		//PRINT("------------- tojson ----------------");
 		NODE* node = ROOT;
 		if (args > 0)
 		{
@@ -260,13 +260,6 @@ namespace ScePHG
 		SPRITE_REG_API();				// sprite 注册
 	}
 };
-// ====================================
-// test
-// ====================================
-void realphg()
-{
-	ScePHG::dofile("main.r");
-}
 
 //------------------------------------------
 // VB
