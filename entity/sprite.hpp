@@ -1,6 +1,6 @@
 /**************************************************************************
-*					¾«Áé
-*				¿É»æÖÆµÄ2D³¡¾°¶ÔÏó
+*					ç²¾çµ
+*				å¯ç»˜åˆ¶çš„2Dåœºæ™¯å¯¹è±¡
 **************************************************************************/
 struct tree_t;
 inline string vec3tos(crvec v)
@@ -14,12 +14,12 @@ namespace sprite
 	struct transform2_t { vec2 p; real ang; real s = 1; };
 	struct spriteres_t
 	{
-		// Ğ¯´øµÄÊôĞÔ
-		bool vis = true;		// ¿É¼ûĞÔ
+		// æºå¸¦çš„å±æ€§
+		bool vis = true;		// å¯è§æ€§
 
-		transform2_t trans;		// ¿Õ¼ä±ä»»
-		float phang;			// ÏàÎ»½Ç
-		string md;				// Ä£ĞÍ
+		transform2_t trans;		// ç©ºé—´å˜æ¢
+		float phang;			// ç›¸ä½è§’
+		string md;				// æ¨¡å‹
 
 		spriteres_t() {}
 		spriteres_t(const spriteres_t& v)
@@ -30,7 +30,7 @@ namespace sprite
 		};
 		~spriteres_t() {}
 	};
-	vector<spriteres_t*> reslist;			// ×ÊÔ´ÁĞ±í
+	vector<spriteres_t*> reslist;			// èµ„æºåˆ—è¡¨
 	spriteres_t& res(ENT& ent)
 	{
 		if (ent.resid == -1)
@@ -82,7 +82,7 @@ namespace sprite
 		{// transform
 			vec2 p;
 			real ang = 0;
-			real s = 1;
+			vec2 s = vec2::ONE;
 			{// transform desc
 				KEY_VAL("p") // raw position
 				{
@@ -102,18 +102,26 @@ namespace sprite
 				}
 				KEY_VAL("s") // scale
 				{
-					s = storeal(it->second);
+					s = vec2::ONE*storeal(it->second);
+				}
+				KEY_VAL("sx") // scale
+				{
+					s.x = storeal(it->second);
+				}
+				KEY_VAL("sy") // scale
+				{
+					s.y = storeal(it->second);
 				}
 			}
 			trans = {
 				parent.p + (vec2::UX.rotcopy(parent.ang)) * p.x + (vec2::UY.rotcopy(parent.ang)) * p.y,
 				parent.ang + ang,
-				parent.s * s
+				s
 			};
 			if (!str.empty()) str += ";";
 			str += (to_string(trans.p.x) + "," + to_string(trans.p.y) + "," + to_string(trans.ang) + "," + to_string(trans.s));
 		}
-		{// Ìí¼Óµ½±äÁ¿ÁĞ±í
+		{// æ·»åŠ åˆ°å˜é‡åˆ—è¡¨
 			KEY_VAL("vis") // vis
 			{
 				if (it->second == "false")
@@ -178,5 +186,5 @@ API(getspriteloc)
 }
 void SPRITE_REG_API()
 {
-	REG_API(getsprloc, getspriteloc);	// »ñµÃget sprite loc
+	REG_API(getsprloc, getspriteloc);	// è·å¾—get sprite loc
 }
