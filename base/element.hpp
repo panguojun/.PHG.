@@ -239,7 +239,7 @@ inline void _PHGPRINT(const std::string& pre, const var& v)
 	else if (v.type == 3)
 		PRINT(pre << v.sval)
 	else
-		PRINT(pre << "unkown type")
+		PRINT(pre << v.sval)
 }
 
 // ------------------------------------------
