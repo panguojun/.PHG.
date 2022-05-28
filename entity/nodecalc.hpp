@@ -576,7 +576,7 @@ void NODECALC_REG_API()
 			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
 			string c = n->kv[b];
 			PRINT(a << "." << b << "=" << c);
-			var v; v.type = 0; nodecalc::res(v).node = n; nodecalc::res(v).key = b;
+			var v; v.type = 0; nodecalc::res(v).node = n; nodecalc::res(v).key = b;v.sval = c;
 			strlist.push_back(c);
 			POP_SPARAM;
 			//PHG_VALPOP(2);
