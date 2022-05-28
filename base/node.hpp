@@ -832,7 +832,7 @@ API(walknode)
 	NODE* node = ROOT;
 	if (args > 1)
 	{
-		string param1 = GET_SPARAM(1);
+		string param1 = GET_SPARAM(2);
 		node = GET_NODE(param1, ROOT);
 		if (!node)
 			return 0;
