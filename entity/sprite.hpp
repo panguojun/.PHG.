@@ -119,7 +119,7 @@ namespace sprite
 				s
 			};
 			if (!str.empty()) str += ";";
-			str += (to_string(trans.p.x) + "," + to_string(trans.p.y) + "," + to_string(trans.ang) + "," + to_string(trans.s));
+			str += (to_string(trans.p.x) + "," + to_string(trans.p.y) + "," + to_string(trans.ang) + "," + to_string(trans.s.x) + "," + to_string(trans.s.y)));
 		}
 		{// 添加到变量列表
 			KEY_VAL("vis") // vis
