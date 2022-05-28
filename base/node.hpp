@@ -839,6 +839,7 @@ API(walknode)
 	}
 	node_walker(node, [script](tree_t* tree)->void
 		{
+			work_stack.push_back(tree);
 			dostring((script + ";").c_str());
 		});
 	POP_SPARAM;
