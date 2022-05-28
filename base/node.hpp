@@ -521,7 +521,6 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 		cd.next();
 	}
 }
-
 // 入口
 void _tree(code& cd)
 {
@@ -533,7 +532,6 @@ void _tree(code& cd)
 
 	//tree_t::clear(tree);
 }
-
 // ------------------------------------
 // 寻源式加法
 // 两个节点之和为最近的相同祖先
@@ -553,9 +551,7 @@ bool porperty_intree(tree_t* tree, const char* key, crstr val)
 	}
 	return false;
 }
-
 // 在节点树上搜索加法规则
-
 const char* walk_addtree(tree_t* tree, crstr v_a, crstr v_b, const char* key)
 {
 	if (tree->children.size() >= 2)
@@ -586,7 +582,6 @@ const char* walk_addtree(tree_t* tree, crstr v_a, crstr v_b, const char* key)
 	}
 	return 0;
 }
-
 // ------------------------------------
 // node walker
 // ------------------------------------
@@ -599,7 +594,6 @@ void node_walker(tree_t* tree, std::function<void(tree_t*)> fun)
 		node_walker(it.second, fun);
 	}
 }
-
 // ====================================
 // API
 // ====================================
@@ -664,7 +658,6 @@ API(api_bye)
 	work_stack.clear();
 	return 0;
 }
-
 API(api_on)
 {
 	ASSERT(args == 1);
@@ -763,7 +756,6 @@ API(property)
 	POP_SPARAM;
 	return 0;
 }
-
 void dump(tree_t* tree, const string& pre = "")
 {
 	PRINT(pre << tree->name << ":{")
@@ -785,8 +777,6 @@ API(dump)
 		dump(ROOT);
 	return 0;
 }
-
-
 API(calc_expr)
 {
 	ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
@@ -846,12 +836,91 @@ API(walknode)
 	
 	return 0;
 }
+namespace node{
+	struct res_t
+	{
+		// 携带的属性
+		NODE* node;
+		string key;
+
+		res_t() {}
+		res_t(const res_t& v)
+		{
+			node = v.node;
+			key = v.key;
+		};
+		~res_t() {}
+	};
+	vector<res_t*> reslist;		// 资源列表
+
+	res_t& cres(const var& ent)
+	{
+		ASSERT(ent.resid >= 0 && ent.resid < reslist.size());
+		return *reslist[ent.resid];
+	}
+	res_t& res(var& ent)
+	{
+		if (ent.resid == -1)
+		{
+			res_t* rs = new res_t();
+			reslist.push_back(rs);
+			ent.resid = reslist.size() - 1;
+
+			ent.type = 0; // 自定义元素类型
+			// 在资源上定义加法运算
+			ent.fun_set = [&ent](const var& v) {
+				if (v.type == 0)
+				{
+					res(ent).node->kv[res(ent).key] = cres(v).node->kv[cres(v).key];
+				}
+				else {
+					//ent.node->kv[ent.key] = v.tostr();
+				}
+			};
+
+		}
+		//PRINTV(ent.resid);
+		ASSERT(ent.resid < reslist.size());
+		return *reslist[ent.resid];
+	}
+}
 // ===================================
 // REG APIs
 // ===================================
 void NODE_REG_API()
 {
+	CALC([](code& cd, char o, int args)->var {
 
+		//PRINT("CALC: " << o << "(" << args << ")");
+		//PRINTV(ME->name);
+		if (o == '.')
+		{
+			crstr a = GET_SPARAM(1);
+			crstr b = GET_SPARAM(2);
+
+			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+			string c = n->kv[b];
+			PRINT(a << "." << b << "=" << c);
+			var v; v.type = 0; nodecalc::res(v).node = n; nodecalc::res(v).key = b;v.sval = c;
+			strlist.push_back(c);
+			POP_SPARAM;
+			//PHG_VALPOP(2);
+			cd.strstack.push_back(c);
+			return v;
+		}
+		return 0;
+		});
+	PROP([](code& cd, const char* a, const char* b, var& v) {
+		int args = 1;
+		PRINT("PROP: " << a << "." << b);
+
+		NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+		//PRINTV(cd.strstack.size());
+		string sv = GET_SPARAM(1);
+		n->kv[b] = sv;
+		POP_SPARAM;
+		});
+	
 	REG_API(im, api_im);			// ME
 	REG_API(bye, api_bye);			// ME = NULL
 	REG_API(on, api_on);			// 当前属性
