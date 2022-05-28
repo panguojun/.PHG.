@@ -205,52 +205,6 @@ namespace nodecalc
 		}
 		return flag;
 	}
-	struct res_t
-	{
-		// 携带的属性
-		NODE* node;
-		string key;
-
-		res_t() {}
-		res_t(const res_t& v)
-		{
-			node = v.node;
-			key = v.key;
-		};
-		~res_t() {}
-	};
-	vector<res_t*> reslist;		// 资源列表
-
-	res_t& cres(const var& ent)
-	{
-		ASSERT(ent.resid >= 0 && ent.resid < reslist.size());
-		return *reslist[ent.resid];
-	}
-	res_t& res(var& ent)
-	{
-		if (ent.resid == -1)
-		{
-			res_t* rs = new res_t();
-			reslist.push_back(rs);
-			ent.resid = reslist.size() - 1;
-
-			ent.type = 0; // 自定义元素类型
-			// 在资源上定义加法运算
-			ent.fun_set = [&ent](const var& v) {
-				if (v.type == 0)
-				{
-					res(ent).node->kv[res(ent).key] = cres(v).node->kv[cres(v).key];
-				}
-				else {
-					//ent.node->kv[ent.key] = v.tostr();
-				}
-			};
-
-		}
-		//PRINTV(ent.resid);
-		ASSERT(ent.resid < reslist.size());
-		return *reslist[ent.resid];
-	}
 }
 
 // ------------------------------------
@@ -261,9 +215,9 @@ API(calc_set_abelian)
 	crstr b = GET_SPARAM(1);
 
 	nodecalc::abelian_sym = atoi(b.c_str());
-	PRINTV(nodecalc::abelian_sym)
+	PRINTV(nodecalc::abelian_sym);
 
-		POP_SPARAM; return 0;
+	POP_SPARAM; return 0;
 }
 API(calc_addd)
 {
@@ -378,14 +332,12 @@ API(calc_wak)
 			nodecalc::_calc_add(n, a, b, cur_property.c_str(), ok.c_str());
 		}
 	}
-
 	POP_SPARAM; return 0;
 }
 
 API(clearstrlist)
 {
 	strlist.clear();
-
 	return 0;
 }
 
@@ -540,7 +492,6 @@ API(getival)
 	POP_SPARAM;
 	return 0;
 }
-
 API(getstr)
 {
 	string param1 = GET_SPARAM(1);
@@ -563,39 +514,7 @@ API(getstr)
 	return 0;
 }
 void NODECALC_REG_API()
-{
-	CALC([](code& cd, char o, int args)->var {
-
-		//PRINT("CALC: " << o << "(" << args << ")");
-		//PRINTV(ME->name);
-		if (o == '.')
-		{
-			crstr a = GET_SPARAM(1);
-			crstr b = GET_SPARAM(2);
-
-			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
-			string c = n->kv[b];
-			PRINT(a << "." << b << "=" << c);
-			var v; v.type = 0; nodecalc::res(v).node = n; nodecalc::res(v).key = b;v.sval = c;
-			strlist.push_back(c);
-			POP_SPARAM;
-			//PHG_VALPOP(2);
-			cd.strstack.push_back(c);
-			return v;
-		}
-		return 0;
-		});
-	PROP([](code& cd, const char* a, const char* b, var& v) {
-		int args = 1;
-		PRINT("PROP: " << a << "." << b);
-
-		NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
-		//PRINTV(cd.strstack.size());
-		string sv = GET_SPARAM(1);
-		n->kv[b] = sv;
-		POP_SPARAM;
-		});
-
+{	
 	REG_API(abe, calc_set_abelian);
 
 	REG_API(addd, calc_addd);
