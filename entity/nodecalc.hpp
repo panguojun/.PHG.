@@ -1,12 +1,12 @@
 /**************************************************************************
-				ÊÂ¼şÔËËã
+				äº‹ä»¶è¿ç®—
 
 **************************************************************************/
 struct tree_t;
 namespace nodecalc
 {
 #define KEY_VAL(val) if (auto& it = tree->kv.find(val); it != tree->kv.end())
-	bool abelian_sym = true;	// °¢±´¶û¶Ô³Æ ¼´ÔËËãµÄ¿É½»»»ĞÔ
+	bool abelian_sym = true;	// é˜¿è´å°”å¯¹ç§° å³è¿ç®—çš„å¯äº¤æ¢æ€§
 
 	tree_t* _walk_tree_node(std::string& str, tree_t* tree, crstr a, const char* key)
 	{
@@ -77,7 +77,7 @@ namespace nodecalc
 				if (flag == 3)
 				{
 					if (!abelian_sym)
-					{// Ë³ĞòÅĞ¶Ï
+					{// é¡ºåºåˆ¤æ–­
 						if (lstn != 0)
 						{
 							PRINTV(it.second->getindex());
@@ -185,7 +185,7 @@ namespace nodecalc
 				if (flag == 3)
 				{
 					if (!abelian_sym)
-					{// Ë³ĞòÅĞ¶Ï
+					{// é¡ºåºåˆ¤æ–­
 						if (lstn != 0)
 						{
 							PRINTV(it.second->getindex());
@@ -207,7 +207,7 @@ namespace nodecalc
 	}
 	struct res_t
 	{
-		// Ğ¯´øµÄÊôĞÔ
+		// æºå¸¦çš„å±æ€§
 		NODE* node;
 		string key;
 
@@ -219,7 +219,7 @@ namespace nodecalc
 		};
 		~res_t() {}
 	};
-	vector<res_t*> reslist;		// ×ÊÔ´ÁĞ±í
+	vector<res_t*> reslist;		// èµ„æºåˆ—è¡¨
 
 	res_t& cres(const var& ent)
 	{
@@ -234,8 +234,8 @@ namespace nodecalc
 			reslist.push_back(rs);
 			ent.resid = reslist.size() - 1;
 
-			ent.type = 0; // ×Ô¶¨ÒåÔªËØÀàĞÍ
-			// ÔÚ×ÊÔ´ÉÏ¶¨Òå¼Ó·¨ÔËËã
+			ent.type = 0; // è‡ªå®šä¹‰å…ƒç´ ç±»å‹
+			// åœ¨èµ„æºä¸Šå®šä¹‰åŠ æ³•è¿ç®—
 			ent.fun_set = [&ent](const var& v) {
 				if (v.type == 0)
 				{
@@ -388,6 +388,180 @@ API(clearstrlist)
 
 	return 0;
 }
+
+// -----------------------------------
+// æ•°æ®è¾“å‡º I/O
+// -----------------------------------
+inline string fixedname(crstr name)
+{
+	const char* p = name.c_str();
+	if (*p == '\'' || *p == '\"')
+	{
+		string ret = p + 1;
+		ret.pop_back();
+		return ret;
+	}
+	return name;
+}
+inline void fixedproperty(string& str)
+{
+	str.erase(std::remove(str.begin(), str.end(), '\''), str.end());
+	str.erase(std::remove(str.begin(), str.end(), '\"'), str.end());
+
+}
+inline rect_t torect(crstr str)
+{
+	rect_t rect;
+	sscanf_s(str.c_str(), "{x:%d,y:%d,width:%d,height:%d}", &rect.x, &rect.y, &rect.width, &rect.height);
+	return rect;
+}
+API(getrect)
+{
+	rectlist.clear();
+	NODE* node = ROOT;
+	if (args > 0)
+	{
+		string param1 = GET_SPARAM(1);
+		node = GET_NODE(param1, ROOT);
+		if (!node)
+		{
+			ERRORMSG("Node:" << param1 << " not found!")
+				return 0;
+		}
+	}
+	string key = "rect";
+	if (args > 1)
+	{
+		key = GET_SPARAM(2);
+	}
+	node_walker(node, [key](tree_t* tree)->void
+		{
+			auto& it = tree->kv.find(key);
+			if (it != tree->kv.end())
+			{
+				string str = it->second;
+				fixedproperty(str);
+				rectlist.push_back(torect(str));
+			}
+		});
+	POP_SPARAM;
+	return 0;
+}
+inline vec3 tovec3(crstr str)
+{
+	vec3 v;
+	sscanf_s(str.c_str(), "%f,%f,%f", &v.x, &v.y, &v.z);
+	return v;
+}
+API(getvec3)
+{
+	vec3list.clear();
+	NODE* node = ROOT;
+	if (args > 0)
+	{
+		string param1 = GET_SPARAM(1);
+		node = GET_NODE(param1, ROOT);
+		if (!node)
+			return 0;
+	}
+	string key = "pos";
+	if (args > 1)
+	{
+		key = GET_SPARAM(2);
+	}
+	node_walker(node, [key](tree_t* tree)->void
+		{
+			auto& it = tree->kv.find(key);
+			if (it != tree->kv.end())
+			{
+				string str = it->second;
+				fixedproperty(str);
+				vec3list.push_back(tovec3(str));
+			}
+		});
+	POP_SPARAM;
+	return 0;
+}
+API(getfval)
+{
+	reallist.clear();
+	NODE* node = ROOT;
+	if (args > 0)
+	{
+		string param1 = GET_SPARAM(1);
+		node = GET_NODE(param1, ROOT);
+		if (!node)
+			return 0;
+	}
+	string key = "x";
+	if (args > 1)
+	{
+		key = GET_SPARAM(2);
+	}
+	node_walker(node, [key](tree_t* tree)->void
+		{
+			auto& it = tree->kv.find(key);
+			if (it != tree->kv.end())
+			{
+				string str = it->second;
+				fixedproperty(str);
+				reallist.push_back(atof(str.c_str()));
+			}
+		});
+	POP_SPARAM;
+	return 0;
+}
+API(getival)
+{
+	intlist.clear();
+	NODE* node = ROOT;
+	if (args > 0)
+	{
+		string param1 = GET_SPARAM(1);
+		node = GET_NODE(param1, ROOT);
+		if (!node)
+			return 0;
+	}
+	string key = "x";
+	if (args > 1)
+	{
+		key = GET_SPARAM(2);
+	}
+	node_walker(node, [key](tree_t* tree)->void
+		{
+			auto& it = tree->kv.find(key);
+			if (it != tree->kv.end())
+			{
+				string str = it->second;
+				fixedproperty(str);
+				intlist.push_back(atoi(str.c_str()));
+			}
+		});
+	POP_SPARAM;
+	return 0;
+}
+
+API(getstr)
+{
+	string param1 = GET_SPARAM(1);
+	string param2 = GET_SPARAM(2);
+
+	//strlist.clear();
+	ScePHG::node_walker(ROOT, [param1, param2](ScePHG::tree_t* tree)->void
+		{
+			if (tree->name == param1) {
+				auto& it = tree->kv.find(param2);
+				if (it != tree->kv.end())
+				{
+					strlist.push_back(it->second.c_str());
+				}
+			}
+		});
+	POP_SPARAM;
+
+	PRINTV(strlist.size());
+	return 0;
+}
 void NODECALC_REG_API()
 {
 	CALC([](code& cd, char o, int args)->var {
@@ -430,11 +604,11 @@ void NODECALC_REG_API()
 	REG_API(sub, calc_sub);
 	REG_API(wak, calc_wak);
 
-	REG_API(getival, getival);		// »ñµÃint value
-	REG_API(getfval, getfval);		// »ñµÃfloat value
-	REG_API(getstr, getstr);		// »ñµÃstring
-	REG_API(getvec3, getvec3);		// »ñµÃRECT
-	REG_API(getrect, getrect);		// »ñµÃRECT
+	REG_API(getival, getival);		// è·å¾—int value
+	REG_API(getfval, getfval);		// è·å¾—float value
+	REG_API(getstr, getstr);		// è·å¾—string
+	REG_API(getvec3, getvec3);		// è·å¾—RECT
+	REG_API(getrect, getrect);		// è·å¾—RECT
 
 	REG_API(cls, clearstrlist);
 }
