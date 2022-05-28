@@ -891,7 +891,8 @@ void NODE_REG_API()
 		int args = 1;
 		PRINT("PROP: " << a << "." << b);
 
-		NODE* n = a == "me" ? (ME) : GET_NODE(a, ROOT); ASSERT(n);
+		NODE* n = strcmp(a, "me") == 0 ? (ME) : GET_NODE(a, ROOT); 
+		ASSERT(n);
 		//PRINTV(cd.strstack.size());
 		string sv = GET_SPARAM(1);
 		n->kv[b] = sv;
