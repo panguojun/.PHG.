@@ -10,18 +10,6 @@
 
 int node_count = 0;				// 节点数量
 
-// 加前缀
-inline void add_suffix(string& name, const string& clonename) {
-
-	string suffix;
-	int pos = clonename.find_last_of('.');
-	if (pos != string::npos)
-		suffix = clonename.substr(pos + 1);
-
-	if (!suffix.empty() && atoi(suffix.c_str()) == 0)
-		name += "." + suffix;
-}
-
 struct tree_t
 {
 	tree_t* parent = 0;
@@ -68,7 +56,6 @@ struct tree_t
 			tree_t* ntree = new tree_t();
 			ntree->index = children.size() + 1;
 			ntree->name = to_string(tree_t::genid()) + "_" + to_string(ntree->index);
-			// add_suffix(ntree->name, it.first);
 			children[ntree->name] = ntree;
 			ntree->parent = this;
 
@@ -202,8 +189,6 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 				{// inhert
 					tree_t* t = GET_NODE(key, ROOT);
 					if (t) {
-						//PRINT("inhert0: " << key);
-						//add_suffix(tree->name, key);
 						(*tree) += (*t);
 					}
 				}
@@ -229,8 +214,6 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 				tree_t* t = GET_NODE(key, ROOT);
 				if (t)
 				{
-					//add_suffix(tree->name, key);
-					//PRINT("inhert1: " << key);
 					(*tree) += (*t);
 				}
 			}
@@ -300,12 +283,12 @@ int select(int ind, int rnd, crstr selector)
 
 	if (rnd % len == ind) // 随机选择一个
 	{
-		PRINT("selected!")
-			return 1; // select one
+		PRINT("selected!");
+		return 1; // select one
 	}
 
-	PRINT("select failed! " << ind)
-		return 0;
+	PRINT("select failed! " << ind);
+	return 0;
 }
 
 // 阵列
@@ -393,8 +376,6 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 				{// inhert
 					tree_t* t = GET_NODE(node, ROOT);
 					if (t) {
-						//PRINT("inhert2: " << node);
-						// add_suffix(tree->name, node);
 						(*ntree) += (*t);
 					}
 				}
@@ -499,8 +480,6 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 				{// inhert
 					tree_t* t = GET_NODE(node, ROOT);
 					if (t) {
-						//PRINT("inhert3: " << node)
-						// add_suffix(tree->name, node);
 						(*ntree) += (*t);
 					}
 				}
@@ -627,8 +606,8 @@ API(api_im)
 		ASSERT(ccd.cur() == '=');
 		ccd.next();
 		string val = getstring(ccd);
-		PRINTV(val)
-			me = _getbyprop(ROOT, key, val.c_str());
+		PRINTV(val);
+		me = _getbyprop(ROOT, key, val.c_str());
 		if (me)
 			PRINTV(me->name);
 	}
@@ -678,7 +657,6 @@ API(array)
 		tree_t* t = _gettree(clonenode);
 		if (t)
 		{
-			// add_suffix(ntree->name, clonenode);
 			(*ntree) += (*t);
 		}
 	}
@@ -717,7 +695,6 @@ API(sequ)
 		if (t)
 		{
 			PRINTV(clonenode);
-			// add_suffix(ntree->name, clonenode);
 			(*ntree) += (*t);
 		}
 	}
