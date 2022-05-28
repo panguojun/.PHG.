@@ -619,7 +619,7 @@ API(api_im)
 		}
 		else if(node == "child")
 		{
-			if (me && !me->children.empty()) me = *me->children.begin();
+			if (me && !me->children.empty()) me = *me->children.begin()->second;
 		}
 		else
 		{
