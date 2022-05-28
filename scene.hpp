@@ -40,7 +40,6 @@ namespace ScePHG
 #include "entity/entity.hpp"
 #include "entity/nodecalc.hpp"
 // ---------------------------------------------------------------------
-	
 
 	// clear all
 	void clear()
@@ -227,7 +226,7 @@ namespace ScePHG
 	// -----------------------------------
 	void setup()
 	{
-		PRINT("setup ScePHG");
+		PRINT("setup {PHG}");
 
 		tree = _tree;
 		act = _act;
