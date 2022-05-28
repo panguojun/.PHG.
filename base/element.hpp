@@ -92,18 +92,21 @@ struct var_t
 	operator int() const
 	{
 		//PRINT("var_t::int " << ival)
-		return ival;
+		if (type == 1)
+			return ival;
+		if (type == 2)
+			return (int)fval;
+		return atoi(sval.c_str());
 	}
 	operator float() const
 	{
 		//PRINT("var_t::int " << ival)
 		if (type == 1)
-			float(ival);
+			return float(ival);
 		if (type == 2)
 			return fval;
-		if (type == 3)
-			return atof(sval.c_str());
-		return 0.0f;
+		return atof(sval.c_str());	
+		//return 0.0f;
 	}
 	inline string tostr() const
 	{
@@ -112,9 +115,7 @@ struct var_t
 			return to_string(ival);
 		if (type == 2)
 			return to_string(fval);
-		if (type == 3)
-			return sval;
-		return "";
+		return sval;
 	}
 	var_t operator + (var_t& v) const
 	{
