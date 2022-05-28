@@ -602,7 +602,7 @@ void NODECALC_REG_API()
 	REG_API(add, calc_add);
 	REG_API(subb, calc_subb);
 	REG_API(sub, calc_sub);
-	REG_API(wak, calc_wak);
+	REG_API(calc, calc_wak);
 
 	REG_API(getival, getival);		// 获得int value
 	REG_API(getfval, getfval);		// 获得float value
