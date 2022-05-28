@@ -36,7 +36,7 @@ void onrequest(const std::string& msg, const std::string& body, std::string& out
 		for (int i = 0; i < ScePHG::strlist.size(); i++)
 		{
 			auto& it = ScePHG::strlist[i];
-			PRINT(it)
+			//PRINT(it)
 			if (i > 0)
 				ss << " ";
 			ss << it;
