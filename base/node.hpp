@@ -875,7 +875,7 @@ void NODE_REG_API()
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
 
-			NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+			NODE* n = a == "me" ? (ME) : GET_NODE(a, ROOT); ASSERT(n);
 			string c = n->kv[b];
 			PRINT(a << "." << b << "=" << c);
 			var v; v.type = 0; node::res(v).node = n; node::res(v).key = b;v.sval = c;
@@ -891,7 +891,7 @@ void NODE_REG_API()
 		int args = 1;
 		PRINT("PROP: " << a << "." << b);
 
-		NODE* n = a == "me" ? ME : GET_NODE(a, ROOT); ASSERT(n);
+		NODE* n = a == "me" ? (ME) : GET_NODE(a, ROOT); ASSERT(n);
 		//PRINTV(cd.strstack.size());
 		string sv = GET_SPARAM(1);
 		n->kv[b] = sv;
