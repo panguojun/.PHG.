@@ -89,7 +89,7 @@ namespace ScePHG
 	}
 	API(scat)
 	{
-		ASSERT(args == 2)
+		ASSERT_RET(args == 2)
 		string param1 = GET_SPARAM(1);
 		string param2 = GET_SPARAM(2);
 		POP_SPARAM;
@@ -98,21 +98,21 @@ namespace ScePHG
 	}
 	API(scmp)
 	{
-		ASSERT(args == 2);
+		ASSERT_RET(args == 2);
 		string param1 = GET_SPARAM(1);
 		string param2 = GET_SPARAM(2);
 		POP_SPARAM; return int(param1 == param2);
 	}
 	API(tos)
 	{
-		ASSERT(args == 1);
+		ASSERT_RET(args == 1);
 		PARAM(v);
 		cd.strstack.push_back(v.type == 1 ? to_string(v.ival) : to_string(v.fval));
 		return 0;
 	}
 	API(strout)
 	{
-		ASSERT(args == 1);
+		ASSERT_RET(args == 1);
 		string param1 = GET_SPARAM(1);
 		//PRINT(param1);
 
@@ -173,7 +173,7 @@ namespace ScePHG
 			string nodename = GET_SPARAM(1);
 			node = GET_NODE(nodename, ROOT);
 		}
-		JSON_PARSER::tojson(node);
+		if (node) JSON_PARSER::tojson(node);
 		return 0;
 	}
 	API(tojson2d)
@@ -185,7 +185,7 @@ namespace ScePHG
 			string nodename = GET_SPARAM(1);
 			node = GET_NODE(nodename, ROOT);
 		}
-		JSON_PARSER::tojson2d(node);
+		if(node) JSON_PARSER::tojson2d(node);
 		return 0;
 	}
 	API(tojsonraw)
@@ -197,7 +197,7 @@ namespace ScePHG
 			string nodename = GET_SPARAM(1);
 			node = GET_NODE(nodename, ROOT);
 		}
-		JSON_PARSER::tojson_raw(node);
+		if (node) JSON_PARSER::tojson_raw(node);
 		return 0;
 	}
 #endif	

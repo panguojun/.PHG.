@@ -60,6 +60,8 @@ inline void savelog(std::stringstream& log = logmessage, const std::string& logf
 #define LOGMSG(msg)		{if(gblog) {logmessage << msg; savelog();}}
 #define event(obj, msg)	{if(gblog) logmessage << "\n" << obj << " : " << msg;}
 #define ASSERT(x)		{if(!(x)){std::stringstream ss; ss << "ASSERT FAILED! " << __FILE__ << "(" << __LINE__ << ")"; ::MessageBoxA(0, ss.str().c_str(), "ASSERT", 0); throw;} }
+#define ASSERT_RET(x)		{if(!(x)){std::stringstream ss; ss << "ASSERT FAILED! " << __FILE__ << "(" << __LINE__ << ")"; ::MessageBoxA(0, ss.str().c_str(), "ASSERT", 0); return 0;} }
+
 #define ERROR(x)		{if(!(x)){std::stringstream ss; ss << "\n" << msg; ::MessageBoxA(0, ss.str().c_str(), "ERROR", 0);} }
 #define ERRORMSG(msg)	{std::stringstream ss; ss << "\n" << msg; ::MessageBoxA(0, ss.str().c_str(), "ERROR", 0);}
 

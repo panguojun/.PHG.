@@ -144,7 +144,7 @@ namespace sprite
 
 		if (tree->children.empty())
 		{
-			strlist.push_back(str);
+			//strlist.push_back(str);
 		}
 		else {
 			// children

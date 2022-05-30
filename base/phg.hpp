@@ -1,7 +1,7 @@
 /****************************************************************************
-					Phg2.2
-					脚本是群论的扩展
-					运算式编程可以挖掘问题的内在对称性
+							Phg2.2
+							脚本是群论的扩展
+							运算式编程可以挖掘问题的内在对称性
 语法示例:
 
 #function
@@ -37,6 +37,8 @@ yy = yy + 1;
 #define PHG_DEBUG
 //#define SYNTAXERR(msg)	ERRORMSG("At: " << cd.ptr - cd.start + 1 << ", ERR: " << msg)
 #define SYNTAXERR(msg)	ERRORMSG("ERR: " << msg << "\nAt: \n" << cd.ptr)
+#define PHG_ASSERT(x) {if(!(x)){std::stringstream ss; ss << "PHG ASSERT FAILED! " << __FILE__ << "(" << __LINE__ << ")"; ::MessageBoxA(0, ss.str().c_str(), "PHG ASSERT", 0); errorcode = 1;} }
+
 #define INVALIDFUN	cd.funcnamemap.end()
 
 #define ADD_VAR		GROUP::gvarmapstack.addvar
@@ -128,6 +130,8 @@ tree_fun tree = 0;
 // 运算
 var(*act)(code& cd, int args);
 
+// 错误处理
+int errorcode = 0;
 // -----------------------------------------------------
 static inline bool checkline(char c) {
 	return (c == '\n' || c == '\r');
@@ -171,7 +175,7 @@ struct codestack_t
 		return cach.c_str();
 	}
 	const char* cur() {
-		ASSERT(!stack.empty());
+		PHG_ASSERT(!stack.empty());
 		return stack[top()];
 	}
 	int top() {
@@ -193,7 +197,7 @@ struct valstack_t
 		//PRINT("POP")
 		if (stack.empty())
 		{
-			ERRORMSG("Value error!");
+			ERRORMSG("pop value error!");
 			return INVALIDVAR;
 		}
 		var ret = stack.back();
@@ -206,20 +210,20 @@ struct valstack_t
 	void pop_back() {
 		if (stack.empty())
 		{
-			ERRORMSG("Value error!");
+			ERRORMSG("pop value error!");
 			return;
 		}
 		stack.pop_back();
 	}
 	var& cur() {
 		//PRINT("cur")
-		ASSERT(!stack.empty());
+		PHG_ASSERT(!stack.empty());
 		return stack[top()];
 	}
 	var& get(int pos) {
 		if (stack.empty() || top() - pos < 0)
 		{
-			ERRORMSG("Value error!");
+			ERRORMSG("get value error!");
 		}
 		return stack[top() - pos];
 	}
@@ -245,11 +249,11 @@ struct oprstack_t
 		return ret;
 	}
 	opr cur() {
-		ASSERT(!stack.empty());
+		PHG_ASSERT(!stack.empty());
 		return stack[top()];
 	}
 	void setcur(opr o) {
-		ASSERT(!stack.empty());
+		PHG_ASSERT(!stack.empty());
 		stack[top()] = o;
 	}
 	int top() {
@@ -425,6 +429,8 @@ struct code
 		return (*p);
 	}
 	bool eoc(const char* p = 0) {
+		if(errorcode != 0) 
+			return true;
 		p == 0 ? p = ptr : 0;
 		return (p == 0 || (*p) == '\0');
 	}
@@ -786,7 +792,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 		}
 	}
 	SYNTAXERR("';' is missing?");
-	cd.ptr = 0; // end
+	errorcode = 1;
 	return INVALIDVAR;
 }
 // single var
@@ -811,7 +817,7 @@ void singvar(code& cd) {
 		std::string prop = cd.getname();
 		//PRINTV(prop);
 		cd.next3();
-		ASSERT(cd.cur() == '=');
+		PHG_ASSERT(cd.cur() == '=');
 		cd.next();
 		var v = expr(cd);
 		cd.next();
@@ -836,7 +842,7 @@ void statement_default(code& cd) {
 		else
 		{
 			SYNTAXERR("statement error : '" << nc << "'");
-			cd.ptr = 0; // end
+			errorcode = 1;
 		}
 	}
 	else if (cd.cur() == '>') {
@@ -884,7 +890,7 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 		}
 		else if (type == '?')  // if else
 		{
-			ASSERT(cd.next() == '(');
+			PHG_ASSERT(cd.next() == '(');
 		IF_STATEMENT:
 			cd.next();
 			int e = int(expr(cd));
@@ -1047,7 +1053,7 @@ var callfunc_phg(code& cd) {
 	fnname fnm = cd.getname();
 	PRINT("callfunc: " << fnm << "()");
 	PRINT("{");
-	ASSERT(cd.next3() == '(');
+	PHG_ASSERT(cd.next3() == '(');
 
 	cd.next();
 	while (!cd.eoc()) {
@@ -1076,7 +1082,7 @@ var callfunc_phg(code& cd) {
 	cd.ptr = cd.funcnamemap[fnm];
 
 	cd.next3();
-	ASSERT(cd.cur() == '(');
+	PHG_ASSERT(cd.cur() == '(');
 
 	gvarmapstack.push();
 	cd.next();
@@ -1103,7 +1109,7 @@ var callfunc_phg(code& cd) {
 		gvarmapstack.addvar(paramnamelist[i].c_str(), paramvallist[paramvallist.size() - 1 - i]);
 
 	var ret(0);
-	ASSERT(subtrunk(cd, ret, 0, true) == 2);
+	PHG_ASSERT(subtrunk(cd, ret, 0, true) == 2);
 	gvarmapstack.pop();
 
 	cd.ptr = cd.codestack.pop();
@@ -1119,7 +1125,7 @@ var callfunc(code& cd) {
 		api_fun_t& apifun = api_list[fnm];
 		apifun.args = 0;
 
-		ASSERT(cd.next3() == '(');
+		PHG_ASSERT(cd.next3() == '(');
 
 		cd.next();
 		while (!cd.eoc()) {
@@ -1136,6 +1142,7 @@ var callfunc(code& cd) {
 			else {
 				cd.valstack.push(expr(cd));
 				apifun.args++;
+				PRINT("add arg")
 			}
 		}
 		var ret = apifun.fun(cd, apifun.args);
@@ -1228,6 +1235,8 @@ void parser_default(code& cd) {
 // ------------------------------------------
 void init()
 {
+	errorcode = 0;
+
 	if (!parser)
 		parser = parser_default;
 	if (!statement)
@@ -1306,7 +1315,7 @@ void dofile(const char* filename)
 		init();
 
 	FILE* f;
-	ASSERT(0 == fopen_s(&f, filename, "rb"));
+	PHG_ASSERT(0 == fopen_s(&f, filename, "rb"));
 
 	int sp = ftell(f);
 	fseek(f, 0, SEEK_END);

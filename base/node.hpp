@@ -796,6 +796,7 @@ API(calc_expr)
 }
 API(walknode)
 {
+	ASSERT_RET(args >= 1)
 	string script = GET_SPARAM(1);
 	NODE* node = ROOT;
 	if (args > 1)
@@ -876,7 +877,8 @@ void NODE_REG_API()
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
 
-			NODE* n = a == "me" ? (ME) : GET_NODE(a, ROOT); ASSERT(n);
+			NODE* n = a == "me" ? (ME) : GET_NODE(a, ROOT);
+			ASSERT_RET(n);
 			string c = n->kv[b];
 			PRINT(a << "." << b << "=" << c);
 			var v; v.type = 0; node::res(v).node = n; node::res(v).key = b;v.sval = c;
