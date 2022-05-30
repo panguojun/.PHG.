@@ -1,7 +1,7 @@
 /****************************************************************************
-							Phg2.2
-							脚本是群论的扩展
-							运算式编程可以挖掘问题的内在对称性
+					Phg2.2
+					脚本是群论的扩展
+					运算式编程可以挖掘问题的内在对称性
 语法示例:
 
 #function
@@ -14,7 +14,7 @@ $blend(a, b, alpha)
 ab = blend(2,8, 0.25)
 >ab;
 
-#if
+#if - else
 ?(i = 1){
 t = t + 1;
 }:{
@@ -337,10 +337,10 @@ struct varmapstack_t
 struct code
 {
 	const char* start;
-	const char* ptr;
+	const char* ptr;	// code pointer
 	codestack_t			codestack;
 	std::map<fnname, functionptr>	funcnamemap;
-	std::vector<std::string>	strstack;
+	std::vector<std::string>		strstack;
 	valstack_t			valstack;
 	oprstack_t			oprstack;
 
@@ -350,8 +350,6 @@ struct code
 	code(const char* buf) {
 		start = buf;
 		ptr = buf;
-		//varmapstack.clear();
-		funcnamemap.clear();
 	}
 	char next0() {
 		return (*(++ptr));
