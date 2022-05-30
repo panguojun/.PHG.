@@ -442,14 +442,13 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 		}
 		else if (c == '{')
 		{
-			if (node.empty())
-			{
-				node = to_string(tree_t::genid()) + "_" + to_string(tree->children.size() + 1);
-			}
-
 			work_stack.push_back(tree);
 			ntree = new tree_t;
 			ntree->index = tree->children.size() + 1;
+			if (node.empty())
+			{
+				node = to_string(tree_t::genid()) + "_" + to_string(ntree->index);
+			}
 			ntree->name = node;
 			tree->children[ntree->name] = ntree;
 			ntree->parent = tree;
@@ -529,37 +528,6 @@ bool porperty_intree(tree_t* tree, const char* key, crstr val)
 		}
 	}
 	return false;
-}
-// 在节点树上搜索加法规则
-const char* walk_addtree(tree_t* tree, crstr v_a, crstr v_b, const char* key)
-{
-	if (tree->children.size() >= 2)
-	{
-		int findcnt = 0;
-		for (auto it : tree->children) {
-			if (it.second->children.empty() && it.second->kv[key] == v_a)
-			{
-				findcnt++;
-			}
-			if (it.second->children.empty() && it.second->kv[key] == v_b)
-			{
-				findcnt++;
-			}
-		}
-
-		if (findcnt == 2)
-		{
-			return tree->kv[key].c_str();
-		}
-	}
-
-	for (auto it : tree->children) {
-		if (const char* c = walk_addtree(it.second, v_a, v_b, key); c != 0)
-		{
-			return c;
-		}
-	}
-	return 0;
 }
 // ------------------------------------
 // node walker
