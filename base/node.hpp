@@ -324,13 +324,13 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 		else if (c == '{')
 		{
 			index++;
-			if (node.empty())
-			{
-				node = to_string(tree_t::genid()) + "." + to_string(tree->children.size() + 1);
-			}
 			work_stack.push_back(tree);
 			ntree = new tree_t;
 			ntree->index = tree->children.size() + 1;
+			if (node.empty())
+			{
+				node = to_string(tree_t::genid()) + "_" + to_string(ntree->index);
+			}
 			ntree->name = node;
 
 			tree->children[ntree->name] = ntree;
@@ -389,7 +389,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 					{
 						cd.next();
 						PRINTV(ret)
-							return;
+						return;
 					}
 				}
 				else
