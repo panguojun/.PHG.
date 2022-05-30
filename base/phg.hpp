@@ -33,16 +33,6 @@ yy = yy + 1;
 > yy;
 
 ****************************************************************************/
-
-//#define PHG_VAR(name, defaultval) (PHG::gcode.varmapstack.stack.empty() || PHG::gcode.varmapstack.stack.front().find(#name) == PHG::gcode.varmapstack.stack.front().end() ? defaultval : PHG::gcode.varmapstack.stack.front()[#name])
-//#define PHG_PARAM(index)	cd.valstack.get(args - index)
-
-//#define var			real
-//#define INVALIDVAR	(0)
-
-// ----------------------------------------------------------------------
-// PHG
-// ----------------------------------------------------------------------
 //namespace PHG{
 #define PHG_DEBUG
 //#define SYNTAXERR(msg)	ERRORMSG("At: " << cd.ptr - cd.start + 1 << ", ERR: " << msg)
@@ -64,6 +54,7 @@ yy = yy + 1;
 #define OPR			0x03FF
 #define LGOPR		0x04FF
 
+// -----------------------------------------------------
 //#ifndef code	
 struct code;
 //#endif
@@ -79,7 +70,7 @@ typedef void(*statement_fun)(code& cd);
 #endif
 statement_fun statement = 0;
 
-char rank[256];
+char rank[256];		// 是运算符等级设定数组
 
 std::vector<var> gtable;
 
@@ -124,9 +115,6 @@ struct api_fun_t
 	fun_t fun;
 };
 
-//using phg_hdr_t = std::function<void()>;
-//std::map<std::string, phg_hdr_t> api_map;
-
 std::map<std::string, api_fun_t> api_list;
 
 void(*table)(code& cd);
@@ -140,7 +128,7 @@ tree_fun tree = 0;
 // 运算
 var(*act)(code& cd, int args);
 
-// -----------------------------------------------------------------------
+// -----------------------------------------------------
 static inline bool checkline(char c) {
 	return (c == '\n' || c == '\r');
 }
@@ -166,6 +154,9 @@ static inline bool isbrackets(char c) {
 	return c == '(';
 }
 
+// -----------------------------------------------------
+// 堆栈定义
+// -----------------------------------------------------
 // stacks define
 struct codestack_t
 {
@@ -340,9 +331,9 @@ struct varmapstack_t
 	}
 } gvarmapstack;
 
-// -----------------------------------------------------------------------
-// code
-
+// -----------------------------------------------------
+// 代码结构体
+// -----------------------------------------------------
 struct code
 {
 	const char* start;
@@ -683,8 +674,9 @@ inline std::string getstring(code& cd, char s1 = '\'', char s2 = '\"', char ed =
 	//PRINTV(content)
 	return content;
 }
-// -----------------------------------------------------------------------
+// -----------------------------------------------------
 // 表达式 for example: x=a+b, v = fun(x), x > 2 || x < 5
+// -----------------------------------------------------
 var expr(code& cd, int args0 = 0, int rank0 = 0)
 {
 	//PRINT("expr( ");
@@ -1179,7 +1171,9 @@ void func(code& cd) {
 	finishtrunk(cd, 0);
 }
 
-// parser
+// ------------------------------------------
+// 默认解析器
+// ------------------------------------------
 void parser_default(code& cd) {
 	PRINT("--------PHG---------");
 	PRINT(cd.ptr);
@@ -1232,6 +1226,8 @@ void parser_default(code& cd) {
 }
 
 // ------------------------------------------
+// 初始化 与 外部调用
+// ------------------------------------------
 void init()
 {
 	if (!parser)
@@ -1278,21 +1274,6 @@ bool checkcode(const char* str)
 		ERRORMSG("number of \'{\' != \'}\'!");
 		return false;
 	}
-	/*if (count(codestr.begin(), codestr.end(), '[') != count(codestr.begin(), codestr.end(), ']'))
-	{
-		ERRORMSG("number of \'[\' != \']\'!");
-		return;
-	}
-	if (count(codestr.begin(), codestr.end(), '<') != count(codestr.begin(), codestr.end(), '>'))
-	{
-		ERRORMSG("number of \'<\' != \'>\'!");
-		return;
-	}*/
-	/*if (checkChinese(codestr.c_str()))
-	{
-		ERRORMSG("include Chinese charactor!");
-		return false;
-	}*/
 	return true;
 }
 // doexpr
