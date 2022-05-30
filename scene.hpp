@@ -242,8 +242,8 @@ namespace ScePHG
 		
 		REG_API(do, dostring);			// dostring
 
-		REG_API(tojson, tojson);		
-		REG_API(tojson2d, tojson2d);
+		REG_API(tojsn, tojson);		
+		REG_API(tojsn2, tojson2d);
 		
 		REG_API(dump, dump);
 

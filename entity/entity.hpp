@@ -81,7 +81,6 @@ namespace entity {
 	
 	void setup(tree_t* tree, const transform_t& parent)
 	{
-		PRINT("setup")
 		work_stack.push_back(tree);
 
 		ENT ent;
@@ -143,8 +142,6 @@ namespace entity {
 				KEY_VAL("s") // scale
 				{
 					s = storeal(it->second);
-
-					PRINTVEC3(s);
 				}
 			}
 			//PRINTVEC3(p);
@@ -164,11 +161,6 @@ namespace entity {
 					res(ent).vis = false;
 				}
 			}
-			
-			KEY_VAL("md") {
-				
-			}
-
 			KEY_VAL("cstr") {
 				res(ent).cstr = it->second;
 			}

@@ -1,6 +1,6 @@
 /**************************************************************************
-*					ç²¾çµ
-*				å¯ç»˜åˆ¶çš„2Dåœºæ™¯å¯¹è±¡
+*					¾«Áé
+*				¿É»æÖÆµÄ2D³¡¾°¶ÔÏó
 **************************************************************************/
 struct tree_t;
 inline string vec3tos(crvec v)
@@ -11,15 +11,15 @@ inline string vec3tos(crvec v)
 }
 namespace sprite
 {
-	struct transform2_t { vec2 p; real ang; real s = 1; };
+	struct transform2_t { vec2 p; real ang; vec2 s = vec2::ONE; };
 	struct spriteres_t
 	{
-		// æºå¸¦çš„å±æ€§
-		bool vis = true;		// å¯è§æ€§
+		// Ğ¯´øµÄÊôĞÔ
+		bool vis = true;		// ¿É¼ûĞÔ
 
-		transform2_t trans;		// ç©ºé—´å˜æ¢
-		float phang;			// ç›¸ä½è§’
-		string md;				// æ¨¡å‹
+		transform2_t trans;		// ¿Õ¼ä±ä»»
+		float phang;			// ÏàÎ»½Ç
+		string md;				// Ä£ĞÍ
 
 		spriteres_t() {}
 		spriteres_t(const spriteres_t& v)
@@ -30,7 +30,7 @@ namespace sprite
 		};
 		~spriteres_t() {}
 	};
-	vector<spriteres_t*> reslist;			// èµ„æºåˆ—è¡¨
+	vector<spriteres_t*> reslist;			// ×ÊÔ´ÁĞ±í
 	spriteres_t& res(ENT& ent)
 	{
 		if (ent.resid == -1)
@@ -119,9 +119,9 @@ namespace sprite
 				s
 			};
 			if (!str.empty()) str += ";";
-			str += (to_string(trans.p.x) + "," + to_string(trans.p.y) + "," + to_string(trans.ang) + "," + to_string(trans.s.x) + "," + to_string(trans.s.y)));
+			str += (to_string(trans.p.x) + "," + to_string(trans.p.y) + "," + to_string(trans.ang) + "," + to_string(trans.s.x) + "," + to_string(trans.s.y));
 		}
-		{// æ·»åŠ åˆ°å˜é‡åˆ—è¡¨
+		{// Ìí¼Óµ½±äÁ¿ÁĞ±í
 			KEY_VAL("vis") // vis
 			{
 				if (it->second == "false")
@@ -186,5 +186,5 @@ API(getspriteloc)
 }
 void SPRITE_REG_API()
 {
-	REG_API(getsprloc, getspriteloc);	// è·å¾—get sprite loc
+	REG_API(getsprloc, getspriteloc);	// »ñµÃget sprite loc
 }

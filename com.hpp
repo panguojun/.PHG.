@@ -214,6 +214,7 @@ struct vector2 {
 	};
 
 	static const vector2 ZERO;
+	static const vector2 ONE;
 	static const vector2 UX;
 	static const vector2 UY;
 	static const vector2 CENTER;
@@ -357,6 +358,7 @@ struct vector2 {
 };
 
 const vector2 vector2::ZERO = vector2(0, 0);
+const vector2 vector2::ONE = vector2(1, 1);
 const vector2 vector2::UX = vector2(1, 0);
 const vector2 vector2::UY = vector2(0, 1);
 const vector2 vector2::CENTER = vector2(0.5, 0.5);
