@@ -735,11 +735,11 @@ API(property)
 }
 void dump(tree_t* tree, const string& pre = "")
 {
-	PRINT(pre << tree->name << ":{")
+	PRINT(pre << tree->name << "{")
 	{
 		for (auto& it : tree->kv)
 		{
-			PRINT(it.first << ":" << it.second);
+			PRINT(pre << "\t" << it.first << ":" << it.second);
 		}
 	}
 	// children
@@ -923,7 +923,7 @@ void NODE_REG_API()
 	REG_API(array, array);			// 节点阵列 (正在放弃中...)
 	REG_API(sequ, sequ);			// 节点序列 (正在放弃中...)
 
-	REG_API(prop, property);		// 添加属性
+	REG_API(prop, property);		// 添加属性(正在放弃中...)
 
 	REG_API(wak, walknode);			// 遍历节点树
 
