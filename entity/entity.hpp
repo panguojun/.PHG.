@@ -47,7 +47,10 @@ namespace entity {
 			ent.resid = reslist.size() - 1;
 			//PRINT("create res id=" << resid);
 		}
-		ASSERT(ent.resid < reslist.size());
+		if (ent.resid >= reslist.size())
+		{
+			throw(std::runtime_error("可能是 setup()参数有误！"));
+		}
 		return *reslist[ent.resid];
 	}
 
@@ -172,29 +175,11 @@ namespace entity {
 			setup(it.second, trans);
 		}
 	}
-
-	
 }
 
 // ------------------------------------
 // API
 // ------------------------------------
-// phgoper
-void phgoper(tree_t* tree)
-{
-	work_stack.push_back(tree);
-	{// bool
-		KEY_VAL("phg")
-		{
-			ScePHG::dostring((it->second + ";").c_str());
-		}
-	}
-	// children
-	for (auto it : tree->children) {
-		phgoper(it.second);
-	}
-}
-
 void ENTITY_REG_API()
 {
 }

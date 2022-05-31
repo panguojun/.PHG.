@@ -20,7 +20,9 @@
 struct var_t
 {
 	std::function<var_t(var_t& a, var_t& b)> fun_add = 0;	// 资源加法函数
+	std::function<var_t(var_t& a, var_t& b)> fun_mul = 0;	// 资源乘法函数
 	std::function<void(const var_t& v)> fun_set = 0;		// 资源set函数
+
 	union {
 		int ival = 0;
 		real fval;
@@ -254,6 +256,7 @@ inline void _PHGPRINT(const std::string& pre, const var& v)
 #undef USE_STRING
 // ------------------------------------------
 // 运算
+// ------------------------------------------
 using fun_calc_t = std::function<var(code& cd, char o, int args)>;
 fun_calc_t fun_calc = 0;
 static var _act(code& cd, int args)
@@ -266,9 +269,9 @@ static var _act(code& cd, int args)
 			return ret;
 	}
 
-	PRINT("calc:" << o << "(" << args << ")")
+	PRINT("calc:" << o << "(" << args << ")");
 
-		switch (o) {
+	switch (o) {
 		case '+': {
 			if (args > 1) {
 				var& b = PHG_VALSTACK(1);
@@ -366,6 +369,6 @@ static var _act(code& cd, int args)
 			}
 		}
 		default: {}
-		}
+	}
 	return INVALIDVAR;
 }

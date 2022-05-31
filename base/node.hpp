@@ -529,6 +529,37 @@ bool porperty_intree(tree_t* tree, const char* key, crstr val)
 	}
 	return false;
 }
+// 在节点树上搜索加法规则
+const char* walk_addtree(tree_t* tree, crstr v_a, crstr v_b, const char* key)
+{
+	if (tree->children.size() >= 2)
+	{
+		int findcnt = 0;
+		for (auto it : tree->children) {
+			if (it.second->children.empty() && it.second->kv[key] == v_a)
+			{
+				findcnt++;
+			}
+			if (it.second->children.empty() && it.second->kv[key] == v_b)
+			{
+				findcnt++;
+			}
+		}
+
+		if (findcnt == 2)
+		{
+			return tree->kv[key].c_str();
+		}
+	}
+
+	for (auto it : tree->children) {
+		if (const char* c = walk_addtree(it.second, v_a, v_b, key); c != 0)
+		{
+			return c;
+		}
+	}
+	return 0;
+}
 // ------------------------------------
 // node walker
 // ------------------------------------
@@ -725,6 +756,8 @@ API(dump)
 }
 API(calc_expr)
 {
+	ASSERT_RET(args == 0)
+
 	ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
 		{
 			for (auto& it : tree->kv) {
@@ -732,18 +765,29 @@ API(calc_expr)
 				const char* ps = it.second.c_str();
 				const char* start = ps;
 				while (*ps != '\0') {
+					string phg_expr = "";
+					if ((*ps) == '(') {
+						int bracket_d = 1;
+						while (true) {
+							char nc = *(++ps);
 
-					if ((*ps) == '(')
-					{
-						int offset = ps - start + 1;
-						int cnt = 0;
-						while (*(++ps) != ')') cnt++;
+							if (nc == '(')
+								bracket_d++;
+							else if (nc == ')')
+								bracket_d--;
+
+							if (bracket_d == 0)
+								break;
+
+							phg_expr.push_back(nc);
+						}
 						{
 							// 内部变量
 							gvarmapstack.addvar("_i", tree->index);
 							gvarmapstack.addvar("_t", tree_t::getdepth(tree));
 						}
-						string str = it.second.substr(offset, cnt) + ";";
+						PRINTV(phg_expr);
+						string str = phg_expr + ";";
 						var v = ScePHG::doexpr(str.c_str());
 
 						result += VAR2STR(v);
@@ -777,6 +821,8 @@ API(walknode)
 	node_walker(node, [script](tree_t* tree)->void
 		{
 			work_stack.push_back(tree);
+			gvarmapstack.addvar("_i", tree->index);
+			gvarmapstack.addvar("_t", tree_t::getdepth(tree));
 			dostring((script + ";").c_str());
 		});
 	POP_SPARAM;

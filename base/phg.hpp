@@ -340,8 +340,8 @@ struct varmapstack_t
 // -----------------------------------------------------
 struct code
 {
-	const char* start;
 	const char* ptr;	// code pointer
+	const char* start;
 	codestack_t			codestack;
 	std::map<fnname, functionptr>	funcnamemap;
 	std::vector<std::string>		strstack;
