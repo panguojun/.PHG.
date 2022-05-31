@@ -416,7 +416,7 @@ API(getvec3)
 		if (!node)
 			return 0;
 	}
-	string key = "pos";
+	string key = "p";
 	if (args > 1)
 	{
 		key = GET_SPARAM(2);
@@ -426,6 +426,8 @@ API(getvec3)
 			auto& it = tree->kv.find(key);
 			if (it != tree->kv.end())
 			{
+				PRINTV(it->second);
+
 				string str = it->second;
 				fixedproperty(str);
 				vec3list.push_back(tovec3(str));

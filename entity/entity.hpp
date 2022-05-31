@@ -81,7 +81,12 @@ namespace entity {
 		sscanf(sval.c_str(), "%f,%f,%f,%f", &ret.x, &ret.y, &ret.z, &ret.w);
 		return ret;
 	}
-	
+	inline string v3tos(crvec v)
+	{
+		stringstream ss;
+		ss << v.x << "," << v.y << "," << v.z;
+		return ss.str();
+	}
 	void setup(tree_t* tree, const transform_t& parent)
 	{
 		work_stack.push_back(tree);
@@ -154,6 +159,7 @@ namespace entity {
 				parent.pyr + pyr, // 叠加？
 				parent.s * s
 			};
+			tree->kv["p"] = v3tos(trans.p);
 		}
 		{// 添加到变量列表
 			//ent.sval = tree->name;

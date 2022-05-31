@@ -1142,7 +1142,6 @@ var callfunc(code& cd) {
 			else {
 				cd.valstack.push(expr(cd));
 				apifun.args++;
-				PRINT("add arg")
 			}
 		}
 		var ret = apifun.fun(cd, apifun.args);

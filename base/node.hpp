@@ -244,7 +244,7 @@ static void _tree(code& cd, tree_t* tree, const string& pre, int depth = 0)
 		else if (c == '\'' || c == '\"') {
 
 			cd.next();
-			*pstr += getstring(cd,c,c,c);
+			*pstr += getstring(cd, c, c, c);
 		}
 
 		// default
@@ -389,7 +389,7 @@ static void _crt_array(code& cd, tree_t* tree, const string& pre, int depth, con
 					{
 						cd.next();
 						PRINTV(ret)
-						return;
+							return;
 					}
 				}
 				else
@@ -453,7 +453,7 @@ static void _crt_sequ(code& cd, tree_t* tree, const string& pre)
 			tree->children[ntree->name] = ntree;
 			ntree->parent = tree;
 
-			PRINT(pre << ntree->name << " : ");
+			//PRINT(pre << ntree->name << " : ");
 
 			_tree(cd, ntree, pre, tree_t::getdepth(tree) + 1);
 			tree = ntree; // parent->child
@@ -612,13 +612,13 @@ API(api_im)
 	}
 	else {
 		SPARAM(node);
-		if(node == "parent")
+		if (node == "parent")
 		{
 			if (me) me = me->parent;
 		}
-		else if(node == "child")
+		else if (node == "child")
 		{
-			if (me && !me->children.empty()) 
+			if (me && !me->children.empty())
 				me = me->children.begin()->second;
 		}
 		else
@@ -758,50 +758,50 @@ API(calc_expr)
 {
 	ASSERT_RET(args == 0)
 
-	ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
-		{
-			for (auto& it : tree->kv) {
-				string result;
-				const char* ps = it.second.c_str();
-				const char* start = ps;
-				while (*ps != '\0') {
-					string phg_expr = "";
-					if ((*ps) == '(') {
-						int bracket_d = 1;
-						while (true) {
-							char nc = *(++ps);
+		ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
+			{
+				for (auto& it : tree->kv) {
+					string result;
+					const char* ps = it.second.c_str();
+					const char* start = ps;
+					while (*ps != '\0') {
+						string phg_expr = "";
+						if ((*ps) == '(') {
+							int bracket_d = 1;
+							while (true) {
+								char nc = *(++ps);
 
-							if (nc == '(')
-								bracket_d++;
-							else if (nc == ')')
-								bracket_d--;
+								if (nc == '(')
+									bracket_d++;
+								else if (nc == ')')
+									bracket_d--;
 
-							if (bracket_d == 0)
-								break;
+								if (bracket_d == 0)
+									break;
 
-							phg_expr.push_back(nc);
+								phg_expr.push_back(nc);
+							}
+							{
+								// 内部变量
+								gvarmapstack.addvar("_i", tree->index);
+								gvarmapstack.addvar("_t", tree_t::getdepth(tree));
+							}
+							PRINTV(phg_expr);
+							string str = phg_expr + ";";
+							var v = ScePHG::doexpr(str.c_str());
+
+							result += VAR2STR(v);
 						}
+						else
 						{
-							// 内部变量
-							gvarmapstack.addvar("_i", tree->index);
-							gvarmapstack.addvar("_t", tree_t::getdepth(tree));
+							result += *ps;
 						}
-						PRINTV(phg_expr);
-						string str = phg_expr + ";";
-						var v = ScePHG::doexpr(str.c_str());
-
-						result += VAR2STR(v);
+						++ps;
 					}
-					else
-					{
-						result += *ps;
-					}
-					++ps;
+					it.second = result;
+					//PRINTV(result);
 				}
-				it.second = result;
-				//PRINTV(result);
-			}
-		});
+			});
 	POP_SPARAM;
 
 	return 0;
@@ -809,7 +809,7 @@ API(calc_expr)
 API(walknode)
 {
 	ASSERT_RET(args >= 1)
-	string script = GET_SPARAM(1);
+		string script = GET_SPARAM(1);
 	NODE* node = ROOT;
 	if (args > 1)
 	{
@@ -826,10 +826,10 @@ API(walknode)
 			dostring((script + ";").c_str());
 		});
 	POP_SPARAM;
-	
+
 	return 0;
 }
-namespace node{
+namespace node {
 	struct res_t
 	{
 		// 携带的属性
@@ -895,7 +895,7 @@ void NODE_REG_API()
 			ASSERT_RET(n);
 			string c = n->kv[b];
 			PRINT(a << "." << b << "=" << c);
-			var v; v.type = 0; node::res(v).node = n; node::res(v).key = b;v.sval = c;
+			var v; v.type = 0; node::res(v).node = n; node::res(v).key = b; v.sval = c;
 			strlist.push_back(c);
 			POP_SPARAM;
 			//PHG_VALPOP(2);
@@ -908,14 +908,14 @@ void NODE_REG_API()
 		int args = 1;
 		PRINT("PROP: " << a << "." << b);
 
-		NODE* n = strcmp(a, "me") == 0 ? (ME) : GET_NODE(a, ROOT); 
+		NODE* n = strcmp(a, "me") == 0 ? (ME) : GET_NODE(a, ROOT);
 		ASSERT(n);
 		//PRINTV(cd.strstack.size());
 		string sv = GET_SPARAM(1);
 		n->kv[b] = sv;
 		POP_SPARAM;
 		});
-	
+
 	REG_API(im, api_im);			// ME
 	REG_API(bye, api_bye);			// ME = NULL(正在放弃中...)
 	REG_API(on, api_on);			// 当前属性
@@ -923,7 +923,7 @@ void NODE_REG_API()
 	REG_API(sequ, sequ);			// 节点序列 (正在放弃中...)
 
 	REG_API(prop, property);		// 添加属性
-	
+
 	REG_API(wak, walknode);			// 遍历节点树
 
 	REG_API(doexpr, calc_expr);		// 执行表达式
