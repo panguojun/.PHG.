@@ -739,6 +739,7 @@ void dump(tree_t* tree, const string& pre = "")
 	{
 		for (auto& it : tree->kv)
 		{
+			PRINT(it.first << ":" << it.second);
 		}
 	}
 	// children
