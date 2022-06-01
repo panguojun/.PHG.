@@ -615,7 +615,7 @@ void getval(code& cd, short type) {
 				else
 				{
 					//PRINT("var: " << name << " not found!");
-					//cd.valstack.push(INVALIDVAR);
+					cd.valstack.push(var(name));
 				}
 			}
 			cd.next3();
