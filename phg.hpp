@@ -742,7 +742,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 					cd.next();
 					args++;
 				}
-				char no = cd.getnext4();
+				char no = isnum(cd.cur()) ? cd.getnext5() : cd.getnext4();
 				//PRINTV(no);
 				if (cd.cur() != '(' &&
 					iscalc(no) || islogic(no))
@@ -765,8 +765,13 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 						args++;
 
 						cd.valstack.push(act(cd, args));
-						args = 1;
-						continue;
+						char nc = cd.getnext();
+						if (iscalc(nc) || islogic(nc)) {
+							args = 1;
+							continue;
+						}
+						else
+							return cd.valstack.pop();
 					}
 				}
 			}
@@ -1291,8 +1296,8 @@ bool checkcode(const char* str)
 // doexpr
 var doexpr(const char* str)
 {
-	PRINT("doexpr " << str)
-		code cd(str);
+	//PRINT("doexpr " << str)
+	code cd(str);
 
 	return expr(cd);
 }
