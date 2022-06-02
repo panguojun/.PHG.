@@ -763,11 +763,14 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 
 						cd.valstack.push(expr(cd, 1, rank[o]));
 						args++;
-
 						cd.valstack.push(act(cd, args));
-						//args = 1;
-						//continue;
-						return cd.valstack.pop();
+						char nc = cd.cur();
+						if(iscalc(nc) || islogic(nc)){
+							args = 1;
+							continue;
+						}
+						else
+							return cd.valstack.pop();
 					}
 				}
 			}
