@@ -193,6 +193,10 @@ struct valstack_t
 		//PRINT("PUSH")
 		stack.push_back(v);
 	}
+	inline void push(var&& v) {
+		//PRINT("PUSH")
+		stack.push_back(v);
+	}
 	var pop() {
 		//PRINT("POP")
 		if (stack.empty())
@@ -697,7 +701,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 			string str = getstring(cd, type, type, type);
 			cd.strstack.push_back(str);
 #ifdef USE_STRING			
-			cd.valstack.push(var(str.c_str()));
+			cd.valstack.push(std::move(var(str.c_str())));
 			args++;
 			//	PRINTV(cd.cur());
 #else
@@ -895,9 +899,9 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			PHG_ASSERT(cd.next() == '(');
 		IF_STATEMENT:
 			cd.next();
-			int e = int(expr(cd));
+			bool e = bool(expr(cd));
 			cd.next();
-			if (e == 0) {// else
+			if (e == false) {// else
 				finishtrunk(cd, 0);
 
 				if (cd.cur() == '}')
