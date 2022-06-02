@@ -62,7 +62,7 @@ std::string log(const Request &req, const Response &res) {
 }
 
 extern void onrequest(const std::string& msg, const std::string& body, std::string& out);
-std::string serverip = "localhost";
+std::string serverip = "127.0.0.1";
 int servermain(int num) {
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
   SSLServer svr(SERVER_CERT_FILE, SERVER_PRIVATE_KEY_FILE);

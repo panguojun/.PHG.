@@ -742,6 +742,7 @@ void dump(tree_t* tree, const string& pre = "")
 			PRINT(pre << "\t" << it.first << ":" << it.second);
 		}
 	}
+
 	// children
 	for (auto& it : tree->children) {
 		dump(it.second, pre + "\t");
@@ -787,7 +788,7 @@ API(calc_expr)
 								gvarmapstack.addvar("_i", tree->index);
 								gvarmapstack.addvar("_t", tree_t::getdepth(tree));
 							}
-							PRINTV(phg_expr);
+							//PRINTV(phg_expr);
 							string str = phg_expr + ";";
 							var v = ScePHG::doexpr(str.c_str());
 

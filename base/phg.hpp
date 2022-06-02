@@ -615,7 +615,9 @@ void getval(code& cd, short type) {
 				else
 				{
 					//PRINT("var: " << name << " not found!");
-					cd.valstack.push(var(name));
+#ifdef USE_STRING	
+					cd.valstack.push(var(name)); // 变量找不到 按照字符串处理
+#endif
 				}
 			}
 			cd.next3();

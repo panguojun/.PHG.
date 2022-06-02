@@ -269,7 +269,7 @@ static var _act(code& cd, int args)
 			return ret;
 	}
 
-	PRINT("calc:" << o << "(" << args << ")");
+	//PRINT("calc:" << o << "(" << args << ")");
 
 	switch (o) {
 		case '+': {

@@ -330,6 +330,18 @@ namespace JSON_PARSER
 		strlist.clear();
 		strlist.push_back(jsn.str());
 	}
+	void fixedstring(string& out, const char* str)
+	{
+		out.clear();
+		char c;
+		while (true)
+		{
+			c = *str++;
+			if (c == '\n') c = (*str++);
+			if (c == 0) break;
+			out += c;
+		}
+	}
 	// to JSON (flat for unity2d)
 	void tojson2d(NODE* me, std::stringstream& jsn, const string& pre = "")
 	{
@@ -345,7 +357,9 @@ namespace JSON_PARSER
 					}
 					else {
 						jsn << ",\n";
-						jsn << pre << "\t" << "\"" << it.first << "\":\"" << it.second << "\"";
+						string str;
+						fixedstring(str, it.second.c_str());
+						jsn << pre << "\t" << "\"" << it.first << "\":\"" << str << "\"";
 					}
 				}
 				{
