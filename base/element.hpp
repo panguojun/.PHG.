@@ -69,9 +69,9 @@ struct var_t
 		else if(type == 1)
 			ival = v.ival;
 		else if(fun_set)
-		{
 			fun_set(v);
-		}
+		else
+			sval = v.sval;
 		resid = v.resid;
 	}
 	bool operator == (int v) const
@@ -90,6 +90,15 @@ struct var_t
 	bool operator != (const var_t& v) const
 	{
 		return !(*this == v);
+	}
+	operator bool() const
+	{
+		//PRINT("var_t::int " << ival)
+		if (type == 1)
+			return ival != 0;
+		if (type == 2)
+			return (int)fval != 0;
+		return !sval.empty() && sval != "";
 	}
 	operator int() const
 	{

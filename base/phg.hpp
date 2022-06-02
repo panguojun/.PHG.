@@ -1,7 +1,7 @@
 /****************************************************************************
-					Phg2.2
-					脚本是群论的扩展
-					运算式编程可以挖掘问题的内在对称性
+							Phg2.2
+							脚本是群论的扩展
+							运算式编程可以挖掘问题的内在对称性
 语法示例:
 
 #function
@@ -765,8 +765,9 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 						args++;
 
 						cd.valstack.push(act(cd, args));
-						args = 1;
-						continue;
+						//args = 1;
+						//continue;
+						return cd.valstack.pop();
 					}
 				}
 			}

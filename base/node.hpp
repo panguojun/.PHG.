@@ -592,6 +592,7 @@ tree_t* _getbyprop(tree_t* tree, crstr key, crstr val)
 }
 API(api_im)
 {
+	ASSERT_RET(ROOT);
 	ASSERT(args == 1);
 
 	NODE* me = 0;
@@ -639,6 +640,7 @@ API(api_bye)
 }
 API(api_on)
 {
+	ASSERT_RET(ROOT);
 	ASSERT(args == 1);
 
 	SPARAM(on);
@@ -758,52 +760,51 @@ API(dump)
 }
 API(calc_expr)
 {
-	ASSERT_RET(args == 0)
+	ASSERT_RET(args == 0);
+	ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
+		{
+			for (auto& it : tree->kv) {
+				string result;
+				const char* ps = it.second.c_str();
+				const char* start = ps;
+				while (*ps != '\0') {
+					string phg_expr = "";
+					if ((*ps) == '(') {
+						int bracket_d = 1;
+						while (true) {
+							char nc = *(++ps);
 
-		ScePHG::node_walker(ROOT, [](ScePHG::tree_t* tree)->void
-			{
-				for (auto& it : tree->kv) {
-					string result;
-					const char* ps = it.second.c_str();
-					const char* start = ps;
-					while (*ps != '\0') {
-						string phg_expr = "";
-						if ((*ps) == '(') {
-							int bracket_d = 1;
-							while (true) {
-								char nc = *(++ps);
+							if (nc == '(')
+								bracket_d++;
+							else if (nc == ')')
+								bracket_d--;
 
-								if (nc == '(')
-									bracket_d++;
-								else if (nc == ')')
-									bracket_d--;
+							if (bracket_d == 0)
+								break;
 
-								if (bracket_d == 0)
-									break;
-
-								phg_expr.push_back(nc);
-							}
-							{
-								// 内部变量
-								gvarmapstack.addvar("_i", tree->index);
-								gvarmapstack.addvar("_t", tree_t::getdepth(tree));
-							}
-							//PRINTV(phg_expr);
-							string str = phg_expr + ";";
-							var v = ScePHG::doexpr(str.c_str());
-
-							result += VAR2STR(v);
+							phg_expr.push_back(nc);
 						}
-						else
 						{
-							result += *ps;
+							// 内部变量
+							gvarmapstack.addvar("_i", tree->index);
+							gvarmapstack.addvar("_t", tree_t::getdepth(tree));
 						}
-						++ps;
+						//PRINTV(phg_expr);
+						string str = phg_expr + ";";
+						var v = ScePHG::doexpr(str.c_str());
+
+						result += VAR2STR(v);
 					}
-					it.second = result;
-					//PRINTV(result);
+					else
+					{
+						result += *ps;
+					}
+					++ps;
 				}
-			});
+				it.second = result;
+				//PRINTV(result);
+			}
+		});
 	POP_SPARAM;
 
 	return 0;
@@ -885,36 +886,38 @@ namespace node {
 void NODE_REG_API()
 {
 	CALC([](code& cd, char o, int args)->var {
-
-		//PRINT("CALC: " << o << "(" << args << ")");
-		//PRINTV(ME->name);
 		if (o == '.')
 		{
+			ASSERT_RET(ROOT);
 			crstr a = GET_SPARAM(1);
 			crstr b = GET_SPARAM(2);
-
+			PRINT("PROP GET: " << a << "." << b);
 			NODE* n = a == "me" ? (ME) : GET_NODE(a, ROOT);
 			ASSERT_RET(n);
 			string c = n->kv[b];
 			PRINT(a << "." << b << "=" << c);
-			var v; v.type = 0; node::res(v).node = n; node::res(v).key = b; v.sval = c;
-			strlist.push_back(c);
+			var v; v.type = 0; v.sval = c; node::res(v).node = n; node::res(v).key = b;
+			
 			POP_SPARAM;
-			//PHG_VALPOP(2);
 			cd.strstack.push_back(c);
+			strlist.push_back(c);
 			return v;
 		}
 		return 0;
 		});
 	PROP([](code& cd, const char* a, const char* b, var& v) {
+		if (!ROOT) return;
 		int args = 1;
-		PRINT("PROP: " << a << "." << b);
+		PRINT("PROP SET: " << a << "." << b);
 
 		NODE* n = strcmp(a, "me") == 0 ? (ME) : GET_NODE(a, ROOT);
 		ASSERT(n);
 		//PRINTV(cd.strstack.size());
 		string sv = GET_SPARAM(1);
-		n->kv[b] = sv;
+		if (sv == "nil")
+			n->kv.erase(b);
+		else
+			n->kv[b] = sv;
 		POP_SPARAM;
 		});
 
