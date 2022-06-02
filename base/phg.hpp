@@ -1,7 +1,7 @@
 /****************************************************************************
-							Phg2.2
-							脚本是群论的扩展
-							运算式编程可以挖掘问题的内在对称性
+					Phg2.2
+					脚本是群论的扩展
+					运算式编程可以挖掘问题的内在对称性
 语法示例:
 
 #function
@@ -190,6 +190,10 @@ struct valstack_t
 {
 	std::vector<var> stack;
 	void push(const var& v) {
+		//PRINT("PUSH")
+		stack.push_back(v);
+	}
+	inline void push(var&& v) {
 		//PRINT("PUSH")
 		stack.push_back(v);
 	}
@@ -697,7 +701,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 			string str = getstring(cd, type, type, type);
 			cd.strstack.push_back(str);
 #ifdef USE_STRING			
-			cd.valstack.push(var(str.c_str()));
+			cd.valstack.push(std::move(var(str.c_str())));
 			args++;
 			//	PRINTV(cd.cur());
 #else
@@ -738,7 +742,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 					cd.next();
 					args++;
 				}
-				char no = cd.getnext4();
+				char no = isnum(cd.cur()) ? cd.getnext5() : cd.getnext4();
 				//PRINTV(no);
 				if (cd.cur() != '(' &&
 					iscalc(no) || islogic(no))
@@ -895,9 +899,9 @@ int subtrunk(code& cd, var& ret, int depth, bool bfunc, bool bsingleline = false
 			PHG_ASSERT(cd.next() == '(');
 		IF_STATEMENT:
 			cd.next();
-			int e = int(expr(cd));
+			bool e = bool(expr(cd));
 			cd.next();
-			if (e == 0) {// else
+			if (e == false) {// else
 				finishtrunk(cd, 0);
 
 				if (cd.cur() == '}')
@@ -1287,8 +1291,8 @@ bool checkcode(const char* str)
 // doexpr
 var doexpr(const char* str)
 {
-	PRINT("doexpr " << str)
-		code cd(str);
+	//PRINT("doexpr " << str)
+	code cd(str);
 
 	return expr(cd);
 }
