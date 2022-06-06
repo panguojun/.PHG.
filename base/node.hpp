@@ -754,8 +754,14 @@ void dump(tree_t* tree, const string& pre = "")
 API(dump)
 {
 	PRINT("------------- DUMP ----------------");
-	if (ROOT)
-		dump(ROOT);
+	NODE* n = ROOT;
+	if (args >= 1)
+	{
+		SPARAM(a);
+		n = a == "me" ? (ME) : GET_NODE(a, ROOT);
+	}
+		
+	dump(n);
 	return 0;
 }
 API(calc_expr)
@@ -811,8 +817,8 @@ API(calc_expr)
 }
 API(walknode)
 {
-	ASSERT_RET(args >= 1)
-		string script = GET_SPARAM(1);
+	ASSERT_RET(args >= 1);
+	string script = GET_SPARAM(1);
 	NODE* node = ROOT;
 	if (args > 1)
 	{
@@ -890,12 +896,15 @@ void NODE_REG_API()
 		{
 			ASSERT_RET(ROOT);
 			crstr a = GET_SPARAM(1);
-			crstr b = GET_SPARAM(2);
-			PRINT("PROP GET: " << a << "." << b);
+			//string b = GET_SPARAM(2);
+			crstr b = PHG_PARAM(2).tostr();
+
+			PHG_PRINT("PROP GET: " << a << "." << b);
 			NODE* n = a == "me" ? (ME) : GET_NODE(a, ROOT);
 			ASSERT_RET(n);
+
 			string c = n->kv[b];
-			PRINT(a << "." << b << "=" << c);
+			PHG_PRINT(a << "." << b << "=" << c);
 			var v; v.type = 0; v.sval = c; node::res(v).node = n; node::res(v).key = b;
 			
 			POP_SPARAM;
@@ -908,7 +917,7 @@ void NODE_REG_API()
 	PROP([](code& cd, const char* a, const char* b, var& v) {
 		if (!ROOT) return;
 		int args = 1;
-		PRINT("PROP SET: " << a << "." << b);
+		PHG_PRINT("PROP SET: " << a << "." << b);
 
 		NODE* n = strcmp(a, "me") == 0 ? (ME) : GET_NODE(a, ROOT);
 		ASSERT(n);

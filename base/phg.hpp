@@ -37,8 +37,8 @@ yy = yy + 1;
 #define PHG_DEBUG
 //#define SYNTAXERR(msg)	ERRORMSG("At: " << cd.ptr - cd.start + 1 << ", ERR: " << msg)
 #define SYNTAXERR(msg)	ERRORMSG("ERR: " << msg << "\nAt: \n" << cd.ptr)
-#define PHG_ASSERT(x) {if(!(x)){std::stringstream ss; ss << "PHG ASSERT FAILED! " << __FILE__ << "(" << __LINE__ << ")"; ::MessageBoxA(0, ss.str().c_str(), "PHG ASSERT", 0); errorcode = 1;} }
-
+#define PHG_ASSERT(x)	{if(!(x)){std::stringstream ss; ss << "PHG ASSERT FAILED! " << __FILE__ << "(" << __LINE__ << ")"; ::MessageBoxA(0, ss.str().c_str(), "PHG ASSERT", 0); errorcode = 1;} }
+#define PHG_PRINT(x)	{if(becho) MYTRACE(x)}
 #define INVALIDFUN	cd.funcnamemap.end()
 
 #define ADD_VAR		GROUP::gvarmapstack.addvar
@@ -91,7 +91,7 @@ std::vector<std::string> gstable;
 extern struct varmapstack_t;
 extern varmapstack_t	gvarmapstack;
 #endif
-
+bool	becho = true;
 inline int add2table(const var& v)
 {
 	for (int i = 0; i < gtable.size(); i++)
@@ -742,7 +742,7 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 					cd.next();
 					args++;
 				}
-				char no = isnum(cd.cur()) ? cd.getnext5() : cd.getnext4();
+				char no = (isnum(cd.cur())) ? cd.getnext5() : cd.getnext4();
 				//PRINTV(no);
 				if (cd.cur() != '(' &&
 					iscalc(no) || islogic(no))
@@ -825,6 +825,11 @@ void singvar(code& cd) {
 	{
 		cd.next();
 		std::string prop = cd.getname();
+#ifdef USE_STRING
+		var va;
+		if (gvarmapstack.getvar(va, prop.c_str()))
+			prop = va.tostr();
+#endif
 		//PRINTV(prop);
 		cd.next3();
 		PHG_ASSERT(cd.cur() == '=');
@@ -1131,7 +1136,7 @@ var callfunc(code& cd) {
 	fnname fnm = cd.getname();
 	if (api_list.find(fnm) != api_list.end())
 	{
-		PRINT("API:" << fnm);
+		PHG_PRINT("API:" << fnm);
 		api_fun_t& apifun = api_list[fnm];
 		apifun.args = 0;
 
@@ -1168,7 +1173,7 @@ var callfunc(code& cd) {
 // func
 void func(code& cd) {
 	fnname fnm = cd.getname();
-	PRINT("define func: " << fnm);
+	PHG_PRINT("define func: " << fnm);
 	if (cd.funcnamemap.find(fnm) != cd.funcnamemap.end())
 	{
 		ERRORMSG("function named: '" << fnm << " already exists!");
@@ -1189,9 +1194,9 @@ void func(code& cd) {
 // 默认解析器
 // ------------------------------------------
 void parser_default(code& cd) {
-	PRINT("--------PHG---------");
-	PRINT(cd.ptr);
-	PRINT("--------------------");
+	PHG_PRINT("--------PHG---------");
+	PHG_PRINT(cd.ptr);
+	PHG_PRINT("--------------------");
 
 	rank['|'] = 1;
 	rank['^'] = 1;

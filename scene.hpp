@@ -220,7 +220,13 @@ namespace ScePHG
 
 		return 0;
 	}
-	
+
+	API(echo)
+	{
+		SPARAM(param1);
+		becho = atoi(param1.c_str());
+		return 0;
+	}
 	// -----------------------------------
 	// REG API
 	// -----------------------------------
@@ -244,8 +250,9 @@ namespace ScePHG
 
 		REG_API(tojsn, tojson);		
 		REG_API(tojsn2, tojson2d);
-		
-		REG_API(dump, dump);
+
+		REG_API(echo, echo);			// 打印开关
+		REG_API(dump, dump);			// 打印节点树
 
 		REG_API(setup, setuptree);		// 生成节点树
 
