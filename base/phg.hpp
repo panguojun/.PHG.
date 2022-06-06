@@ -590,13 +590,14 @@ inline var chars2var(code& cd) {
 }
 
 // get value
-void getval(code& cd, short type) {
+bool getval(code& cd, short type) {
 
 	if (type == NUMBER) {
 		cd.valstack.push(chars2var(cd));
 		/*if (cd.oprstack.empty() || !(iscalc(cd.oprstack.cur()) || islogic(cd.oprstack.cur()))) {
 			cd.oprstack.push('.');
 		}*/
+		return true;
 	}
 	else if (type == NAME) {
 		const char* name = cd.getname();
@@ -631,7 +632,9 @@ void getval(code& cd, short type) {
 		//if (cd.oprstack.empty() || !(iscalc(cd.oprstack.cur()) || islogic(cd.oprstack.cur()))) {
 		//	cd.oprstack.push('.');
 		//}
+		return true;
 	}
+	return false;
 }
 // finished trunk
 void finishtrunk(code& cd, int trunkcnt = 0)
@@ -735,14 +738,17 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 				args++;
 			}
 			else {
+				char no;
 				if (cd.cur() == '(')
 				{
 					cd.next();
 					cd.valstack.push(expr(cd));
+					no = cd.getnext4();
 					cd.next();
 					args++;
 				}
-				char no = (isnum(cd.cur())) ? cd.getnext5() : cd.getnext4();
+				else
+					no = isnum(cd.cur()) ? cd.getnext5() : cd.getnext4();
 				//PRINTV(no);
 				if (cd.cur() != '(' &&
 					iscalc(no) || islogic(no))
@@ -751,21 +757,22 @@ var expr(code& cd, int args0 = 0, int rank0 = 0)
 						cd.next();
 
 					type = get(cd);
-					if (rank[o] >= rank[no]) {
-						getval(cd, type);
-						args++;
+					if (rank[o] >= rank[no]) { // A*B+...
+						if(getval(cd, type))
+							args++;
 
 						cd.valstack.push(act(cd, args));
 						args = 1;
 					}
-					else {
+					else { // A+B*...
 						getval(cd, type);
 
 						cd.valstack.push(expr(cd, 1, rank[o]));
 						args++;
+
 						cd.valstack.push(act(cd, args));
 						char nc = cd.cur();
-						if(iscalc(nc) || islogic(nc)){
+						if (iscalc(nc) || islogic(nc)) {
 							args = 1;
 							continue;
 						}
