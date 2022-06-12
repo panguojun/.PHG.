@@ -1,1 +1,29 @@
-so('Hello world');
+{# script for 3d modeling 
+  a0{md:spine2;z:12;s:10}
+  a{a0,s:2.1;seg:2;
+    {md:gear;y:-4;yaw:90;s:1.25}
+    {md:wingr;y:4;yaw:90;s:1.25}
+  }
+  b{md:pipe1;z:5}
+  w1{b,pit:90;
+    {md:wheel;x:2;rol:90;s:2}}
+  w2{b,yaw:90;
+    {md:wheel;x:2;rol:90;s:2}}
+  dan{md:unkown;s:(rnd(52)/3.0);
+    x:(rnd(55)-rnd(55));
+    y:(rnd(25)-rnd(175));
+    z:(rnd(75)-rnd(75))}
+  tree{md:tree3;
+    y:-20;s:550;pit:90}
+
+  this{z:-5;s:0.3;y:-20
+    {s:2;y:15;
+      [{a},a,a,a,a,a,a,
+      a,a,a,a,a,a,a,a,a,a,a,a]}
+
+    {md:liandanlu1;y:-150;s:20;pit:90}
+    {y:50;[dan,dan,dan,dan,dan,dan,dan]}
+    {tree,md:tree7}
+  }
+}
+doexpr();setup('entity');tojson('this');
