@@ -772,43 +772,45 @@ API(calc_expr)
 			for (auto& it : tree->kv) {
 				string result;
 				const char* ps = it.second.c_str();
-				const char* start = ps;
-				while (*ps != '\0') {
-					string phg_expr = "";
-					if ((*ps) == '(') {
-						int bracket_d = 1;
-						while (true) {
-							char nc = *(++ps);
+				if (*ps == '(') {
+					const char* start = ps;
+					while (*ps != '\0') {
+						string phg_expr = "";
+						if ((*ps) == '(') {
+							int bracket_d = 1;
+							while (true) {
+								char nc = *(++ps);
 
-							if (nc == '(')
-								bracket_d++;
-							else if (nc == ')')
-								bracket_d--;
+								if (nc == '(')
+									bracket_d++;
+								else if (nc == ')')
+									bracket_d--;
 
-							if (bracket_d == 0)
-								break;
+								if (bracket_d == 0)
+									break;
 
-							phg_expr.push_back(nc);
+								phg_expr.push_back(nc);
+							}
+							{
+								// 内部变量
+								gvarmapstack.addvar("_i", tree->index);
+								gvarmapstack.addvar("_t", tree_t::getdepth(tree));
+							}
+							//PRINTV(phg_expr);
+							string str = phg_expr + ";";
+							var v = ScePHG::doexpr(str.c_str());
+
+							result += VAR2STR(v);
 						}
+						else
 						{
-							// 内部变量
-							gvarmapstack.addvar("_i", tree->index);
-							gvarmapstack.addvar("_t", tree_t::getdepth(tree));
+							result += *ps;
 						}
-						//PRINTV(phg_expr);
-						string str = phg_expr + ";";
-						var v = ScePHG::doexpr(str.c_str());
-
-						result += VAR2STR(v);
+						++ps;
 					}
-					else
-					{
-						result += *ps;
-					}
-					++ps;
+					it.second = result;
+					//PRINTV(result);
 				}
-				it.second = result;
-				//PRINTV(result);
 			}
 		});
 	POP_SPARAM;
