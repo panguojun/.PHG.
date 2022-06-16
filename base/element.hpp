@@ -84,8 +84,12 @@ struct var_t
 	}
 	bool operator == (const var_t& v) const
 	{
-		return  (type == v.type && ((type == 1 && ival == v.ival) || (type == 2 && fval == v.fval))) ||
+		return
+			(type == v.type && ((type == 1 && ival == v.ival) ||
+			((type == 0 || v.type == 0) && sval == v.sval) ||
+			(type == 2 && fval == v.fval))) ||
 			(type != v.type && float(*this) == float(v));
+
 	}
 	bool operator != (const var_t& v) const
 	{
