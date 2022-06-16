@@ -772,7 +772,7 @@ API(calc_expr)
 			for (auto& it : tree->kv) {
 				string result;
 				const char* ps = it.second.c_str();
-				if (*ps == '(') {
+				if (*ps != '\"' && *ps != '\'') {
 					const char* start = ps;
 					while (*ps != '\0') {
 						string phg_expr = "";
