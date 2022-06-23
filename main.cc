@@ -25,7 +25,16 @@ void onrequest(const std::string& msg, const std::string& body, std::string& out
 	else if (msg == "cmd")
 	{
 		ScePHG::strlist.clear();
-		ScePHG::dostring(body.c_str()); 
+		{
+			if (body.find(".r") != std::string::npos)
+			{
+				ScePHG::dofile(body.c_str());
+			}
+			else
+			{
+				ScePHG::dostring(body.c_str());
+			}
+		}
 
 		/*stringstream jsn;
 		jsn << "{\"" << "nodes" << "\":[\n";
