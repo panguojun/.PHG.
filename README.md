@@ -7,24 +7,24 @@
 ![FV67FCfUEAEQQfb](https://user-images.githubusercontent.com/8099625/175246104-a1f453da-c92c-4afa-8660-b7fdfe00391a.png)
 
 # API
-echo()
-dump()
-msgbox()
+echo()  
+dump()  
+msgbox()  
 
-rnd()
-sin()
-cos()
+rnd()  
+sin()  
+cos()  
 
-im()
-on()
+im()  
+on()  
 
-wak()
-expr()
+wak()  
+expr()  
 
-add()
-sub()
-calc()
+add()  
+sub()  
+calc()  
 
-draw()
-setup()
-tojson()
+draw()  
+setup()  
+tojson()  
