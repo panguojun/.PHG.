@@ -2,16 +2,17 @@
 *{PHG} : A mini programming language for describing everything.*
 
 ![phg](https://user-images.githubusercontent.com/8099625/169991127-eddeb6bd-b67b-4359-a68a-14e16da3863d.png)
+
 PHG is a minimalist programming language named after bacteriophage. This language combines the idea of group theory to carry out custom overloading of variables and operation elements in the host program.
 {PHG} is a specialization PHG for describing the structure of nodes, which is a descriptive language. The nodes it describes can be given any meaning, such as 3D scene nodes, 2D sprite nodes, etc. Internally combines some special syntax and embedded PHG statements to describe complex scenes with the simplest text.
-##Basic Concept
+## Basic Concept
 -Define {a}, define a node a.
 -Property property : value;
 -Attribute attribute = value;
 -Inherit {a}, inherit properties from existing nodes, but not properties
 -Array[a,b,c] and Queue<a,b,c> (see page 4 for details)
 -Immediate statement (phg) immediately executes the PHG statement enclosed in parentheses
-##Sequences and Arrays
+## Sequences and Arrays
 -A sequence refers to an ordered N-tuple, and the sequence itself can be used as an element to participate in four operations
 			<a,b,c,d>  
  The relationship formula between sequence and node expression:
@@ -19,7 +20,7 @@ PHG is a minimalist programming language named after bacteriophage. This languag
 -Arrays are the concept of arrays and can also perform Boolean operations according to set theory
 		[a,b,c,d] = {{a}{b}{c}{d}}![image](https://user-images.githubusercontent.com/8099625/181430554-9ffd85ea-dd9e-4890-938e-c151c76d9438.png)
 
-##Basic Syntax - Symbols
+## Basic Syntax - Symbols
 -#comment
 -@cycle? :condition
 -$ function and return
