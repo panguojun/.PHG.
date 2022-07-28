@@ -52,6 +52,29 @@ PHG is a minimalist programming language named after bacteriophage. This languag
   @n{ statement1 ?(_i = x) ˜;statement2 }
   @ (expr){ statement }
 ```
+## Basic Syntax - Functions
+- Functions are divided into script custom functions and host API functions
+- Custom function format:
+```
+	$function(args...) { statement $return }
+```	
+Call method:
+```
+	function(args);
+```
+## Basic Syntax - Tree Structure
+- The tree structure is the data object of PHG, corresponding to the class or structure
+- How to define a tree structure ：
+```
+name : {
+	Inherit node name ,
+	property = value;property: value;
+	name: { child node }
+	? selector [ a:{},{b},c] #array
+	<a,b,c> #Queue
+	Phg/onevent : PHG expression 
+}
+```
 
 ## PHG language parser structure design
 * ### kernel (base)
