@@ -138,6 +138,32 @@ The relationship formula between sequence and node expression:
 ```
 [a, b, c, d] = {{a}{b}{c}{d}}
 ```
+- Array and queue notation can be used to define child nodes. For example:
+```
+    	node1{x:1;<a{},b{}>}
+    	node1{x:1;[a{},b{}]}
+    	#It is also possible to inherit from other nodes:
+	a{x:1}b{y:1}
+	node1{z:1;<a,b>[a,b]}
+```
+- Queues and arrays cannot be nested directly when they are nested:
+```
+<a,b<c,d>> X
+[a,b[c,d]] X
+[a,b<c,d>] X
+#Separate with curly brackets:
+[a,b,{[c,d]}]
+[a,b,{<c,d>}]
+```
+- You cannot name it directly. For example:
+ ```
+A[a,b,c] X
+A<a,b,c> X
+
+Requires brace delimitation:
+A{[b,c,d]}
+A{<b,c,d>}
+```
 
 ## Example:
 ![FV67FCfUEAEQQfb](https://user-images.githubusercontent.com/8099625/175246104-a1f453da-c92c-4afa-8660-b7fdfe00391a.png)
