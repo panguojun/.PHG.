@@ -29,6 +29,7 @@ PHG is a minimalist programming language named after bacteriophage. This languag
 -~ escape symbol
 
 -> print symbols
+![20220728-142920](https://user-images.githubusercontent.com/8099625/181436828-3af5d91e-1787-48ba-858e-dd95f23533f3.jpg)
 
 -; end symbol
 
@@ -158,6 +159,7 @@ A{<b,c,d>}
 
 ## Example:
 ![FV67FCfUEAEQQfb](https://user-images.githubusercontent.com/8099625/175246104-a1f453da-c92c-4afa-8660-b7fdfe00391a.png)
+![Uploading image.png…]()
 
 ## API:
 echo()  
