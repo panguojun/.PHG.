@@ -66,7 +66,7 @@ Call method:
 - The tree structure is the data object of PHG, corresponding to the class or structure
 - How to define a tree structure ：
 ```
-name : {
+name{
 	Inherit node name ,
 	property = value;property: value;
 	name: { child node }
@@ -74,6 +74,17 @@ name : {
 	<a,b,c> #Queue
 	Phg/onevent : PHG expression 
 }
+```
+Example
+```
+{	
+      a{ p:1,0,0;
+	  b{p:2,0,0}
+	  <a,a,a>
+	  [a,a,a]           
+    }
+}
+
 ```
 
 ## PHG language parser structure design
