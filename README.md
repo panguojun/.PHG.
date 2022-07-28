@@ -107,53 +107,53 @@ Where _t, _i are internal variables, which are the depth and the position number
 nodename{property definition; child nodename{}…}
 for example: 
 ```
-	node1{pos:1,2,3; node2{}}
-	
-	#Can be nested or anonymous such as:
-    	node1{pos:1,2,3; node2{x:1; node3{y:1}}}
-     	node1{x:1;{y:1}}   
+node1{pos:1,2,3; node2{}}
 
-	#Can inherit other nodes such as:
-    	node1{x:1}
-    	node2{x:2;{node1}{node2,y:1}}
+#Can be nested or anonymous such as:
+node1{pos:1,2,3; node2{x:1; node3{y:1}}}
+node1{x:1;{y:1}}   
+
+#Can inherit other nodes such as:
+node1{x:1}
+node2{x:2;{node1}{node2,y:1}}
 ```
 
-## sequences and arrays
+## Sequences and Arrays
 - A sequence refers to an ordered N-tuple, and the sequence itself can be used as an element to participate in four operations
 ```
-	<a, b, c, d>
-	
-	#The relationship formula between sequence and node expression:
-	<a, b, c, d> = {a{b{c{d}}}}
+<a, b, c, d>
 
-	#Array is the concept of array, and there is a level relationship between elements:
-	[a, b, c, d] = {{a}{b}{c}{d}}
+#The relationship formula between sequence and node expression:
+<a, b, c, d> = {a{b{c{d}}}}
 
-	#Array and queue notation can be used to define child nodes. For example:
+#Array is the concept of array, and there is a level relationship between elements:
+[a, b, c, d] = {{a}{b}{c}{d}}
 
-    	node1{x:1;<a{},b{}>}
-    	node1{x:1;[a{},b{}]}
-    	#It is also possible to inherit from other nodes:
-	a{x:1}b{y:1}
-	node1{z:1;<a,b>[a,b]}
+#Array and queue notation can be used to define child nodes. For example:
 
-	#Queues and arrays cannot be nested directly when they are nested:
+node1{x:1;<a{},b{}>}
+node1{x:1;[a{},b{}]}
+#It is also possible to inherit from other nodes:
+a{x:1}b{y:1}
+node1{z:1;<a,b>[a,b]}
 
-	<a,b<c,d>> X
-	[a,b[c,d]] X
-	[a,b<c,d>] X
-	#Separate with curly brackets:
-	[a,b,{[c,d]}]
-	[a,b,{<c,d>}]
+#Queues and arrays cannot be nested directly when they are nested:
 
-	#You cannot name it directly. For example:
+<a,b<c,d>> X
+[a,b[c,d]] X
+[a,b<c,d>] X
+#Separate with curly brackets:
+[a,b,{[c,d]}]
+[a,b,{<c,d>}]
 
-	A[a,b,c] X
-	A<a,b,c> X
+#You cannot name it directly. For example:
 
-	#Requires brace delimitation:
-	A{[b,c,d]}
-	A{<b,c,d>}
+A[a,b,c] X
+A<a,b,c> X
+
+#Requires brace delimitation:
+A{[b,c,d]}
+A{<b,c,d>}
 ```
 
 ## Example:
