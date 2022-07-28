@@ -1,8 +1,8 @@
 # {PHG}
-*{PHG} : A mini programming language for describing everything.*
-## PHG language parser structure design
+*{PHG} : A mini programming language for describing everything.
 ![phg](https://user-images.githubusercontent.com/8099625/169991127-eddeb6bd-b67b-4359-a68a-14e16da3863d.png)
-* ## kernel (base)
+## PHG language parser structure design
+* ### kernel (base)
 The PHG kernel is divided into three layers: basic grammar layer (PHG parser), node grammar layer (NODE parser), element and operation layer (element/nodecalc)
 * ### Basic syntax layer
 The basic syntax of PHG as a minimalist programming language is implemented in this layer. Specifically, it includes variable definitions, control statements, and function calls.
