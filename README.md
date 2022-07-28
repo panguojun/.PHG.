@@ -81,6 +81,12 @@ name{
 		[a,a,a]           
 	}
 }
+- define a{ }, define a node a
+- property property : value;
+- attribute attribute = value;
+- Inherit {a}, inherit properties from existing nodes, but not properties
+- Array [a, b, c] with sequence <a, b, c>
+- Immediate statement (phg) immediately executes the PHG statement enclosed in parentheses
 
 ```
 ## Example:
