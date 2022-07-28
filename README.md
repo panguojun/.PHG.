@@ -88,7 +88,37 @@ name{
 - Array [a, b, c] with sequence <a, b, c>
 - Immediate statement (phg) immediately executes the PHG statement enclosed in parentheses
 
+## properties of tree nodes
+
+- The attribute definition format of the tree node:
+attribute name: value;
+- Such as: pos: 1,2,3;
+
+- Attributes of tree nodes can be PHG expressions, with expressions enclosed in parentheses, for example:
 ```
+{pos: (_t*2),(_i*3),1}
+```
+Where _t, _i are internal variables, which are the depth and the position number in the array respectively.
+
+## Subnode definition specification
+
+- The definition format of the child node:
+nodename{property definition; child nodename{}…}
+for example: 
+```
+node1{pos:1,2,3; node2{}}
+```
+Can be nested or anonymous such as:
+```
+     node1{pos:1,2,3; node2{x:1; node3{y:1}}}
+     node1{x:1;{y:1}}
+```     
+Can inherit other nodes such as:
+```
+    node1{x:1}
+    node2{x:2;{node1}{node2,y:1}}
+```
+
 ## Example:
 ![FV67FCfUEAEQQfb](https://user-images.githubusercontent.com/8099625/175246104-a1f453da-c92c-4afa-8660-b7fdfe00391a.png)
 
