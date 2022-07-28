@@ -13,11 +13,11 @@ PHG is a minimalist programming language named after bacteriophage. This languag
 -Array[a,b,c] and Queue<a,b,c> (see page 4 for details)
 -Immediate statement (phg) immediately executes the PHG statement enclosed in parentheses
 ## Sequences and Arrays
--A sequence refers to an ordered N-tuple, and the sequence itself can be used as an element to participate in four operations
+- A sequence refers to an ordered N-tuple, and the sequence itself can be used as an element to participate in four operations
 			<a,b,c,d>  
- The relationship formula between sequence and node expression:
+- The relationship formula between sequence and node expression:
 		<a,b,c,d> = {a{b{c{d}}}}
--Arrays are the concept of arrays and can also perform Boolean operations according to set theory
+- Arrays are the concept of arrays and can also perform Boolean operations according to set theory
 		[a,b,c,d] = {{a}{b}{c}{d}}
 
 ## Basic Syntax - Symbols
@@ -36,11 +36,22 @@ PHG is a minimalist programming language named after bacteriophage. This languag
 -{},[],<> 
 
 ## Basic Syntax - Variables
--Basic variables are divided into integers and floating-point trees, which can be directly defined as:
+- Basic variables are divided into integers and floating-point trees, which can be directly defined as:
 	a = 1; b = 0.1; >a+b; (print the value of a+b)
--Variables can also be node names defined in the tree structure
--Variables can be customized by the host program, and corresponding operations can also be customizedme is the current operation node
+- Variables can also be node names defined in the tree structure
+- Variables can be customized by the host program, and corresponding operations can also be customizedme is the current operation node
 
+## Basic Syntax - Control Statements
+- Conditional statements: 
+```
+  ?(expr){ statement }:{ else statement }  
+  ?(expr) statement1; : statement2
+```
+- Loop statement:  
+```
+  @n{ statement1 ?(_i = x) ˜;statement2 }
+  @ (expr){ statement }
+```
 
 ## PHG language parser structure design
 * ### kernel (base)
