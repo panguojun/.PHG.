@@ -18,16 +18,23 @@ PHG is a minimalist programming language named after bacteriophage. This languag
  The relationship formula between sequence and node expression:
 		<a,b,c,d> = {a{b{c{d}}}}
 -Arrays are the concept of arrays and can also perform Boolean operations according to set theory
-		[a,b,c,d] = {{a}{b}{c}{d}}![image](https://user-images.githubusercontent.com/8099625/181430554-9ffd85ea-dd9e-4890-938e-c151c76d9438.png)
+		[a,b,c,d] = {{a}{b}{c}{d}}
 
 ## Basic Syntax - Symbols
 -#comment
+
 -@cycle? :condition
+
 -$ function and return
+
 -~ escape symbol
+
 -> print symbols
+
 -; end symbol
+
 -{},[],<> 
+
 
 ## PHG language parser structure design
 * ### kernel (base)
