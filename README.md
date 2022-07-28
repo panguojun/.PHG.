@@ -73,9 +73,7 @@ name{
 	<a,b,c> #Queue
 	Phg/onevent : PHG expression 
 }
-```
-Example
-```
+# test me
 {	
 	a { 	p:1,0,0;
 		b{p:2,0,0}
@@ -85,7 +83,7 @@ Example
 }
 
 ```
-## Sample:
+## Example:
 ![FV67FCfUEAEQQfb](https://user-images.githubusercontent.com/8099625/175246104-a1f453da-c92c-4afa-8660-b7fdfe00391a.png)
 
 ## API:
