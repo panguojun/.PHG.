@@ -35,6 +35,12 @@ PHG is a minimalist programming language named after bacteriophage. This languag
 
 -{},[],<> 
 
+## Basic Syntax - Variables
+-Basic variables are divided into integers and floating-point trees, which can be directly defined as:
+	a = 1; b = 0.1; >a+b; (print the value of a+b)
+-Variables can also be node names defined in the tree structure
+-Variables can be customized by the host program, and corresponding operations can also be customizedme is the current operation node
+
 
 ## PHG language parser structure design
 * ### kernel (base)
